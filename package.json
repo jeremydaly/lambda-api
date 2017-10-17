@@ -1,0 +1,31 @@
+{
+  "name": "lamda-api",
+  "version": "0.1.0",
+  "description": "Lightweight Node.js API for AWS Lambda",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jeremydaly/lambda-api.git"
+  },
+  "keywords": [
+    "nodejs",
+    "api",
+    "awslambda"
+  ],
+  "author": "Jeremy Daly <jeremy@jeremydaly.com>",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/jeremydaly/lambda-api/issues"
+  },
+  "homepage": "https://github.com/jeremydaly/lambda-api#readme",
+  "dependencies": {
+    "bluebird": "^3.5.1"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^4.0.1"
+  }
+}

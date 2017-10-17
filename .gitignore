@@ -1,0 +1,8 @@
+# Dependency directories
+node_modules
+
+# Optional npm cache directory
+.npm
+
+# Local REDIS test data
+dump.rdb
