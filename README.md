@@ -1,4 +1,6 @@
 # lambda-api
+**PLEASE NOTE:** This project is still in development and is not ready for production.
+
 ### Lightweight Node.js API for AWS Lambda
 
 Lambda API is a lightweight Node.js API router for use with AWS API Gateway and AWS Lambda using Lambda Proxy integration. This closely mirrors (and is based on Express.js) but is significantly stripped down to maximize performance with Lambda's stateless, single run executions. The API uses Bluebird promises to serialize asynchronous execution.
@@ -8,60 +10,60 @@ Lambda Proxy Integration is an option in API Gateway that allows the details of 
 
 ```javascript
 {
-	"resource": "/v1/posts",
-	"path": "/v1/posts",
-	"httpMethod": "GET",
-	"headers": {
-		"Authorization": "Bearer ...",
-		"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-		"Accept-Encoding": "gzip, deflate",
-		"Accept-Language": "en-us",
-		"cache-control": "max-age=0",
-		"CloudFront-Forwarded-Proto": "https",
-		"CloudFront-Is-Desktop-Viewer": "true",
-		"CloudFront-Is-Mobile-Viewer": "false",
-		"CloudFront-Is-SmartTV-Viewer": "false",
-		"CloudFront-Is-Tablet-Viewer": "false",
-		"CloudFront-Viewer-Country": "US",
-		"Cookie": "...",
-		"Host": "...",
-		"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) ...",
-		"Via": "2.0 ... (CloudFront)",
-		"X-Amz-Cf-Id": "...",
-		"X-Amzn-Trace-Id": "...",
-		"X-Forwarded-For": "xxx.xxx.xxx.xxx",
-		"X-Forwarded-Port": "443",
-		"X-Forwarded-Proto": "https"
-	},
-	"queryStringParameters": {
-		"qs1": "q1"
-	},
-	"stageVariables": null,
-	"requestContext": {
-		"accountId": "...",
-		"resourceId": "...",
-		"stage": "prod",
-		"requestId": "...",
-		"identity": {
-			"cognitoIdentityPoolId": null,
-			"accountId": null,
-			"cognitoIdentityId": null,
-			"caller": null,
-			"apiKey": null,
-			"sourceIp": "xxx.xxx.xxx.xxx",
-			"accessKey": null,
-			"cognitoAuthenticationType": null,
-			"cognitoAuthenticationProvider": null,
-			"userArn": null,
-			"userAgent": "...",
-			"user": null
-		},
-		"resourcePath": "/v1/posts",
-		"httpMethod": "GET",
-		"apiId": "..."
-	},
-	"body": null,
-	"isBase64Encoded": false
+  "resource": "/v1/posts",
+  "path": "/v1/posts",
+  "httpMethod": "GET",
+  "headers": {
+    "Authorization": "Bearer ...",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Encoding": "gzip, deflate",
+    "Accept-Language": "en-us",
+    "cache-control": "max-age=0",
+    "CloudFront-Forwarded-Proto": "https",
+    "CloudFront-Is-Desktop-Viewer": "true",
+    "CloudFront-Is-Mobile-Viewer": "false",
+    "CloudFront-Is-SmartTV-Viewer": "false",
+    "CloudFront-Is-Tablet-Viewer": "false",
+    "CloudFront-Viewer-Country": "US",
+    "Cookie": "...",
+    "Host": "...",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) ...",
+    "Via": "2.0 ... (CloudFront)",
+    "X-Amz-Cf-Id": "...",
+    "X-Amzn-Trace-Id": "...",
+    "X-Forwarded-For": "xxx.xxx.xxx.xxx",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "queryStringParameters": {
+    "qs1": "q1"
+  },
+  "stageVariables": null,
+  "requestContext": {
+    "accountId": "...",
+    "resourceId": "...",
+    "stage": "prod",
+    "requestId": "...",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "apiKey": null,
+      "sourceIp": "xxx.xxx.xxx.xxx",
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "...",
+      "user": null
+    },
+    "resourcePath": "/v1/posts",
+    "httpMethod": "GET",
+    "apiId": "..."
+  },
+  "body": null,
+  "isBase64Encoded": false
 }
 ```
 
@@ -187,6 +189,12 @@ api.get('/users', function(req,res) {
 ### error
 An error can be triggered by calling the `error` method. This will cause the API to stop execution and return the message to the client. Custom error handling can be accomplished using the [Error Handling](#error-handling) feature.
 
+```javascript
+api.get('/users', function(req,res) {
+  res.error('This is an error')
+})
+```
+
 ## Path Parameters
 Path parameters are extracted from the path sent in by API Gateway. Although API Gateway supports path parameters, the API doesn't use these values but insteads extracts them from the actual path. This gives you more flexibility with the API Gateway configuration. Path parameters are defined in routes using a colon `:` as a prefix.
 
@@ -199,7 +207,6 @@ api.get('/users/:userId', function(req,res) {
 Path parameters act as wildcards that capture the value into the `params` object. The example above would match `/users/123` and `/users/test`. The system always looks for static paths first, so if you defined paths for `/users/test` and `/users/:userId`, exact path matches would take precedence. Path parameters only match the part of the path they are defined on. E.g. `/users/456/test` would not match `/users/:userId`. You would either need to define `/users/:userId/test` as its own path, or create another path with an additional path parameter, e.g. `/users/:userId/:anotherParam`.
 
 A path can contain as many parameters as you want. E.g. `/users/:param1/:param2/:param3`.
-
 
 ## Middleware
 The API supports middleware to preprocess requests before they execute their matching routes. Middleware is defined using the `use` method and require a function with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
