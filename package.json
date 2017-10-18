@@ -1,5 +1,5 @@
 {
-  "name": "lamda-api",
+  "name": "lambda-api",
   "version": "0.1.0-alpha",
   "description": "Lightweight Node.js API for AWS Lambda",
   "main": "index.js",
@@ -13,7 +13,8 @@
   "keywords": [
     "nodejs",
     "api",
-    "awslambda"
+    "awslambda",
+    "apigateway"
   ],
   "author": "Jeremy Daly <jeremy@jeremydaly.com>",
   "license": "MIT",
