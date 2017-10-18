@@ -14,7 +14,7 @@
     "nodejs",
     "api",
     "awslambda",
-    "apigateway"
+    "apigateway",
     "web",
     "framework",
     "json",
