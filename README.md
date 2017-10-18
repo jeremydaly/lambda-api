@@ -1,6 +1,10 @@
 # lambda-api
 **PLEASE NOTE:** This project is still in development and is not ready for production.
 
+[![Build Status](https://travis-ci.org/jeremydaly/lambda-api.svg?branch=master)](https://travis-ci.org/jeremydaly/lambda-api)
+[![npm](https://img.shields.io/npm/v/lambda-api.svg)](https://www.npmjs.com/package/lambda-api)
+[![npm](https://img.shields.io/npm/l/lambda-api.svg)](https://www.npmjs.com/package/lambda-api)
+
 ### Lightweight Node.js API for AWS Lambda
 
 Lambda API is a lightweight Node.js API router for use with AWS API Gateway and AWS Lambda using Lambda Proxy integration. This closely mirrors (and is based on Express.js) but is significantly stripped down to maximize performance with Lambda's stateless, single run executions. The API uses Bluebird promises to serialize asynchronous execution.

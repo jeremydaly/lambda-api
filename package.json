@@ -15,6 +15,11 @@
     "api",
     "awslambda",
     "apigateway"
+    "web",
+    "framework",
+    "json",
+    "schema",
+    "open"
   ],
   "author": "Jeremy Daly <jeremy@jeremydaly.com>",
   "license": "MIT",
