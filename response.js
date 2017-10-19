@@ -63,7 +63,7 @@ class RESPONSE {
     const response = {
       headers: this._headers,
       statusCode: this._statusCode,
-      body: body
+      body: typeof body === 'object' ? JSON.stringify(body) : (typeof body !== 'string' ? body.toString() : body)
     }
 
 		// Trigger the callback function
