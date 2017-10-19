@@ -1,5 +1,5 @@
 # lambda-api
-**PLEASE NOTE:** This project is still in development and is not ready for production.
+**PLEASE NOTE:** This project is still in beta and should be used with caution in production.
 
 [![Build Status](https://travis-ci.org/jeremydaly/lambda-api.svg?branch=master)](https://travis-ci.org/jeremydaly/lambda-api)
 [![npm](https://img.shields.io/npm/v/lambda-api.svg)](https://www.npmjs.com/package/lambda-api)
@@ -212,6 +212,16 @@ Path parameters act as wildcards that capture the value into the `params` object
 
 A path can contain as many parameters as you want. E.g. `/users/:param1/:param2/:param3`.
 
+## Wildcard Routes
+Wildcard routes are supported for methods that match an existing route. E.g. `options` on an existing `get` route. As of now, the best use case is for the OPTIONS method to provide CORS headers. Wildcards only work in the base path. `/users/*`, for example, is not supported. For additional wildcard support, use [Path Parameters](#path-parameters) instead.
+
+```javascript
+api.options('/*', function(req,res) {
+  // Do something
+  res.status(200).send({});
+})
+```
+
 ## Middleware
 The API supports middleware to preprocess requests before they execute their matching routes. Middleware is defined using the `use` method and require a function with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
 
@@ -219,7 +229,7 @@ The API supports middleware to preprocess requests before they execute their mat
 api.use(function(req,res,next) {
   // do something
   next()
-});
+})
 ```
 
 Middleware can be used to authenticate requests, log API calls, etc. The `REQUEST` and `RESPONSE` objects behave as they do within routes, allowing you to manipulate either object. In the case of authentication, for example, you could verify a request and update the `REQUEST` with an `authorized` flag and continue execution. Or if the request couldn't be authorized, you could respond with an error directly from the middleware. For example:
@@ -233,7 +243,7 @@ api.use(function(req,res,next) {
   } else {
     res.status(401).error('Not Authorized')
   }
-});
+})
 ```
 
 The `next()` callback tells the system to continue executing. If this is not called then the system will hang and eventually timeout unless another request ending call such as `error` is called. You can define as many middleware functions as you want. They will execute serially and synchronously in the order in which they are defined.
@@ -252,3 +262,23 @@ The `next()` callback will cause the script to continue executing and eventually
 
 ## Promises
 The API uses Bluebird promises to manage asynchronous script execution. Additional methods such as `async / await` or simple callbacks should be supported. The API will wait for a request ending call before returning data back to the client. Middleware will wait for the `next()` callback before proceeding to the next step.
+
+## CORS Support
+CORS can be implemented using the [wildcard routes](#wildcard-routes) feature. A typical implementation would be as follows:
+
+```javascript
+api.options('/*', function(req,res) {
+  // Add CORS headers
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+  res.status(200).send({});
+})
+```
+
+Conditional route support could be added via middleware or with conditional logic within the `OPTIONS` route.
+
+## Configuring Routes in API Gateway
+Routes must be configured in API Gateway in order to support routing to the Lambda function. The easiest way to support all of your routes without recreating them is to use [API Gateway's Proxy Integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-set-up-simple-proxy.html#api-gateway-proxy-resource?icmpid=docs_apigateway_console).
+
+Simply create one `{proxy+}` route that uses the `ANY` method and all requests will be routed to your Lambda function and processed by the `lambda-api` module.
