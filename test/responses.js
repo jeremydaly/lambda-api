@@ -39,6 +39,10 @@ api.get('/testStringResponse', function(req,res) {
   res.send('this is a string')
 })
 
+api.get('/testEmptyResponse', function(req,res) {
+  res.send()
+})
+
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
 /******************************************************************************/
@@ -82,6 +86,16 @@ describe('Response Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'this is a string' })
+      })
+    }) // end it
+
+    it('Empty response', function() {
+      let _event = Object.assign({},event,{ path: '/testEmptyResponse'})
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '' })
       })
     }) // end it
 
