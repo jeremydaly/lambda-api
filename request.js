@@ -24,6 +24,8 @@ class REQUEST {
 
 		// Set the headers
 		this.headers = app._event.headers
+		
+		this.requestContext = app._event.requestContext
 
 		// console.log(this.headers);
 		// console.log(app._event.body);
