@@ -24,13 +24,9 @@ class REQUEST {
 
 		// Set the headers
 		this.headers = app._event.headers
-		
-		// Set the requestContext from the event where one can find the authorizer Context from AWS 
-		this.requestContext = app._event.requestContext
 
-		// console.log(this.headers);
-		// console.log(app._event.body);
-		// console.log('Content-Type', this.headers['Content-Type']);
+		// Set the requestContext
+		this.requestContext = app._event.requestContext
 
 		// Set the body
 		if (this.headers['Content-Type'] && this.headers['Content-Type'].includes("application/x-www-form-urlencoded")) {

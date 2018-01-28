@@ -1,6 +1,6 @@
 {
   "name": "lambda-api",
-  "version": "0.1.0-beta",
+  "version": "0.1.0",
   "description": "Lightweight Node.js API for AWS Lambda",
   "main": "index.js",
   "scripts": {
