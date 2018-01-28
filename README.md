@@ -1,5 +1,4 @@
 # lambda-api
-**PLEASE NOTE:** This project is still in beta and should be used with caution in production.
 
 [![Build Status](https://travis-ci.org/jeremydaly/lambda-api.svg?branch=master)](https://travis-ci.org/jeremydaly/lambda-api)
 [![npm](https://img.shields.io/npm/v/lambda-api.svg)](https://www.npmjs.com/package/lambda-api)
@@ -7,7 +6,27 @@
 
 ### Lightweight Node.js API for AWS Lambda
 
-Lambda API is a lightweight Node.js API router for use with AWS API Gateway and AWS Lambda using Lambda Proxy integration. This closely mirrors (and is based on Express.js) but is significantly stripped down to maximize performance with Lambda's stateless, single run executions. The API uses Bluebird promises to serialize asynchronous execution.
+Lambda API is a lightweight Node.js API router for use with AWS API Gateway and AWS Lambda using Lambda Proxy integration. This closely mirrors (and is based on) other routers like Express.js but is significantly stripped down to maximize performance with Lambda's stateless, single run executions. The API uses Bluebird promises to serialize asynchronous execution.
+
+## Simple Example
+
+```javascript
+const API = require('lambda-api') // API library
+
+// Init API instance
+const api = new API({ version: 'v1.0', base: 'v1' });
+
+api.get('/test', function(req,res) {
+  res.status(200).json({ status: 'ok' })
+})
+
+module.exports.handler = (event, context, callback) => {
+
+  // Run the request
+  api.run(event,context,callback);
+
+} // end handler
+```
 
 ## Lambda Proxy integration
 Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled looks like this:
@@ -73,26 +92,6 @@ Lambda Proxy Integration is an option in API Gateway that allows the details of 
 
 The API automatically parses this information to create a normalized `REQUEST` object. The request can then be routed using the APIs methods.
 
-## Simple Example
-
-```javascript
-const API = require('lambda-api') // API library
-
-// Init API instance
-const api = new API({ version: 'v1.0', base: 'v1' });
-
-api.get('/test', function(req,res) {
-  res.status(200).json({ status: 'ok' })
-})
-
-module.exports.handler = (event, context, callback) => {
-
-  // Run the request
-  api.run(event,context,callback);
-
-} // end handler
-```
-
 ## Configuration
 
 Include the `lambda-api` module into your Lambda handler script and initialize an instance. You can initialize the API with an optional `version` which can be accessed via the `REQUEST` object and a `base` path. The base path can be used to route multiple versions to different instances.
@@ -144,6 +143,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
  - If the `Content-Type` header is `application/x-www-form-urlencoded`, it will attempt to parse a URL encoded string using `querystring`
  - Otherwise it will be plain text.
 - `route`: The matched route of the request
+- `requestContext`: The `requestContext` passed from the API Gateway
 
 The request object can be used to pass additional information through the processing chain. For example, if you are using a piece of authentication middleware, you can add additional keys to the `REQUEST` object with information about the user. See [middleware](#middleware) for more information.
 
@@ -247,6 +247,17 @@ api.use(function(req,res,next) {
 ```
 
 The `next()` callback tells the system to continue executing. If this is not called then the system will hang and eventually timeout unless another request ending call such as `error` is called. You can define as many middleware functions as you want. They will execute serially and synchronously in the order in which they are defined.
+
+### Clean Up
+The API has a built-in clean up method called 'finally()' that will execute after all middleware and routes have been completed, but before execution is complete. This can be used to close database connections or to perform other clean up functions. A clean up function can be defined using the `finally` method and requires a function with two parameters for the REQUEST and the RESPONSE as its only argument. For example:
+
+```javascript
+api.finally(function(req,res) {
+  // close unneeded database connections and perform clean up
+})
+```
+
+The `RESPONSE` **CANNOT** be manipulated since it has already been generated. Only one `finally()` method can be defined. This uses the Bluebird `finally()` method internally and will execute after properly handled errors as well.
 
 ## Error Handling
 The API has simple built-in error handling that will log the error using `console.log`. These will be available via CloudWatch Logs. By default, errors will trigger a JSON response with the error message. If you would like to define additional error handling, you can define them using the `use` method similar to middleware. Error handling middleware must be defined as a function with **four** arguments instead of three like normal middleware. An additional `error` parameter must be added as the first parameter. This will contain the error object generated.
