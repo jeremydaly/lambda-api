@@ -25,6 +25,7 @@ class REQUEST {
 		// Set the headers
 		this.headers = app._event.headers
 		
+		// Set the requestContext from the event where one can find the authorizer Context from AWS 
 		this.requestContext = app._event.requestContext
 
 		// console.log(this.headers);
