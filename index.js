@@ -1,5 +1,12 @@
 'use strict';
 
+/**
+ * Lightweight Node.js API for AWS Lambda
+ * @author Jeremy Daly <jeremy@jeremydaly>
+ * @version 0.1.0
+ * @license MIT
+ */
+
 const REQUEST = require('./request.js') // Response object
 const RESPONSE = require('./response.js') // Response object
 const Promise = require('bluebird') // Promise library
