@@ -199,6 +199,17 @@ describe('Route Tests:', function() {
       })
     }) // end it
 
+    it('Path with multiple parameters and querystring without tailing slash: /test/123/query/456?test=653', function() {
+        let _event = Object.assign({},event,{ path: '/test/123/query/456', queryStringParameters: { test: '653' } })
+
+        return new Promise((resolve,reject) => {
+            api.run(_event,{},function(err,res) { resolve(res) })
+        }).then((result) => {
+            // console.log(result);
+            expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","params":{"test":"123","test2":"456"},"query":"653"}' })
+        })
+    }) // end it
+
 
     it('Missing path: /not_found', function() {
       let _event = Object.assign({},event,{ path: '/not_found' })

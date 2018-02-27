@@ -41,8 +41,13 @@ class REQUEST {
 			}
 		}
 
-		// Extract path from event
-		let path = app._event.path.trim().replace(/^\/(.*?)(\/)*$/,'$1').split('/')
+        // Extract path from event
+        let path = app._event.path.trim()
+        let queryIndex = path.indexOf('?')
+        if(queryIndex >= 0){
+            path = path.substring(0, queryIndex)
+        }
+        path = path.replace(/^\/(.*?)(\/)*$/,'$1').split('/')
 
 		// Remove base if it exists
 		if (app._base && app._base === path[0]) {
