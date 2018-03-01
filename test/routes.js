@@ -200,6 +200,29 @@ describe('Route Tests:', function() {
     }) // end it
 
 
+    it('Event path + querystring w/ trailing slash (this shouldn\'t happen with API Gateway)', function() {
+      let _event = Object.assign({},event,{ path: '/test/123/query/?test=321', queryStringParameters: { test: '321' } })
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        //console.log(result);
+        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}' })
+      })
+    }) // end it
+
+    it('Event path + querystring w/o trailing slash (this shouldn\'t happen with API Gateway)', function() {
+      let _event = Object.assign({},event,{ path: '/test/123/query?test=321', queryStringParameters: { test: '321' } })
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        //console.log(result);
+        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}' })
+      })
+    }) // end it
+
+
     it('Missing path: /not_found', function() {
       let _event = Object.assign({},event,{ path: '/not_found' })
 
