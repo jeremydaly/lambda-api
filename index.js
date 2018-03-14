@@ -14,10 +14,10 @@ const Promise = require('bluebird') // Promise library
 // Create the API class
 class API {
 
-	// Create the constructor function.
-	constructor(props) {
+  // Create the constructor function.
+  constructor(props) {
 
-		// Set the version and base paths
+    // Set the version and base paths
     this._version = props.version ? props.version : 'v1'
     this._base = props.base ? props.base.trim() : ''
 
@@ -28,34 +28,34 @@ class API {
     // Stores route mappings
     this._routes = {}
 
-		// Default callback
-		this._cb = function(err,res) { console.log('No callback specified') }
+    // Default callback
+    this._cb = function(err,res) { console.log('No callback specified') }
 
-		// Middleware stack
-		this._middleware = []
+    // Middleware stack
+    this._middleware = []
 
-		// Error middleware stack
-		this._errors = []
+    // Error middleware stack
+    this._errors = []
 
-		// Store app packages and namespaces
-		this._app = {}
+    // Store app packages and namespaces
+    this._app = {}
 
-		// Keep track of callback execution
-		this._done = false
+    // Keep track of callback execution
+    this._done = false
 
-		// Executed after the callback
-		this._finally = () => {}
+    // Executed after the callback
+    this._finally = () => {}
 
-		// Promise placeholder for final route promise resolution
-		this._promise = function() { console.log('no promise to resolve') }
-		this._reject = function() { console.log('no promise to reject') }
+    // Promise placeholder for final route promise resolution
+    this._promise = function() { console.log('no promise to resolve') }
+    this._reject = function() { console.log('no promise to reject') }
 
-		// Global error status
-		this._errorStatus = 500
+    // Global error status
+    this._errorStatus = 500
 
-		// Testing flag
-		this._test = false
-  }
+    // Testing flag
+    this._test = false
+  } // end constructor
 
   // GET: convenience method
   get(path, handler) {
@@ -117,186 +117,185 @@ class API {
   // RUN: This runs the routes
   run(event,context,cb) { // TODO: Make this dynamic
 
-		this.startTimer('total')
+    this.startTimer('total')
 
-		this._done = false
+    this._done = false
 
-		// Set the event, context and callback
-		this._event = event
-		this._context = context
-		this._cb = cb
+    // Set the event, context and callback
+    this._event = event
+    this._context = context
+    this._cb = cb
 
-		// Initalize response object
-		let response = new RESPONSE(this)
-		let request = {}
+    // Initalize response object
+    let response = new RESPONSE(this)
+    let request = {}
 
-		Promise.try(() => { // Start a promise
+    Promise.try(() => { // Start a promise
 
-			// Initalize the request object
-			request = new REQUEST(this)
+      // Initalize the request object
+      request = new REQUEST(this)
 
-			// Execute the request
-			return this.execute(request,response)
+      // Execute the request
+      return this.execute(request,response)
 
-		}).catch((e) => {
+    }).catch((e) => {
 
-			let message;
+      let message;
 
-			if (e instanceof Error) {
-				response.status(this._errorStatus)
-				message = e.message
-				!this._test && console.log(e)
-			} else {
-				message = e
-				!this._test && console.log('API Error:',e)
-			}
+      if (e instanceof Error) {
+        response.status(this._errorStatus)
+        message = e.message
+        !this._test && console.log(e)
+      } else {
+        message = e
+        !this._test && console.log('API Error:',e)
+      }
 
-			// Execute error middleware
-			if (this._errors.length > 0) {
+      // Execute error middleware
+      if (this._errors.length > 0) {
 
-				// Init stack queue
-				let queue = []
+        // Init stack queue
+        let queue = []
 
-				// Loop through the middleware and queue promises
-				for (let i in this._errors) {
-					queue.push(() => {
-						return new Promise((resolve, reject) => {
-							this._promise = () => { resolve() } // keep track of the last resolve()
-							this._reject = (e) => { reject(e) } // keep track of the last reject()
-							this._errors[i](e,request,response,() => { resolve() }) // execute the errors with the resolve callback
-						}) // end promise
-					}) // end queue
-				} // end for
+        // Loop through the middleware and queue promises
+        for (let i in this._errors) {
+          queue.push(() => {
+            return new Promise((resolve, reject) => {
+              this._promise = () => { resolve() } // keep track of the last resolve()
+              this._reject = (e) => { reject(e) } // keep track of the last reject()
+              this._errors[i](e,request,response,() => { resolve() }) // execute the errors with the resolve callback
+            }) // end promise
+          }) // end queue
+        } // end for
 
-				// Return Promise.each serialially
-				return Promise.each(queue, function(queue_item) {
-					return queue_item()
-				}).then(() => {
-					response.json({'error':message})
-				})
+        // Return Promise.each serialially
+        return Promise.each(queue, function(queue_item) {
+          return queue_item()
+        }).then(() => {
+          response.json({'error':message})
+        })
 
-			} else {
-				response.json({'error':message})
-			}
+      } else {
+        response.json({'error':message})
+      }
 
-		}).finally(() => {
-			this._finally(request,response)
-		})
+    }).finally(() => {
+      this._finally(request,response)
+    })
   } // end run function
 
 
-	// Custom callback
-	_callback(err, res) {
+  // Custom callback
+  _callback(err, res) {
 
-		// Resolve any outstanding promise
-		this._promise()
+    // Resolve any outstanding promise
+    this._promise()
 
-		this._done = true
+    this._done = true
 
-		//console.log(this);
-		this.endTimer('total')
+    this.endTimer('total')
 
-		if (res) {
-			if (this._debug) {
-				console.log(this._procTimes)
-			}
-		}
+    if (res) {
+      if (this._debug) {
+        console.log(this._procTimes)
+      }
+    }
 
-		// Execute the primary callback
-		this._cb(err,res)
+    // Execute the primary callback
+    this._cb(err,res)
 
-	} // end _callback
+  } // end _callback
 
 
-	// Middleware handler
-	use(fn) {
-		if (fn.length === 3) {
-			this._middleware.push(fn)
-		} else if (fn.length === 4) {
-			this._errors.push(fn)
-		} else {
-			throw new Error('Middleware must have 3 or 4 parameters')
-		}
-	} // end use
+  // Middleware handler
+  use(fn) {
+    if (fn.length === 3) {
+      this._middleware.push(fn)
+    } else if (fn.length === 4) {
+      this._errors.push(fn)
+    } else {
+      throw new Error('Middleware must have 3 or 4 parameters')
+    }
+  } // end use
 
-	// Finally function
-	finally(fn) {
-		this._finally = fn
-	}
+  // Finally function
+  finally(fn) {
+    this._finally = fn
+  }
 
-	// Process
-	execute(req,res) {
+  // Process
+  execute(req,res) {
 
-		// Init stack queue
-		let queue = []
+    // Init stack queue
+    let queue = []
 
-		// If execute is called after the app is done, just return out
-		if (this._done) { return; }
+    // If execute is called after the app is done, just return out
+    if (this._done) { return; }
 
-		// If there is middleware
-		if (this._middleware.length > 0) {
-			// Loop through the middleware and queue promises
-			for (let i in this._middleware) {
-				queue.push(() => {
-					return new Promise((resolve, reject) => {
-						this._promise = () => { resolve() } // keep track of the last resolve()
-						this._reject = (e) => { reject(e) } // keep track of the last reject()
-						this._middleware[i](req,res,() => { resolve() }) // execute the middleware with the resolve callback
-					}) // end promise
-				}) // end queue
-			} // end for
+    // If there is middleware
+    if (this._middleware.length > 0) {
+      // Loop through the middleware and queue promises
+      for (let i in this._middleware) {
+        queue.push(() => {
+          return new Promise((resolve, reject) => {
+            this._promise = () => { resolve() } // keep track of the last resolve()
+            this._reject = (e) => { reject(e) } // keep track of the last reject()
+            this._middleware[i](req,res,() => { resolve() }) // execute the middleware with the resolve callback
+          }) // end promise
+        }) // end queue
+      } // end for
+    } // end if
 
-		} // end if
+    // Push the main execution path to the queue stack
+    queue.push(() => {
+      return new Promise((resolve, reject) => {
+        this._promise = () => { resolve() } // keep track of the last resolve()
+        this._reject = (e) => { reject(e) } // keep track of the last reject()
+        this.handler(req,res) // execute the handler with no callback
+      })
+    })
 
-		// Push the main execution path to the queue stack
-		queue.push(() => {
-			return new Promise((resolve, reject) => {
-				this._promise = () => { resolve() } // keep track of the last resolve()
-				this._reject = (e) => { reject(e) } // keep track of the last reject()
-				this.handler(req,res) // execute the handler with no callback
-			})
-		})
+    // Return Promise.each serialially
+    return Promise.each(queue, function(queue_item) {
+      return queue_item()
+    })
 
-		// Return Promise.each serialially
-		return Promise.each(queue, function(queue_item) {
-			return queue_item()
-		})
-
-	} // end execute
+  } // end execute
 
 
 
   //-------------------------------------------------------------------------//
-	//-------------------------------------------------------------------------//
-	// TIMER FUNCTIONS
-	//-------------------------------------------------------------------------//
-	//-------------------------------------------------------------------------//
+  // TIMER FUNCTIONS
+  //-------------------------------------------------------------------------//
 
-	// Returns the calculated processing times from all stopped timers
-	getTimers(timer) {
+  // Returns the calculated processing times from all stopped timers
+  getTimers(timer) {
+    if (timer) {
+      return this._procTimes[timer]
+    } else {
+      return this._procTimes
+    }
+  } // end getTimers
 
-		if (timer) {
-			return this._procTimes[timer]
-		} else {
-			return this._procTimes
-		}
-	} // end getTimers
+  // Starts a timer for debugging purposes
+  startTimer(name) {
+    this._timers[name] = Date.now()
+  } // end startTimer
 
-	// Starts a timer for debugging purposes
-	startTimer(name) {
-		this._timers[name] = Date.now()
-	} // end startTimer
+  // Ends a timer and calculates the total processing time
+  endTimer(name) {
+    try {
+      this._procTimes[name] = (Date.now()-this._timers[name]) + ' ms'
+      delete this._timers[name]
+    } catch(e) {
+      console.error('Could not end timer: ' + name)
+    }
+  } // end endTimer
 
-	// Ends a timer and calculates the total processing time
-	endTimer(name) {
-		try {
-			this._procTimes[name] = (Date.now()-this._timers[name]) + ' ms'
-			delete this._timers[name]
-		} catch(e) {
-			console.error('Could not end timer: ' + name)
-		}
-	} // end endTimer
 
+  //-------------------------------------------------------------------------//
+  // UTILITY FUNCTIONS
+  //-------------------------------------------------------------------------//
 
   deepFind(obj, path) {
     let paths = path//.split('.'),
@@ -330,11 +329,13 @@ class API {
         obj[path[0]] = Object.assign(value,obj[path[0]])
       }
     }
-  } // end setDeepValue
+  } // end setRoute
 
-	// Load app packages
-	app(packages) {
-		// Check for supplied packages
+
+  // Load app packages
+  app(packages) {
+
+    // Check for supplied packages
     if (typeof packages === 'object') {
       // Loop through and set package namespaces
       for (let namespace in packages) {
@@ -344,12 +345,15 @@ class API {
           console.error(e.message)
         }
       }
-    } // end if
+    } else if (arguments.length === 2 && typeof packages === 'string') {
+      this._app[packages] = arguments[1]
+    }// end if
 
-		// Return a reference
-		return this._app
-	}
+    // Return a reference
+    return this._app
+  }
 
 } // end API class
 
+// Export the API class
 module.exports = API

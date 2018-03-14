@@ -10,6 +10,9 @@ class REQUEST {
     // Create a reference to the app
     this.app = app
 
+    // Expose Namespaces
+    this.namespace = this.ns = app._app
+
     // Set the version
     this.version = app._version
 
