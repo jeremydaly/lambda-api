@@ -133,6 +133,7 @@ api.METHOD('patch','/users', function(req,res) {
 
 The `REQUEST` object contains a parsed and normalized request from API Gateway. It contains the following values by default:
 
+- `app`: A reference to an instance of the app
 - `version`: The version set at initialization
 - `params`: Dynamic path parameters parsed from the path (see [path parameters](#path-parameters))
 - `method`: The HTTP method of the request
@@ -145,6 +146,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
  - Otherwise it will be plain text.
 - `route`: The matched route of the request
 - `requestContext`: The `requestContext` passed from the API Gateway
+- `namespace` or `ns`: A reference to modules added to the app's namespace (see [namespaces](#namespaces))
 
 The request object can be used to pass additional information through the processing chain. For example, if you are using a piece of authentication middleware, you can add additional keys to the `REQUEST` object with information about the user. See [middleware](#middleware) for more information.
 
@@ -272,8 +274,45 @@ api.use(function(err,req,res,next) {
 
 The `next()` callback will cause the script to continue executing and eventually call the standard error handling function. You can short-circuit the default handler by calling a request ending method such as `send`, `html`, or `json`.
 
+## Namespaces
+Lambda API allows you to map specific modules to namespaces that can be accessed from the `REQUEST` object. This is helpful when using the pattern in which you create a module that exports middleware, error, or route functions. In the example below, the `data` namespace is added to app and then accessed by reference within an included module.
+
+The main handler file might look like this:
+
+```javascript
+// Use app() function to add 'data' namespace
+api.app('data',require('./lib/data.js'))
+
+// Create a get route to load user details
+api.get('/users/:userId', require('./lib/users.js'))
+```
+
+The users.js module might look like this:
+
+```javascript
+module.exports = function(req, res) {
+  let userInfo = req.namespace.data.getUser(req.params.userId)
+  res.json({ 'userInfo': userInfo })
+});
+```
+
+By saving references in namespaces, you can access them without needing to require them in every module. Namespaces can be added using the `app()` method of the API. `app()` accepts either two parameters: a string representing the name of the namespace and a function reference, OR an object with string names as keys and function references as the values. For example:
+
+```javascript
+api.app('namespace',require('./lib/ns-functions.js'))
+
+// OR
+
+api.app({
+  'namespace1': require('./lib/ns1-functions.js'),
+  'namespace2': require('./lib/ns2-functions.js')
+})
+```
+
 ## Promises
-The API uses Bluebird promises to manage asynchronous script execution. Additional methods such as `async / await` or simple callbacks should be supported. The API will wait for a request ending call before returning data back to the client. Middleware will wait for the `next()` callback before proceeding to the next step.
+The API uses Bluebird promises to manage asynchronous script execution. The API will wait for a request ending call before returning data back to the client. Middleware will wait for the `next()` callback before proceeding to the next step.
+
+**NOTE:** AWS Lambda currently only supports Node v6.10, which doesn't support `async / await`. If you'd like to use `async / await`, you'll need to polyfill.
 
 ## CORS Support
 CORS can be implemented using the [wildcard routes](#wildcard-routes) feature. A typical implementation would be as follows:
