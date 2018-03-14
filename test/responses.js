@@ -49,54 +49,54 @@ api.get('/testEmptyResponse', function(req,res) {
 
 describe('Response Tests:', function() {
 
-    it('Object response: convert to string', function() {
-      let _event = Object.assign({},event,{ path: '/testObjectResponse'})
+  it('Object response: convert to string', function() {
+    let _event = Object.assign({},event,{ path: '/testObjectResponse'})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"object":true}' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"object":true}' })
+    })
+  }) // end it
 
-    it('Numeric response: convert to string', function() {
-      let _event = Object.assign({},event,{ path: '/testNumberResponse'})
+  it('Numeric response: convert to string', function() {
+    let _event = Object.assign({},event,{ path: '/testNumberResponse'})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '123' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '123' })
+    })
+  }) // end it
 
-    it('Array response: convert to string', function() {
-      let _event = Object.assign({},event,{ path: '/testArrayResponse'})
+  it('Array response: convert to string', function() {
+    let _event = Object.assign({},event,{ path: '/testArrayResponse'})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '[1,2,3]' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '[1,2,3]' })
+    })
+  }) // end it
 
-    it('String response: no conversion', function() {
-      let _event = Object.assign({},event,{ path: '/testStringResponse'})
+  it('String response: no conversion', function() {
+    let _event = Object.assign({},event,{ path: '/testStringResponse'})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'this is a string' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'this is a string' })
+    })
+  }) // end it
 
-    it('Empty response', function() {
-      let _event = Object.assign({},event,{ path: '/testEmptyResponse'})
+  it('Empty response', function() {
+    let _event = Object.assign({},event,{ path: '/testEmptyResponse'})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '' })
+    })
+  }) // end it
 
 }) // end ERROR HANDLING tests

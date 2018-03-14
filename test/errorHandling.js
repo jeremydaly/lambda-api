@@ -93,54 +93,54 @@ api.get('/testErrorPromise', function(req,res) {
 
 describe('Error Handling Tests:', function() {
 
-    it('Called Error', function() {
-      let _event = Object.assign({},event,{ path: '/testError'})
+  it('Called Error', function() {
+    let _event = Object.assign({},event,{ path: '/testError'})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test error message"}' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test error message"}' })
+    })
+  }) // end it
 
-    it('Thrown Error', function() {
-      let _event = Object.assign({},event,{ path: '/testErrorThrow'})
+  it('Thrown Error', function() {
+    let _event = Object.assign({},event,{ path: '/testErrorThrow'})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test thrown error"}' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test thrown error"}' })
+    })
+  }) // end it
 
-    it('Simulated Error', function() {
-      let _event = Object.assign({},event,{ path: '/testErrorSimulated'})
+  it('Simulated Error', function() {
+    let _event = Object.assign({},event,{ path: '/testErrorSimulated'})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 405, body: '{"error":"This is a simulated error"}' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 405, body: '{"error":"This is a simulated error"}' })
+    })
+  }) // end it
 
-    it('Error Middleware', function() {
-      let _event = Object.assign({},event,{ path: '/testErrorMiddleware'})
+  it('Error Middleware', function() {
+    let _event = Object.assign({},event,{ path: '/testErrorMiddleware'})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/plain' }, statusCode: 500, body: 'This is a test error message: 123/456' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/plain' }, statusCode: 500, body: 'This is a test error message: 123/456' })
+    })
+  }) // end it
 
-    it('Error Middleware w/ Promise', function() {
-      let _event = Object.assign({},event,{ path: '/testErrorPromise'})
+  it('Error Middleware w/ Promise', function() {
+    let _event = Object.assign({},event,{ path: '/testErrorPromise'})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/plain' }, statusCode: 500, body: 'This is a test error message: 123/456' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/plain' }, statusCode: 500, body: 'This is a test error message: 123/456' })
+    })
+  }) // end it
 
 }) // end ERROR HANDLING tests

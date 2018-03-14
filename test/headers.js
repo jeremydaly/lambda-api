@@ -47,34 +47,34 @@ api.get('/testJSONP', function(req,res) {
 
 describe('Header Tests:', function() {
 
-    it('New Header: /test -- test: testVal', function() {
-      let _event = Object.assign({},event,{})
+  it('New Header: /test -- test: testVal', function() {
+    let _event = Object.assign({},event,{})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json', 'test': 'testVal' }, statusCode: 200, body: '{"method":"get","status":"ok"}' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json', 'test': 'testVal' }, statusCode: 200, body: '{"method":"get","status":"ok"}' })
+    })
+  }) // end it
 
-    it('Override Header: /testOveride -- Content-Type: text/html', function() {
-      let _event = Object.assign({},event,{ path: '/testOverride'})
+  it('Override Header: /testOveride -- Content-Type: text/html', function() {
+    let _event = Object.assign({},event,{ path: '/testOverride'})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html' }, statusCode: 200, body: '<div>testHTML</div>' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html' }, statusCode: 200, body: '<div>testHTML</div>' })
+    })
+  }) // end it
 
-    it('HTML Convenience Method: /testHTML', function() {
-      let _event = Object.assign({},event,{ path: '/testHTML'})
+  it('HTML Convenience Method: /testHTML', function() {
+    let _event = Object.assign({},event,{ path: '/testHTML'})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html' }, statusCode: 200, body: '<div>testHTML</div>' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html' }, statusCode: 200, body: '<div>testHTML</div>' })
+    })
+  }) // end it
 
 }) // end HEADER tests
