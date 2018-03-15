@@ -27,4 +27,10 @@ module.exports = {
     throw new Error('This is a thrown module error')
   },
 
+  dataTest: function(req,res) {
+    // Use data namespace
+    let data = req.ns.data.dataCall()
+    res.json({ method:'get', status:'ok', data: data })
+  },
+
 } // end exports

@@ -77,35 +77,37 @@ api.get('/testPromise', function(req,res) {
 
 describe('Middleware Tests:', function() {
 
-    it('Set Values in res object', function() {
-      let _event = Object.assign({},event,{})
+  this.slow(300);
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddleware":"123","testMiddleware2":"456"}' })
-      })
-    }) // end it
+  it('Set Values in res object', function() {
+    let _event = Object.assign({},event,{})
 
-    it('Access params, querystring, and body values', function() {
-      let _event = Object.assign({},event,{ httpMethod: 'post', path: '/test/123', queryStringParameters: { test: "456" }, body: { test: "789" } })
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddleware":"123","testMiddleware2":"456"}' })
+    })
+  }) // end it
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddleware3":"123","testMiddleware4":"456","testMiddleware5":"789"}' })
-      })
-    }) // end it
+  it('Access params, querystring, and body values', function() {
+    let _event = Object.assign({},event,{ httpMethod: 'post', path: '/test/123', queryStringParameters: { test: "456" }, body: { test: "789" } })
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddleware3":"123","testMiddleware4":"456","testMiddleware5":"789"}' })
+    })
+  }) // end it
 
 
-    it('Middleware with Promise/Delay', function() {
-      let _event = Object.assign({},event,{ path: '/testPromise'})
+  it('Middleware with Promise/Delay', function() {
+    let _event = Object.assign({},event,{ path: '/testPromise'})
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddlewarePromise":"test"}' })
-      })
-    }) // end it
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddlewarePromise":"test"}' })
+    })
+  }) // end it
 
 }) // end MIDDLEWARE tests

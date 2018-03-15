@@ -133,6 +133,7 @@ api.METHOD('patch','/users', function(req,res) {
 
 The `REQUEST` object contains a parsed and normalized request from API Gateway. It contains the following values by default:
 
+- `app`: A reference to an instance of the app
 - `version`: The version set at initialization
 - `params`: Dynamic path parameters parsed from the path (see [path parameters](#path-parameters))
 - `method`: The HTTP method of the request
@@ -145,6 +146,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
  - Otherwise it will be plain text.
 - `route`: The matched route of the request
 - `requestContext`: The `requestContext` passed from the API Gateway
+- `namespace` or `ns`: A reference to modules added to the app's namespace (see [namespaces](#namespaces))
 
 The request object can be used to pass additional information through the processing chain. For example, if you are using a piece of authentication middleware, you can add additional keys to the `REQUEST` object with information about the user. See [middleware](#middleware) for more information.
 
@@ -188,6 +190,32 @@ There is also an `html` convenience method for the `send` method that will set t
 ```javascript
 api.get('/users', function(req,res) {
   res.html('<div>This is HTML</div>')
+})
+```
+
+### location
+The `location` convenience method sets the `Location:` header with the value of a single string argument. The value passed in is not validated but will be encoded before being added to the header. Values that are already encoded can be safely passed in. Note that a valid `3xx` status code must be set to trigger browser redirection. The value can be a relative/absolute path OR a FQDN.
+
+```javascript
+api.get('/redirectToHome', function(req,res) {
+  res.location('/home').status(302).html('<div>Redirect to Home</div>')
+})
+
+api.get('/redirectToGithub', function(req,res) {
+  res.location('https://github.com').status(302).html('<div>Redirect to GitHub</div>')
+})
+```
+
+### redirect
+The `redirect` convenience method triggers a redirection and ends the current API execution. This method is similar to the `location()` method, but it automatically sets the status code and calls `send()`. The redirection URL (relative/absolute path OR a FQDN) can be specified as the only parameter or as a second parameter when a valid `3xx` status code is supplied as the first parameter. The status code is set to `302` by default, but can be changed to `300`, `301`, `302`, `303`, `307`, or `308` by adding it as the first parameter.
+
+```javascript
+api.get('/redirectToHome', function(req,res) {
+  res.redirect('/home')
+})
+
+api.get('/redirectToGithub', function(req,res) {
+  res.redirect(301,'https://github.com')
 })
 ```
 
@@ -272,8 +300,45 @@ api.use(function(err,req,res,next) {
 
 The `next()` callback will cause the script to continue executing and eventually call the standard error handling function. You can short-circuit the default handler by calling a request ending method such as `send`, `html`, or `json`.
 
+## Namespaces
+Lambda API allows you to map specific modules to namespaces that can be accessed from the `REQUEST` object. This is helpful when using the pattern in which you create a module that exports middleware, error, or route functions. In the example below, the `data` namespace is added to the API and then accessed by reference within an included module.
+
+The main handler file might look like this:
+
+```javascript
+// Use app() function to add 'data' namespace
+api.app('data',require('./lib/data.js'))
+
+// Create a get route to load user details
+api.get('/users/:userId', require('./lib/users.js'))
+```
+
+The users.js module might look like this:
+
+```javascript
+module.exports = function(req, res) {
+  let userInfo = req.namespace.data.getUser(req.params.userId)
+  res.json({ 'userInfo': userInfo })
+});
+```
+
+By saving references in namespaces, you can access them without needing to require them in every module. Namespaces can be added using the `app()` method of the API. `app()` accepts either two parameters: a string representing the name of the namespace and a function reference *OR* an object with string names as keys and function references as the values. For example:
+
+```javascript
+api.app('namespace',require('./lib/ns-functions.js'))
+
+// OR
+
+api.app({
+  'namespace1': require('./lib/ns1-functions.js'),
+  'namespace2': require('./lib/ns2-functions.js')
+})
+```
+
 ## Promises
-The API uses Bluebird promises to manage asynchronous script execution. Additional methods such as `async / await` or simple callbacks should be supported. The API will wait for a request ending call before returning data back to the client. Middleware will wait for the `next()` callback before proceeding to the next step.
+The API uses Bluebird promises to manage asynchronous script execution. The API will wait for a request ending call before returning data back to the client. Middleware will wait for the `next()` callback before proceeding to the next step.
+
+**NOTE:** AWS Lambda currently only supports Node v6.10, which doesn't support `async / await`. If you'd like to use `async / await`, you'll need to polyfill.
 
 ## CORS Support
 CORS can be implemented using the [wildcard routes](#wildcard-routes) feature. A typical implementation would be as follows:
@@ -294,3 +359,6 @@ Conditional route support could be added via middleware or with conditional logi
 Routes must be configured in API Gateway in order to support routing to the Lambda function. The easiest way to support all of your routes without recreating them is to use [API Gateway's Proxy Integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-set-up-simple-proxy.html#api-gateway-proxy-resource?icmpid=docs_apigateway_console).
 
 Simply create one `{proxy+}` route that uses the `ANY` method and all requests will be routed to your Lambda function and processed by the `lambda-api` module.
+
+## Contributions
+Contributions, ideas and bug reports are welcome and greatly appreciated. Please add  [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bugs reports.
