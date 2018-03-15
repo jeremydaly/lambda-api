@@ -194,7 +194,7 @@ api.get('/users', function(req,res) {
 ```
 
 ### location
-The `location` convenience method sets the `Location:` header with the value of a single string argument. The value passed in is not validated but will be encoded before being added to the header. Values that are already encoded can be safely passed in. Note that a valid `3xx` status code must be set to trigger browser redirection. The value can be a relative or absolute path OR a FQDN.
+The `location` convenience method sets the `Location:` header with the value of a single string argument. The value passed in is not validated but will be encoded before being added to the header. Values that are already encoded can be safely passed in. Note that a valid `3xx` status code must be set to trigger browser redirection. The value can be a relative/absolute path OR a FQDN.
 
 ```javascript
 api.get('/redirectToHome', function(req,res) {
@@ -207,7 +207,7 @@ api.get('/redirectToGithub', function(req,res) {
 ```
 
 ### redirect
-The `redirect` convenience method triggers a redirection and ends the current API execution. This method is similar to the `location()` method, but it automatically sets the status code and calls the `send()` method. The redirection URL (relative or absolute path OR a FQDN) can be specified as the only parameter or as a second parameter when a valid `3xx` status code is supplied as the first parameter. The status code is set to 302 by default, but can be changed to 300, 301, 302, 303, 307, or 308 by adding it as the first parameter.
+The `redirect` convenience method triggers a redirection and ends the current API execution. This method is similar to the `location()` method, but it automatically sets the status code and calls `send()`. The redirection URL (relative/absolute path OR a FQDN) can be specified as the only parameter or as a second parameter when a valid `3xx` status code is supplied as the first parameter. The status code is set to `302` by default, but can be changed to `300`, `301`, `302`, `303`, `307`, or `308` by adding it as the first parameter.
 
 ```javascript
 api.get('/redirectToHome', function(req,res) {
@@ -301,7 +301,7 @@ api.use(function(err,req,res,next) {
 The `next()` callback will cause the script to continue executing and eventually call the standard error handling function. You can short-circuit the default handler by calling a request ending method such as `send`, `html`, or `json`.
 
 ## Namespaces
-Lambda API allows you to map specific modules to namespaces that can be accessed from the `REQUEST` object. This is helpful when using the pattern in which you create a module that exports middleware, error, or route functions. In the example below, the `data` namespace is added to app and then accessed by reference within an included module.
+Lambda API allows you to map specific modules to namespaces that can be accessed from the `REQUEST` object. This is helpful when using the pattern in which you create a module that exports middleware, error, or route functions. In the example below, the `data` namespace is added to the API and then accessed by reference within an included module.
 
 The main handler file might look like this:
 
@@ -322,7 +322,7 @@ module.exports = function(req, res) {
 });
 ```
 
-By saving references in namespaces, you can access them without needing to require them in every module. Namespaces can be added using the `app()` method of the API. `app()` accepts either two parameters: a string representing the name of the namespace and a function reference, OR an object with string names as keys and function references as the values. For example:
+By saving references in namespaces, you can access them without needing to require them in every module. Namespaces can be added using the `app()` method of the API. `app()` accepts either two parameters: a string representing the name of the namespace and a function reference *OR* an object with string names as keys and function references as the values. For example:
 
 ```javascript
 api.app('namespace',require('./lib/ns-functions.js'))
@@ -359,3 +359,6 @@ Conditional route support could be added via middleware or with conditional logi
 Routes must be configured in API Gateway in order to support routing to the Lambda function. The easiest way to support all of your routes without recreating them is to use [API Gateway's Proxy Integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-set-up-simple-proxy.html#api-gateway-proxy-resource?icmpid=docs_apigateway_console).
 
 Simply create one `{proxy+}` route that uses the `ANY` method and all requests will be routed to your Lambda function and processed by the `lambda-api` module.
+
+## Contributions
+Contributions, ideas and bug reports are welcome and greatly appreciated. Please add  [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bugs reports.
