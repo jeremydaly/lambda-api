@@ -193,6 +193,32 @@ api.get('/users', function(req,res) {
 })
 ```
 
+### location
+The `location` convenience method sets the `Location:` header with the value of a single string argument. The value passed in is not validated but will be encoded before being added to the header. Values that are already encoded can be safely passed in. Note that a valid `3xx` status code must be set to trigger browser redirection. The value can be a relative or absolute path OR a FQDN.
+
+```javascript
+api.get('/redirectToHome', function(req,res) {
+  res.location('/home').status(302).html('<div>Redirect to Home</div>')
+})
+
+api.get('/redirectToGithub', function(req,res) {
+  res.location('https://github.com').status(302).html('<div>Redirect to GitHub</div>')
+})
+```
+
+### redirect
+The `redirect` convenience method triggers a redirection and ends the current API execution. This method is similar to the `location()` method, but it automatically sets the status code and calls the `send()` method. The redirection URL (relative or absolute path OR a FQDN) can be specified as the only parameter or as a second parameter when a valid `3xx` status code is supplied as the first parameter. The status code is set to 302 by default, but can be changed to 300, 301, 302, 303, 307, or 308 by adding it as the first parameter.
+
+```javascript
+api.get('/redirectToHome', function(req,res) {
+  res.redirect('/home')
+})
+
+api.get('/redirectToGithub', function(req,res) {
+  res.redirect(301,'https://github.com')
+})
+```
+
 ### error
 An error can be triggered by calling the `error` method. This will cause the API to stop execution and return the message to the client. Custom error handling can be accomplished using the [Error Handling](#error-handling) feature.
 
