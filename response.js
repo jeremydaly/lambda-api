@@ -1,5 +1,14 @@
 'use strict'
 
+/**
+ * Lightweight Node.js API for AWS Lambda
+ * @author Jeremy Daly <jeremy@jeremydaly>
+ * @license MIT
+ */
+
+const escapeHtml = require('./utils.js').escapeHtml;
+const encodeUrl = require('./utils.js').encodeUrl;
+
 class RESPONSE {
 
   // Create the constructor function.
@@ -45,12 +54,38 @@ class RESPONSE {
     this.header('Content-Type','text/html').send(body)
   }
 
+  // Convenience method for setting Location header
+  location(path) {
+    this.header('Location',encodeUrl(path))
+    return this
+  }
+
+  // Convenience method for Redirect
+  redirect(path) {
+    let statusCode = 302 // default
+
+    // If status code is provided
+    if (arguments.length === 2) {
+      if ([300,301,302,303,307,308].includes(arguments[0])) {
+        statusCode = arguments[0]
+        path = arguments[1]
+      } else {
+        throw new Error(arguments[0] + ' is an invalid redirect status code')
+      }
+    }
+
+    let url = escapeHtml(path)
+
+    this.location(path)
+      .status(statusCode)
+      .html(`<p>${statusCode} Redirecting to <a href="${url}">${url}</a></p>`)
+  }
+
   // TODO: cookie
   // TODO: clearCookie
   // TODO: attachement
   // TODO: download
   // TODO: location
-  // TODO: redirect
   // TODO: sendFile
   // TODO: sendStatus
   // TODO: type
