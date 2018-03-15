@@ -93,6 +93,8 @@ api.get('/testErrorPromise', function(req,res) {
 
 describe('Error Handling Tests:', function() {
 
+  this.slow(300);
+
   it('Called Error', function() {
     let _event = Object.assign({},event,{ path: '/testError'})
 

@@ -77,6 +77,8 @@ api.get('/testPromise', function(req,res) {
 
 describe('Middleware Tests:', function() {
 
+  this.slow(300);
+
   it('Set Values in res object', function() {
     let _event = Object.assign({},event,{})
 

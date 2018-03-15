@@ -48,6 +48,8 @@ api.get('/testAppThrownError', function(req,res) {
 
 describe('Module Tests:', function() {
 
+  this.slow(300);
+
   it('Standard module response', function() {
     let _event = Object.assign({},event,{ path:'/testApp' })
 
