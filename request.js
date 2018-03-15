@@ -1,5 +1,11 @@
 'use strict'
 
+/**
+ * Lightweight Node.js API for AWS Lambda
+ * @author Jeremy Daly <jeremy@jeremydaly>
+ * @license MIT
+ */
+
 const QS = require('querystring') // Require the querystring library
 
 class REQUEST {
