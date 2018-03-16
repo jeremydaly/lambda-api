@@ -5,27 +5,36 @@
 [![npm](https://img.shields.io/npm/v/lambda-api.svg)](https://www.npmjs.com/package/lambda-api)
 [![npm](https://img.shields.io/npm/l/lambda-api.svg)](https://www.npmjs.com/package/lambda-api)
 
-### Lightweight Node.js API for AWS Lambda
+### Lightweight web framework for your serverless applications
 
-Lambda API is a lightweight Node.js API router for use with AWS API Gateway and AWS Lambda using Lambda Proxy integration. This closely mirrors (and is based on) other routers like Express.js but is significantly stripped down to maximize performance with Lambda's stateless, single run executions. The API uses Bluebird promises to serialize asynchronous execution.
+Lambda API is a lightweight web framework for use with AWS API Gateway and AWS Lambda using Lambda Proxy integration. This closely mirrors (and is based on) other routers like Express.js, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
 
 ## Simple Example
 
 ```javascript
-// Init Lambda API instance
+// Require the framework and instantiate it
 const api = require('lambda-api')()
 
+// Define a route
 api.get('/test', function(req,res) {
   res.status(200).json({ status: 'ok' })
 })
 
+// Declare your Lambda handler
 module.exports.handler = (event, context, callback) => {
-
   // Run the request
-  api.run(event,context,callback);
-
-} // end handler
+  api.run(event, context, callback)
+}
 ```
+
+## Why Another Web Framework?
+Express.js, Fastify, Koa, Restify, and Hapi are just a few of the many amazing web frameworks out there for Node.js. So why build yet another one when there are so many great options already? One word: **DEPENDENCIES**.
+
+These other frameworks are extremely powerful, but that benefit comes with the steep price of requiring several additional Node.js modules. Not only is this a bit of a security issue (see Beware of Third-Party Packages in [Securing Serverless](https://www.jeremydaly.com/securing-serverless-a-newbies-guide/)), but it also adds bloat to your codebase, filling your `node_modules` directory with a ton of extra files. For serverless applications that need to load quickly, all of these extra dependencies slow down execution and use more memory than necessary. Express.js has **30 dependencies**, Fastify has **12**, and Hapi has **17**! These numbers don't even include their dependencies' dependencies.
+
+Lambda API has **ONE** dependency. We use [Bluebird](http://bluebirdjs.com/docs/getting-started.html) promises to serialize asynchronous execution. We use promises because AWS Lambda currently only supports Node v6.10, which doesn't support `async / await`. Bluebird is faster than native promise and it has **no dependencies** either, making it the perfect choice for Lambda API.
+
+Lambda API was written to be extremely lightweight and built specifically for serverless applications using AWS Lambda. It provides support for API routing, serving up HTML pages, issuing redirects, and much more. It has a powerful middleware and error handling system, allowing you to implement everything from custom authentication to complex logging systems. Best of all, it was designed to work with Lambda's Proxy Integration, automatically handling all the interaction with API Gateway for you. It parses **REQUESTS** and formats **RESPONSES** for you, allowing you to focus on your application's core functionality, instead of fiddling with inputs and outputs.
 
 ## Lambda Proxy integration
 Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled looks like this:
@@ -93,10 +102,10 @@ The API automatically parses this information to create a normalized `REQUEST` o
 
 ## Configuration
 
-Include the `lambda-api` module into your Lambda handler script and initialize an instance. You can initialize the API with an optional `version` which can be accessed via the `REQUEST` object and a `base` path. The base path can be used to route multiple versions to different instances.
+Require the `lambda-api` module into your Lambda handler script and instantiate it. You can initialize the API with an optional `version` which can be accessed via the `REQUEST` object and a `base` path. The base path can be used to route multiple versions to different instances.
 
 ```javascript
-// Init Lambda API instance with optional version and base path
+// Require the framework and instantiate it with optional version and base parameters
 const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ```
 
