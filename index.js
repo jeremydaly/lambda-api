@@ -18,8 +18,8 @@ class API {
   constructor(props) {
 
     // Set the version and base paths
-    this._version = props.version ? props.version : 'v1'
-    this._base = props.base ? props.base.trim() : ''
+    this._version = props && props.version ? props.version : 'v1'
+    this._base = props && props.base ? props.base.trim() : ''
 
     // Stores timers for debugging
     this._timers = {}
@@ -356,4 +356,6 @@ class API {
 } // end API class
 
 // Export the API class
-module.exports = API
+module.exports = opts => new API(opts)
+
+// console.error('DEPRECATED: constructor method. Use require(\'lambda-api\')({ version: \'v1.0\', base: \'v1\' }) to initialize the framework instead')
