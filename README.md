@@ -12,10 +12,8 @@ Lambda API is a lightweight Node.js API router for use with AWS API Gateway and 
 ## Simple Example
 
 ```javascript
-const API = require('lambda-api') // API library
-
-// Init API instance
-const api = new API({ version: 'v1.0', base: 'v1' });
+// Init Lambda API instance
+const api = require('lambda-api')()
 
 api.get('/test', function(req,res) {
   res.status(200).json({ status: 'ok' })
@@ -98,10 +96,8 @@ The API automatically parses this information to create a normalized `REQUEST` o
 Include the `lambda-api` module into your Lambda handler script and initialize an instance. You can initialize the API with an optional `version` which can be accessed via the `REQUEST` object and a `base` path. The base path can be used to route multiple versions to different instances.
 
 ```javascript
-const API = require('lambda-api') // API library
-
-// Init API instance with optional version and base path
-const api = new API({ version: 'v1.0', base: 'v1' });
+// Init Lambda API instance with optional version and base path
+const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ```
 
 ## Routes and HTTP Methods
