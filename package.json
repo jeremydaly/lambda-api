@@ -1,7 +1,7 @@
 {
   "name": "lambda-api",
-  "version": "0.2.0",
-  "description": "Lightweight Node.js API for AWS Lambda",
+  "version": "0.2.1",
+  "description": "Lightweight web framework for your serverless applications",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
