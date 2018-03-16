@@ -2,7 +2,7 @@
 
 /**
  * Lightweight Node.js API for AWS Lambda
- * @author Jeremy Daly <jeremy@jeremydaly>
+ * @author Jeremy Daly <jeremy@jeremydaly.com>
  * @license MIT
  */
 
