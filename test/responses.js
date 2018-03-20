@@ -42,6 +42,10 @@ api.get('/testEmptyResponse', function(req,res) {
   res.send()
 })
 
+api.get('/testJSONPResponse', function(req,res) {
+  res.jsonp({ foo: 'bar' })
+})
+
 api.get('/location', function(req,res) {
   res.location('http://www.github.com').html('Location header set')
 })
@@ -115,6 +119,58 @@ describe('Response Tests:', function() {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
       expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '' })
+    })
+  }) // end it
+
+  it('JSONP response (default callback)', function() {
+    let _event = Object.assign({},event,{ path: '/testJSONPResponse' })
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'callback({"foo":"bar"})' })
+    })
+  }) // end it
+
+  it('JSONP response (using callback URL param)', function() {
+    let _event = Object.assign({},event,{ path: '/testJSONPResponse', queryStringParameters: { callback: 'foo' }})
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'foo({"foo":"bar"})' })
+    })
+  }) // end it
+
+
+  it('JSONP response (using cb URL param)', function() {
+    let _event = Object.assign({},event,{ path: '/testJSONPResponse', queryStringParameters: { cb: 'bar' }})
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'bar({"foo":"bar"})' })
+    })
+  }) // end it
+
+
+  it('JSONP response (using both URL params, prefer callback)', function() {
+    let _event = Object.assign({},event,{ path: '/testJSONPResponse', queryStringParameters: { callback: 'foo', cb: 'bar' }})
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'foo({"foo":"bar"})' })
+    })
+  }) // end it
+
+  it('JSONP response (using URL param with spaces)', function() {
+    let _event = Object.assign({},event,{ path: '/testJSONPResponse', queryStringParameters: { callback: 'foo bar'}})
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'foo_bar({"foo":"bar"})' })
     })
   }) // end it
 

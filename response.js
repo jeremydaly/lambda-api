@@ -1,13 +1,13 @@
 'use strict'
 
 /**
- * Lightweight Node.js API for AWS Lambda
+ * Lightweight web framework for your serverless applications
  * @author Jeremy Daly <jeremy@jeremydaly.com>
  * @license MIT
  */
 
-const escapeHtml = require('./utils.js').escapeHtml;
-const encodeUrl = require('./utils.js').encodeUrl;
+const escapeHtml = require('./utils.js').escapeHtml
+const encodeUrl = require('./utils.js').encodeUrl
 
 class RESPONSE {
 
@@ -25,6 +25,9 @@ class RESPONSE {
       // Set the Content-Type by default
       "Content-Type": "application/json" //charset=UTF-8
     }
+
+    // Default callback function
+    this._callback = 'callback'
   }
 
   // Sets the statusCode
@@ -44,10 +47,15 @@ class RESPONSE {
     this.header('Content-Type','application/json').send(JSON.stringify(body))
   }
 
-  // TODO: Convenience method for JSONP
-  // jsonp(body) {
-  // 	this.header('Content-Type','application/json').send(JSON.stringify(body))
-  // }
+  // Convenience method for JSONP
+  jsonp(body) {
+    // Check the querystring for callback or cb
+    let query = this.app._event.queryStringParameters || {}
+    let cb = query.callback || query.cb
+
+    this.header('Content-Type','application/json')
+      .send((cb ? cb.replace(' ','_') : 'callback') + '(' + JSON.stringify(body) + ')')
+  }
 
   // Convenience method for HTML
   html(body) {
