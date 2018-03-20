@@ -260,6 +260,10 @@ An error can be triggered by calling the `error` method. This will cause the API
 api.get('/users', function(req,res) {
   res.error('This is an error')
 })
+
+api.get('/users', function(req,res) {
+  res.error({ error: 'This is an error' })
+})
 ```
 
 ## Path Parameters
