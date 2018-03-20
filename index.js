@@ -20,6 +20,7 @@ class API {
     // Set the version and base paths
     this._version = props && props.version ? props.version : 'v1'
     this._base = props && props.base ? props.base.trim() : ''
+    this._callbackName = props && props.callback ? props.callback.trim() : 'callback'
 
     // Stores timers for debugging
     this._timers = {}

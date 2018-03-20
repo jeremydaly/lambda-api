@@ -5,9 +5,12 @@ const expect = require('chai').expect // Assertion library
 
 // Init API instance
 const api = require('../index')({ version: 'v1.0', base: 'v1' })
+// Init secondary API for JSONP callback testing
+const api2 = require('../index')({ version: 'v1.0', base: 'v1', callback: 'cb' })
 
 // NOTE: Set test to true
 api._test = true;
+api2._test = true;
 
 let event = {
   httpMethod: 'get',
@@ -43,6 +46,11 @@ api.get('/testEmptyResponse', function(req,res) {
 })
 
 api.get('/testJSONPResponse', function(req,res) {
+  res.jsonp({ foo: 'bar' })
+})
+
+// Secondary route
+api2.get('/testJSONPResponse', function(req,res) {
   res.jsonp({ foo: 'bar' })
 })
 
@@ -147,20 +155,9 @@ describe('Response Tests:', function() {
     let _event = Object.assign({},event,{ path: '/testJSONPResponse', queryStringParameters: { cb: 'bar' }})
 
     return new Promise((resolve,reject) => {
-      api.run(_event,{},function(err,res) { resolve(res) })
+      api2.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
       expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'bar({"foo":"bar"})' })
-    })
-  }) // end it
-
-
-  it('JSONP response (using both URL params, prefer callback)', function() {
-    let _event = Object.assign({},event,{ path: '/testJSONPResponse', queryStringParameters: { callback: 'foo', cb: 'bar' }})
-
-    return new Promise((resolve,reject) => {
-      api.run(_event,{},function(err,res) { resolve(res) })
-    }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'foo({"foo":"bar"})' })
     })
   }) // end it
 

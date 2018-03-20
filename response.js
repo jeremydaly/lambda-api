@@ -51,7 +51,7 @@ class RESPONSE {
   jsonp(body) {
     // Check the querystring for callback or cb
     let query = this.app._event.queryStringParameters || {}
-    let cb = query.callback || query.cb
+    let cb = query[this.app._callbackName]
 
     this.header('Content-Type','application/json')
       .send((cb ? cb.replace(' ','_') : 'callback') + '(' + JSON.stringify(body) + ')')

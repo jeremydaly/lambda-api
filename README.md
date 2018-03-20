@@ -189,6 +189,35 @@ api.get('/users', function(req,res) {
 })
 ```
 
+### jsonp
+There is a `jsonp` convenience method for the `send` method that will set the headers to `application\json`, perform `JSON.stringify()` on the contents passed to it, and wrap the results in a callback function. By default, the callback function is named `callback`.
+
+```javascript
+res.jsonp({ foo: 'bar' })
+// => callback({ "foo": "bar" })
+
+res.status(500).jsonp({ error: 'some error'})
+// => callback({ "error": "some error" })
+```
+
+The default can be changed by passing in `callback` as a URL parameter, e.g. `?callback=foo`.
+
+```javascript
+// ?callback=foo
+res.jsonp({ foo: 'bar' })
+// => foo({ "foo": "bar" })
+```
+
+You can change the default URL parameter using the optional `callback` option when initializing the API.
+
+```javascript
+const api = require('lambda-api')({ callback: 'cb' });
+
+// ?cb=bar
+res.jsonp({ foo: 'bar' })
+// => bar({ "foo": "bar" })
+```
+
 ### html
 There is also an `html` convenience method for the `send` method that will set the headers to `text/html` and pass through the contents.
 
