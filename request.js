@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * Lightweight Node.js API for AWS Lambda
+ * Lightweight web framework for your serverless applications
  * @author Jeremy Daly <jeremy@jeremydaly.com>
  * @license MIT
  */
