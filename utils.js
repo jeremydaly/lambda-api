@@ -25,3 +25,14 @@ let UNMATCHED_SURROGATE_PAIR_REPLACE = '$1\uFFFD$2'
 module.exports.encodeUrl = url => String(url)
   .replace(UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE)
   .replace(ENCODE_CHARS_REGEXP, encodeURI)
+
+module.exports.encodeBody = body =>
+  typeof body === 'object' ? JSON.stringify(body) : (body && typeof body !== 'string' ? body.toString() : (body ? body : ''))
+
+module.exports.parseBody = body => {
+  try {
+    return JSON.parse(body)
+  } catch(e) {
+    return body;
+  }
+}

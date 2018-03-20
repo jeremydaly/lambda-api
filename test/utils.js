@@ -39,6 +39,49 @@ describe('Utility Function Tests:', function() {
       expect(decoded).to.equal(url)
     }) // end it
 
-  }) // end escapeHtml tests
+  }) // end encodeUrl tests
+
+
+  describe('encodeBody:', function() {
+
+    it('String', function() {
+      expect(utils.encodeBody('test string')).to.equal('test string')
+    }) // end it
+
+    it('Number', function() {
+      expect(utils.encodeBody(123)).to.equal('123')
+    }) // end it
+
+    it('Array', function() {
+      expect(utils.encodeBody([1,2,3])).to.equal('[1,2,3]')
+    }) // end it
+
+    it('Object', function() {
+      expect(utils.encodeBody({ foo: 'bar' })).to.equal('{"foo":"bar"}')
+    }) // end it
+
+  }) // end encodeBody tests
+
+
+  describe('parseBody:', function() {
+
+    it('String', function() {
+      expect(utils.parseBody('test string')).to.equal('test string')
+    }) // end it
+
+    it('Number', function() {
+      expect(utils.parseBody('123')).to.equal(123)
+    }) // end it
+
+    it('Array', function() {
+      expect(utils.parseBody('[1,2,3]')).to.deep.equal([ 1, 2, 3 ])
+    }) // end it
+
+    it('Object', function() {
+      expect(utils.parseBody('{"foo":"bar"}')).to.deep.equal({ foo: 'bar' })
+    }) // end it
+
+  }) // end encodeBody tests
+
 
 }) // end UTILITY tests

@@ -7,6 +7,7 @@
  */
 
 const QS = require('querystring') // Require the querystring library
+const parseBody = require('./utils.js').parseBody
 
 class REQUEST {
 
@@ -37,6 +38,17 @@ class REQUEST {
     // Set the headers
     this.headers = app._event.headers
 
+    // Set and parse cookies
+    this.cookies = app._event.headers.Cookie ?
+      app._event.headers.Cookie.split(';')
+        .reduce(
+          (acc,cookie) => {
+            cookie = cookie.trim().split('=')
+            return Object.assign(acc,{ [cookie[0]] : parseBody(decodeURIComponent(cookie[1])) })
+          },
+          {}
+        ) : {}
+
     // Set the requestContext
     this.requestContext = app._event.requestContext
 
@@ -46,11 +58,7 @@ class REQUEST {
     } else if (typeof app._event.body === 'object') {
       this.body = app._event.body
     } else {
-      try {
-        this.body = JSON.parse(app._event.body)
-      } catch(e) {
-        this.body = app._event.body;
-      }
+      this.body = parseBody(app._event.body)
     }
 
     // Extract path from event (strip querystring just in case)
