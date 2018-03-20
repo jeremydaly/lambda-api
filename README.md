@@ -181,7 +181,7 @@ api.get('/users', function(req,res) {
 The `send` methods triggers the API to return data to the API Gateway. The `send` method accepts one parameter and sends the contents through as is, e.g. as an object, string, integer, etc. AWS Gateway expects a string, so the data should be converted accordingly.
 
 ### json
-There is a `json` convenience method for the `send` method that will set the headers to `application\json` as well as perform `JSON.stringify()` on the contents passed to it.
+There is a `json` convenience method for the `send` method that will set the headers to `application/json` as well as perform `JSON.stringify()` on the contents passed to it.
 
 ```javascript
 api.get('/users', function(req,res) {
@@ -190,7 +190,7 @@ api.get('/users', function(req,res) {
 ```
 
 ### jsonp
-There is a `jsonp` convenience method for the `send` method that will set the headers to `application\json`, perform `JSON.stringify()` on the contents passed to it, and wrap the results in a callback function. By default, the callback function is named `callback`.
+There is a `jsonp` convenience method for the `send` method that will set the headers to `application/json`, perform `JSON.stringify()` on the contents passed to it, and wrap the results in a callback function. By default, the callback function is named `callback`.
 
 ```javascript
 res.jsonp({ foo: 'bar' })
