@@ -9,24 +9,24 @@
 
 Lambda API is a lightweight web framework for use with AWS API Gateway and AWS Lambda using Lambda Proxy integration. This closely mirrors (and is based on) other routers like Express.js, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
 
+**IMPORTANT:** There is a [breaking change](#breaking-change-in-v03) in v0.3 that affects instantiation.
+
 ## Simple Example
 
 ```javascript
-const API = require('lambda-api') // API library
+// Require the framework and instantiate it
+const api = require('lambda-api')()
 
-// Init API instance
-const api = new API({ version: 'v1.0', base: 'v1' });
-
+// Define a route
 api.get('/test', function(req,res) {
   res.status(200).json({ status: 'ok' })
 })
 
+// Declare your Lambda handler
 module.exports.handler = (event, context, callback) => {
-
   // Run the request
-  api.run(event,context,callback);
-
-} // end handler
+  api.run(event, context, callback)
+}
 ```
 
 ## Why Another Web Framework?
@@ -37,6 +37,21 @@ These other frameworks are extremely powerful, but that benefit comes with the s
 Lambda API has **ONE** dependency. We use [Bluebird](http://bluebirdjs.com/docs/getting-started.html) promises to serialize asynchronous execution. We use promises because AWS Lambda currently only supports Node v6.10, which doesn't support `async / await`. Bluebird is faster than native promise and it has **no dependencies** either, making it the perfect choice for Lambda API.
 
 Lambda API was written to be extremely lightweight and built specifically for serverless applications using AWS Lambda. It provides support for API routing, serving up HTML pages, issuing redirects, and much more. It has a powerful middleware and error handling system, allowing you to implement everything from custom authentication to complex logging systems. Best of all, it was designed to work with Lambda's Proxy Integration, automatically handling all the interaction with API Gateway for you. It parses **REQUESTS** and formats **RESPONSES** for you, allowing you to focus on your application's core functionality, instead of fiddling with inputs and outputs.
+
+## Breaking Change in v0.3
+Please note that the invocation method has been changed. You no longer need to use the `new` keyword to instantiate Lambda API. It can now be instantiated in one line:
+
+ ```javascript
+ const api = require('lambda-api')()
+ ```
+
+`lambda-api` returns a `function` now instead of a `class`, so options can be passed in as its only argument:
+
+```javascript
+const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
+```
+
+**IMPORTANT:** Upgrading to v0.3.0 requires either removing the `new` keyword or switching to the one-line format. This provides more flexibility for instantiating Lambda API in future releases.
 
 ## Lambda Proxy integration
 Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled looks like this:
@@ -104,13 +119,11 @@ The API automatically parses this information to create a normalized `REQUEST` o
 
 ## Configuration
 
-Include the `lambda-api` module into your Lambda handler script and initialize an instance. You can initialize the API with an optional `version` which can be accessed via the `REQUEST` object and a `base` path. The base path can be used to route multiple versions to different instances.
+Require the `lambda-api` module into your Lambda handler script and instantiate it. You can initialize the API with an optional `version` which can be accessed via the `REQUEST` object and a `base` path.
 
 ```javascript
-const API = require('lambda-api') // API library
-
-// Init API instance with optional version and base path
-const api = new API({ version: 'v1.0', base: 'v1' });
+// Require the framework and instantiate it with optional version and base parameters
+const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ```
 
 ## Routes and HTTP Methods
@@ -156,6 +169,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `route`: The matched route of the request
 - `requestContext`: The `requestContext` passed from the API Gateway
 - `namespace` or `ns`: A reference to modules added to the app's namespace (see [namespaces](#namespaces))
+- `cookies`: An object containing cookies sent from the browser (see the [cookie](#cookie) `RESPONSE` method)
 
 The request object can be used to pass additional information through the processing chain. For example, if you are using a piece of authentication middleware, you can add additional keys to the `REQUEST` object with information about the user. See [middleware](#middleware) for more information.
 
@@ -185,12 +199,41 @@ api.get('/users', function(req,res) {
 The `send` methods triggers the API to return data to the API Gateway. The `send` method accepts one parameter and sends the contents through as is, e.g. as an object, string, integer, etc. AWS Gateway expects a string, so the data should be converted accordingly.
 
 ### json
-There is a `json` convenience method for the `send` method that will set the headers to `application\json` as well as perform `JSON.stringify()` on the contents passed to it.
+There is a `json` convenience method for the `send` method that will set the headers to `application/json` as well as perform `JSON.stringify()` on the contents passed to it.
 
 ```javascript
 api.get('/users', function(req,res) {
   res.json({ message: 'This will be converted automatically' })
 })
+```
+
+### jsonp
+There is a `jsonp` convenience method for the `send` method that will set the headers to `application/json`, perform `JSON.stringify()` on the contents passed to it, and wrap the results in a callback function. By default, the callback function is named `callback`.
+
+```javascript
+res.jsonp({ foo: 'bar' })
+// => callback({ "foo": "bar" })
+
+res.status(500).jsonp({ error: 'some error'})
+// => callback({ "error": "some error" })
+```
+
+The default can be changed by passing in `callback` as a URL parameter, e.g. `?callback=foo`.
+
+```javascript
+// ?callback=foo
+res.jsonp({ foo: 'bar' })
+// => foo({ "foo": "bar" })
+```
+
+You can change the default URL parameter using the optional `callback` option when initializing the API.
+
+```javascript
+const api = require('lambda-api')({ callback: 'cb' });
+
+// ?cb=bar
+res.jsonp({ foo: 'bar' })
+// => bar({ "foo": "bar" })
 ```
 
 ### html
@@ -236,6 +279,40 @@ api.get('/users', function(req,res) {
   res.error('This is an error')
 })
 ```
+
+### cookie
+
+Convenience method for setting cookies. This method accepts a `name`, `value` and an optional `options` object with the following parameters:
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| domain   | `String` | Domain name to use for the cookie. This defaults to the current domain. |
+| expires  | `Date` | The expiration date of the cookie. Local dates will be converted to GMT. Creates session cookie if this value is not specified. |
+| httpOnly | `Boolean` | Sets the cookie to be accessible only via a web server, not JavaScript. |
+| maxAge | `Number` | Set the expiration time relative to the current time in milliseconds. Automatically sets the `expires` property if not explicitly provided. |
+| path | `String` | Path for the cookie. Defaults to "/" for the root directory. |
+| secure | `Boolean` | Sets the cookie to be used with HTTPS only. |
+|sameSite | `Boolean` or `String` | Sets the SameSite value for cookie. `true` or `false` sets `Strict` or `Lax` respectively. Also allows a string value. See https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00#section-4.1.1 |
+
+The `name` attribute should be a string (auto-converted if not), but the `value` attribute can be any type of value. The `value` will be serialized (if an object, array, etc.) and then encoded using `encodeURIComponent` for safely assigning the cookie value. Cookies are automatically parsed, decoded, and available via the `REQUEST` object (see [REQUEST](#request)).
+
+**NOTE:** The `cookie()` method only sets the header. A execution ending method like `send()`, `json()`, etc. must be called to send the response.
+
+```javascript
+res.cookie('foo', 'bar', { maxAge: 3600*1000, secure: true }).send()
+res.cookie('fooObject', { foo: 'bar' }, { domain: '.test.com', path: '/admin', httpOnly: true }).send()
+res.cookie('fooArray', [ 'one', 'two', 'three' ], { path: '/', httpOnly: true }).send()
+```
+
+### clearCookie
+Convenience method for expiring cookies. Requires the `name` and optional `options` object as specified in the [cookie](#cookie) method. This method will automatically set the expiration time. However, most browsers require the same options to clear a cookie as was used to set it. E.g. if you set the `path` to "/admin" when you set the cookie, you must use this same value to clear it.
+
+```javascript
+res.clearCookie('foo', { secure: true }).send()
+res.clearCookie('fooObject', { domain: '.test.com', path: '/admin', httpOnly: true }).send()
+res.clearCookie('fooArray', { path: '/', httpOnly: true }).send()
+```
+**NOTE:** The `clearCookie()` method only sets the header. A execution ending method like `send()`, `json()`, etc. must be called to send the response.
 
 ## Path Parameters
 Path parameters are extracted from the path sent in by API Gateway. Although API Gateway supports path parameters, the API doesn't use these values but insteads extracts them from the actual path. This gives you more flexibility with the API Gateway configuration. Path parameters are defined in routes using a colon `:` as a prefix.

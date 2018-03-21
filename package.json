@@ -1,6 +1,6 @@
 {
   "name": "lambda-api",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Lightweight web framework for your serverless applications",
   "main": "index.js",
   "scripts": {
@@ -11,6 +11,7 @@
     "url": "git+https://github.com/jeremydaly/lambda-api.git"
   },
   "keywords": [
+    "serverless",
     "nodejs",
     "api",
     "awslambda",
