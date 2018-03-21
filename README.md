@@ -9,6 +9,8 @@
 
 Lambda API is a lightweight web framework for use with AWS API Gateway and AWS Lambda using Lambda Proxy integration. This closely mirrors (and is based on) other routers like Express.js, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
 
+**IMPORTANT:** There is a [breaking change](#breaking-change-in-v0.3) in v0.3.0
+
 ## Simple Example
 
 ```javascript
@@ -35,6 +37,21 @@ These other frameworks are extremely powerful, but that benefit comes with the s
 Lambda API has **ONE** dependency. We use [Bluebird](http://bluebirdjs.com/docs/getting-started.html) promises to serialize asynchronous execution. We use promises because AWS Lambda currently only supports Node v6.10, which doesn't support `async / await`. Bluebird is faster than native promise and it has **no dependencies** either, making it the perfect choice for Lambda API.
 
 Lambda API was written to be extremely lightweight and built specifically for serverless applications using AWS Lambda. It provides support for API routing, serving up HTML pages, issuing redirects, and much more. It has a powerful middleware and error handling system, allowing you to implement everything from custom authentication to complex logging systems. Best of all, it was designed to work with Lambda's Proxy Integration, automatically handling all the interaction with API Gateway for you. It parses **REQUESTS** and formats **RESPONSES** for you, allowing you to focus on your application's core functionality, instead of fiddling with inputs and outputs.
+
+## Breaking Change in v0.3
+Please note that the invocation method has been changed. You no longer need to use the `new` keyword to initialize Lambda API. It can now be initialized in one line:
+
+ ```javascript
+ const api = require('lambda-api')()
+ ```
+
+`lambda-api` returns a `function` now instead of a `class`, so options can be passed in as its only argument:
+
+```javascript
+const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
+```
+
+**IMPORTANT:** Upgrading to v0.3.0 requires either removing the `new` keyword or switching to the one-line format. This provides more flexibility with initializing in future releases.
 
 ## Lambda Proxy integration
 Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled looks like this:
@@ -102,7 +119,7 @@ The API automatically parses this information to create a normalized `REQUEST` o
 
 ## Configuration
 
-Require the `lambda-api` module into your Lambda handler script and instantiate it. You can initialize the API with an optional `version` which can be accessed via the `REQUEST` object and a `base` path. The base path can be used to route multiple versions to different instances.
+Require the `lambda-api` module into your Lambda handler script and instantiate it. You can initialize the API with an optional `version` which can be accessed via the `REQUEST` object and a `base` path.
 
 ```javascript
 // Require the framework and instantiate it with optional version and base parameters
