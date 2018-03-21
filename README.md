@@ -152,6 +152,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `route`: The matched route of the request
 - `requestContext`: The `requestContext` passed from the API Gateway
 - `namespace` or `ns`: A reference to modules added to the app's namespace (see [namespaces](#namespaces))
+- `cookies`: An object containing cookies sent from the browser (see the [cookie](#cookie) `RESPONSE` method)
 
 The request object can be used to pass additional information through the processing chain. For example, if you are using a piece of authentication middleware, you can add additional keys to the `REQUEST` object with information about the user. See [middleware](#middleware) for more information.
 
