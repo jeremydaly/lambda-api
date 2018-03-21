@@ -262,6 +262,40 @@ api.get('/users', function(req,res) {
 })
 ```
 
+### cookie
+
+Convenience method for setting cookies. This method accepts a `name`, `value` and an optional `options` object with the following parameters:
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| domain   | `String` | Domain name to use for the cookie. This defaults to the current domain. |
+| expires  | `Date` | The expiration date of the cookie. Local dates will be converted to GMT. Creates session cookie if this value is not specified. |
+| httpOnly | `Boolean` | Sets the cookie to be accessible only via a web server, not JavaScript. |
+| maxAge | `Number` | Set the expiration time relative to the current time in milliseconds. Automatically sets the `expires` property if not explicitly provided. |
+| path | `String` | Path for the cookie. Defaults to "/" for the root directory. |
+| secure | `Boolean` | Sets the cookie to be used with HTTPS only. |
+|sameSite | `Boolean` or `String` | Sets the SameSite value for cookie. `true` or `false` sets `Strict` or `Lax` respectively. Also allows a string value. See https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00#section-4.1.1 |
+
+The `name` attribute should be a string (auto-converted if not), but the `value` attribute can be any type of value. The `value` will be serialized (if an object, array, etc.) and then encoded using `encodeURIComponent` for safely assigning the cookie value. Cookies are automatically parsed, decoded, and available via the `REQUEST` object.
+
+**NOTE:** The `cookie()` method only sets the header. A execution ending method like `send()`, `json()`, etc. must be called to send the response.
+
+```javascript
+res.cookie('foo', 'bar', { maxAge: 3600*1000, secure: true }).send()
+res.cookie('fooObject', { foo: 'bar' }, { domain: '.test.com', path: '/admin', httpOnly: true }).send()
+res.cookie('fooArray', [ 'one', 'two', 'three' ], { path: '/', httpOnly: true }).send()
+```
+
+### clearCookie
+Convenience method for expiring cookies. Requires the `name` and optional `options` object as specified in the [cookie](#cookie) method. This method will automatically set the expiration time. However, most browsers require the same options to clear a cookie as was used to set it. E.g. if you set the `path` to "/admin" when you set the cookie, you must use this same value to clear it.
+
+```javascript
+res.clearCookie('foo', { secure: true }).send()
+res.clearCookie('fooObject', { domain: '.test.com', path: '/admin', httpOnly: true }).send()
+res.clearCookie('fooArray', { path: '/', httpOnly: true }).send()
+```
+**NOTE:** The `clearCookie()` method only sets the header. A execution ending method like `send()`, `json()`, etc. must be called to send the response.
+
 ## Path Parameters
 Path parameters are extracted from the path sent in by API Gateway. Although API Gateway supports path parameters, the API doesn't use these values but insteads extracts them from the actual path. This gives you more flexibility with the API Gateway configuration. Path parameters are defined in routes using a colon `:` as a prefix.
 
