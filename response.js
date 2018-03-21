@@ -116,7 +116,7 @@ class RESPONSE {
       : ''
 
     // path (String): Path for the cookie
-    cookieString += opts.path ? '; Path=' + opts.path : ''
+    cookieString += opts.path ? '; Path=' + opts.path : '; Path=/'
 
     // secure (Boolean): Marks the cookie to be used with HTTPS only
     cookieString += opts.secure && opts.secure === true ? '; Secure' : ''

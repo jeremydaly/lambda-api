@@ -130,7 +130,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-            'Set-Cookie': 'test=value'
+            'Set-Cookie': 'test=value; Path=/'
           }, statusCode: 200, body: '{}'
         })
       })
@@ -145,7 +145,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-            'Set-Cookie': 'test=http%3A%2F%2F%20%5B%5D%20foo%3Bbar'
+            'Set-Cookie': 'test=http%3A%2F%2F%20%5B%5D%20foo%3Bbar; Path=/'
           }, statusCode: 200, body: '{}'
         })
       })
@@ -161,7 +161,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-            'Set-Cookie': 'test=%7B%22foo%22%3A%22bar%22%7D'
+            'Set-Cookie': 'test=%7B%22foo%22%3A%22bar%22%7D; Path=/'
           }, statusCode: 200, body: '{}'
         })
       })
@@ -177,7 +177,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-            'Set-Cookie': '123=value'
+            'Set-Cookie': '123=value; Path=/'
           }, statusCode: 200, body: '{}'
         })
       })
@@ -193,7 +193,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-            'Set-Cookie': 'test=value; Expires=Tue, 01 Jan 2019 00:00:00 GMT'
+            'Set-Cookie': 'test=value; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/'
           }, statusCode: 200, body: '{}'
         })
       })
@@ -208,7 +208,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-            'Set-Cookie': 'test=value; MaxAge=3600; Expires='+ new Date(Date.now()+3600000).toUTCString()
+            'Set-Cookie': 'test=value; MaxAge=3600; Expires='+ new Date(Date.now()+3600000).toUTCString() + '; Path=/'
           }, statusCode: 200, body: '{}'
         })
       })
@@ -223,7 +223,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-            'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT'
+            'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/'
           }, statusCode: 200, body: '{}'
         })
       })
@@ -238,7 +238,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-            'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; HttpOnly'
+            'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; HttpOnly; Path=/'
           }, statusCode: 200, body: '{}'
         })
       })
@@ -253,7 +253,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-            'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Secure'
+            'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; Secure'
           }, statusCode: 200, body: '{}'
         })
       })
@@ -283,7 +283,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-            'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; SameSite=Strict'
+            'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Strict'
           }, statusCode: 200, body: '{}'
         })
       })
@@ -298,7 +298,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-            'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; SameSite=Lax'
+            'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Lax'
           }, statusCode: 200, body: '{}'
         })
       })
@@ -313,7 +313,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-            'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; SameSite=Test'
+            'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Test'
           }, statusCode: 200, body: '{}'
         })
       })
