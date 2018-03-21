@@ -132,8 +132,12 @@ class RESPONSE {
     return this
   }
 
+  // Convenience method for clearing cookies
+  clearCookie(name,opts={}) {
+    let options = Object.assign({ expires: new Date(1), maxAge: -1000, path: '/' }, opts)
+    return this.cookie(name,'',options)
+  }
 
-  // TODO: clearCookie
   // TODO: attachement
   // TODO: download
   // TODO: sendFile

@@ -103,7 +103,15 @@ api.get('/cookieSameSiteString', function(req,res) {
 })
 
 api.get('/cookieParse', function(req,res) {
-  res.send({ cookies: req.cookies } )
+  res.send({ cookies: req.cookies })
+})
+
+api.get('/cookieClear', function(req,res) {
+  res.clearCookie('test').send({})
+})
+
+api.get('/cookieClearOptions', function(req,res) {
+  res.clearCookie('test', { domain: 'test.com', httpOnly: true, secure: true }).send({})
 })
 
 /******************************************************************************/
@@ -374,6 +382,44 @@ describe('Cookie Tests:', function() {
       })
     }) // end it
 
-  })
+  }) // end parse tests
 
-}) // end ROUTE tests
+  describe("Clear", function() {
+
+    it('Clear cookie (no options)', function() {
+      let _event = Object.assign({},event,{
+        path: '/cookieClear'
+      })
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        expect(result).to.deep.equal({
+          headers: {
+            'Content-Type': 'application/json',
+            'Set-Cookie': 'test=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=-1; Path=/'
+          }, statusCode: 200, body: '{}'
+        })
+      })
+    }) // end it
+
+    it('Clear cookie (w/ options)', function() {
+      let _event = Object.assign({},event,{
+        path: '/cookieClearOptions'
+      })
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        expect(result).to.deep.equal({
+          headers: {
+            'Content-Type': 'application/json',
+            'Set-Cookie': 'test=; Domain=test.com; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; MaxAge=-1; Path=/; Secure'
+          }, statusCode: 200, body: '{}'
+        })
+      })
+    }) // end it
+
+  }) // end Clear tests
+
+}) // end COOKIE tests
