@@ -117,6 +117,12 @@ Lambda Proxy Integration is an option in API Gateway that allows the details of 
 
 The API automatically parses this information to create a normalized `REQUEST` object. The request can then be routed using the APIs methods.
 
+## Install
+
+```
+npm i lambda-api --save
+```
+
 ## Configuration
 
 Require the `lambda-api` module into your Lambda handler script and instantiate it. You can initialize the API with an optional `version` which can be accessed via the `REQUEST` object and a `base` path.
@@ -161,7 +167,8 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `method`: The HTTP method of the request
 - `path`: The path passed in by the request
 - `query`: Querystring parameters parsed into an object
-- `headers`: An object containing the request headers
+- `headers`: An object containing the request headers (properties converted to lowercase for HTTP/2, see [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540))
+- `rawHeaders`: An object containing the original request headers (property case preserved)
 - `body`: The body of the request.
  - If the `Content-Type` header is `application/json`, it will attempt to parse the request using `JSON.parse()`
  - If the `Content-Type` header is `application/x-www-form-urlencoded`, it will attempt to parse a URL encoded string using `querystring`
