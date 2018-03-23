@@ -327,6 +327,38 @@ describe('Route Tests:', function() {
       })
     }) // end it
 
+    it('With "x-www-form-urlencoded; charset=UTF-8" body: /test/form', function() {
+      let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'post', body: 'test=123&test2=456', headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' } })
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        // console.log(result);
+        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}' })
+      })
+    }) // end it
+
+    it('With x-www-form-urlencoded body and lowercase "Content-Type" header: /test/form', function() {
+      let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'post', body: 'test=123&test2=456', headers: { 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8' } })
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        // console.log(result);
+        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}' })
+      })
+    }) // end it
+
+    it('With x-www-form-urlencoded body and mixed case "Content-Type" header: /test/form', function() {
+      let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'post', body: 'test=123&test2=456', headers: { 'CoNtEnt-TYPe': 'application/x-www-form-urlencoded' } })
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        // console.log(result);
+        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}' })
+      })
+    }) // end it
 
     it('Missing path: /not_found', function() {
       let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'post' })
@@ -425,6 +457,39 @@ describe('Route Tests:', function() {
 
     it('With x-www-form-urlencoded body: /test/form', function() {
       let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'put', body: 'test=123&test2=456', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        // console.log(result);
+        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}' })
+      })
+    }) // end it
+
+    it('With "x-www-form-urlencoded; charset=UTF-8" body: /test/form', function() {
+      let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'put', body: 'test=123&test2=456', headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' } })
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        // console.log(result);
+        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}' })
+      })
+    }) // end it
+
+    it('With x-www-form-urlencoded body and lowercase "Content-Type" header: /test/form', function() {
+      let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'put', body: 'test=123&test2=456', headers: { 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8' } })
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        // console.log(result);
+        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}' })
+      })
+    }) // end it
+
+    it('With x-www-form-urlencoded body and mixed case "Content-Type" header: /test/form', function() {
+      let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'put', body: 'test=123&test2=456', headers: { 'CoNtEnt-TYPe': 'application/x-www-form-urlencoded' } })
 
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })

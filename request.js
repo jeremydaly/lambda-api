@@ -36,11 +36,14 @@ class REQUEST {
     this.query = app._event.queryStringParameters ? app._event.queryStringParameters : {}
 
     // Set the headers
-    this.headers = app._event.headers
+    this.rawHeaders = app._event.headers
+
+    this.headers = Object.keys(this.rawHeaders).reduce((acc,header) =>
+      Object.assign(acc,{[header.toLowerCase()]:this.rawHeaders[header]}), {})
 
     // Set and parse cookies
-    this.cookies = app._event.headers.Cookie ?
-      app._event.headers.Cookie.split(';')
+    this.cookies = this.headers.cookie ?
+      this.headers.cookie.split(';')
         .reduce(
           (acc,cookie) => {
             cookie = cookie.trim().split('=')
@@ -53,7 +56,7 @@ class REQUEST {
     this.requestContext = app._event.requestContext
 
     // Set the body
-    if (this.headers['Content-Type'] && this.headers['Content-Type'].includes("application/x-www-form-urlencoded")) {
+    if (this.headers['content-type'] && this.headers['content-type'].includes("application/x-www-form-urlencoded")) {
       this.body = QS.parse(app._event.body)
     } else if (typeof app._event.body === 'object') {
       this.body = app._event.body
