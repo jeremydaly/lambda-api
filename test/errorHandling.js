@@ -4,7 +4,7 @@ const Promise = require('bluebird') // Promise library
 const expect = require('chai').expect // Assertion library
 
 // Init API instance
-const api = require('../index')({ version: 'v1.0', base: 'v1' })
+const api = require('../index')({ version: 'v1.0' })
 
 // NOTE: Set test to true
 api._test = true;

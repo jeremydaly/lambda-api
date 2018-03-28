@@ -4,9 +4,9 @@ const Promise = require('bluebird') // Promise library
 const expect = require('chai').expect // Assertion library
 
 // Init API instance
-const api = require('../index')({ version: 'v1.0', base: 'v1' })
+const api = require('../index')({ version: 'v1.0' })
 // Init secondary API for JSONP callback testing
-const api2 = require('../index')({ version: 'v1.0', base: 'v1', callback: 'cb' })
+const api2 = require('../index')({ version: 'v1.0', callback: 'cb' })
 
 // NOTE: Set test to true
 api._test = true;
