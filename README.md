@@ -454,3 +454,9 @@ Simply create one `{proxy+}` route that uses the `ANY` method and all requests w
 
 ## Contributions
 Contributions, ideas and bug reports are welcome and greatly appreciated. Please add  [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bugs reports.
+
+
+## NOTES
+In order for "root" path mapping to work, you need to also create an `ANY` route for `/` in addition to your `{proxy+}` route.
+
+To enable binary support, you need to add `*/*` under Binary Media Types in API Gateway > APIs > [your api] -> Settings.
