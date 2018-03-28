@@ -55,13 +55,19 @@ class REQUEST {
     // Set the requestContext
     this.requestContext = app._event.requestContext
 
+    // Capture the raw body
+    this.rawBody = app._event.body
+
+    // Set the body (decode it if base64 encoded)
+    this.body = app._event.isBase64Encoded ? Buffer.from(app._event.body, 'base64').toString() : app._event.body
+
     // Set the body
     if (this.headers['content-type'] && this.headers['content-type'].includes("application/x-www-form-urlencoded")) {
-      this.body = QS.parse(app._event.body)
-    } else if (typeof app._event.body === 'object') {
-      this.body = app._event.body
+      this.body = QS.parse(this.body)
+    } else if (typeof this.body === 'object') {
+      this.body = this.body
     } else {
-      this.body = parseBody(app._event.body)
+      this.body = parseBody(this.body)
     }
 
     // Extract path from event (strip querystring just in case)
