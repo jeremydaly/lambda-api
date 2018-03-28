@@ -459,4 +459,4 @@ Contributions, ideas and bug reports are welcome and greatly appreciated. Please
 ## NOTES
 In order for "root" path mapping to work, you need to also create an `ANY` route for `/` in addition to your `{proxy+}` route.
 
-To enable binary support, you need to add `*/*` under Binary Media Types in API Gateway > APIs > [your api] -> Settings.
+To enable binary support, you need to add `*/*` under Binary Media Types in API Gateway > APIs > [your api] -> Settings. This will also base64 encode all body content, but Lambda API will automatically decode it for you.
