@@ -96,6 +96,9 @@ class API {
     // Split the route and clean it up
     let route = this._prefix.concat(parsedPath)
 
+    // For root path support
+    if (route.length === 0) { route.push('')}
+
     // Keep track of path variables
     let pathVars = {}
 
