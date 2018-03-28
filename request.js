@@ -67,10 +67,10 @@ class REQUEST {
     // Extract path from event (strip querystring just in case)
     let path = app._event.path.trim().split('?')[0].replace(/^\/(.*?)(\/)*$/,'$1').split('/')
 
-    // Remove base if it exists
-    if (app._base && app._base === path[0]) {
-      path.shift()
-    } // end remove base
+    // // Remove base if it exists
+    // if (app._base && app._base === path[0]) {
+    //  path.shift()
+    // } // end remove base
 
     // Init the route
     this.route = null

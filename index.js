@@ -19,8 +19,11 @@ class API {
 
     // Set the version and base paths
     this._version = props && props.version ? props.version : 'v1'
-    this._base = props && props.base ? props.base.trim() : ''
+    this._base = props && props.base && typeof props.base === 'string' ? props.base.trim() : ''
     this._callbackName = props && props.callback ? props.callback.trim() : 'callback'
+
+    // Prefix stack w/ base
+    this._prefix = this.parseRoute(this._base)
 
     // Stores timers for debugging
     this._timers = {}
@@ -56,6 +59,7 @@ class API {
 
     // Testing flag
     this._test = false
+
   } // end constructor
 
   // GET: convenience method
@@ -86,8 +90,11 @@ class API {
   // METHOD: Adds method and handler to routes
   METHOD(method, path, handler) {
 
+    // Parse the path
+    let parsedPath = this.parseRoute(path)
+
     // Split the route and clean it up
-    let route = path.trim().replace(/^\/(.*?)(\/)*$/,'$1').split('/')
+    let route = this._prefix.concat(parsedPath)
 
     // Keep track of path variables
     let pathVars = {}
@@ -106,7 +113,7 @@ class API {
       // Add the route to the global _routes
       this.setRoute(
         this._routes,
-        (i === route.length-1 ? { ['__'+method.toUpperCase()]: { vars: pathVars, handler: handler, route: path } } : {}),
+        (i === route.length-1 ? { ['__'+method.toUpperCase()]: { vars: pathVars, handler: handler, route: '/'+parsedPath.join('/') } } : {}),
         route.slice(0,i+1)
       );
 
@@ -298,19 +305,10 @@ class API {
   // UTILITY FUNCTIONS
   //-------------------------------------------------------------------------//
 
-  deepFind(obj, path) {
-    let paths = path//.split('.'),
-    let current = obj
-
-    for (let i = 0; i < paths.length; ++i) {
-      if (current[paths[i]] == undefined) {
-        return undefined
-      } else {
-        current = current[paths[i]]
-      }
-    }
-    return current
+  parseRoute(path) {
+    return path.trim().replace(/^\/(.*?)(\/)*$/,'$1').split('/').filter(x => x.trim() !== '')
   }
+
 
   setRoute(obj, value, path) {
     if (typeof path === "string") {
@@ -354,9 +352,26 @@ class API {
     return this._app
   }
 
+
+  // Register routes with options
+  register(fn,options) {
+
+    // Extract Prefix
+    let prefix = options.prefix && options.prefix.toString().trim() !== '' ?
+      this.parseRoute(options.prefix) : []
+
+    // Concat to existing prefix
+    this._prefix = this._prefix.concat(prefix)
+
+    // Execute the routing function
+    fn(this,options)
+
+    // Remove the last prefix
+    this._prefix = this._prefix.slice(0,-(prefix.length))
+
+  } // end register
+
 } // end API class
 
 // Export the API class
 module.exports = opts => new API(opts)
-
-// console.error('DEPRECATED: constructor method. Use require(\'lambda-api\')({ version: \'v1.0\', base: \'v1\' }) to initialize the framework instead')
