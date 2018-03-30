@@ -21,6 +21,7 @@ class API {
     this._version = props && props.version ? props.version : 'v1'
     this._base = props && props.base && typeof props.base === 'string' ? props.base.trim() : ''
     this._callbackName = props && props.callback ? props.callback.trim() : 'callback'
+    this._mimeTypes = props && props.mimeTypes && typeof props.mimeTypes === 'object' ? props.mimeTypes : {}
 
     // Prefix stack w/ base
     this._prefix = this.parseRoute(this._base)
