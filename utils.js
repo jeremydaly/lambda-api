@@ -26,13 +26,34 @@ module.exports.encodeUrl = url => String(url)
   .replace(UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE)
   .replace(ENCODE_CHARS_REGEXP, encodeURI)
 
+
+
 module.exports.encodeBody = body =>
   typeof body === 'object' ? JSON.stringify(body) : (body && typeof body !== 'string' ? body.toString() : (body ? body : ''))
+
+
 
 module.exports.parseBody = body => {
   try {
     return JSON.parse(body)
   } catch(e) {
     return body;
+  }
+}
+
+
+
+const mimeMap = require('./mimemap.js') // MIME Map
+
+module.exports.mimeLookup = (input,custom={}) => {
+  let type = input.trim().replace(/^\./,'')
+
+  // If it contains a slash, return unmodified
+  if (/.*\/.*/.test(type)) {
+    return input.trim()
+  } else {
+    // Lookup mime type
+    let mime = Object.assign(mimeMap,custom)[type]
+    return mime ? mime : false
   }
 }
