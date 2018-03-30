@@ -14,6 +14,9 @@ const mimeLookup = require('./utils.js').mimeLookup
 const fs = require('fs') // Require Node.js file system
 const path = require('path') // Require Node.js path
 
+const Promise = require('bluebird') // Promise library
+
+
 class RESPONSE {
 
   // Create the constructor function.
@@ -164,10 +167,74 @@ class RESPONSE {
   }
 
 
-  sendFile(file,opts={}) {
-    let data = fs.readFileSync(file)
-    this._isBase64 = true
-    this.send(data.toString('base64'))
+  sendFile(file) {
+
+    let buffer, modified
+
+    let opts = arguments.length > 1 && typeof arguments[1] === 'object' ? arguments[1] : {}
+    let fn = arguments.length > 1 && typeof arguments[1] === 'function' ? arguments[1] :
+            (arguments.length > 2 && typeof arguments[2] === 'function' ? arguments[2] :
+              e => { if(e) this.error(e) } )
+
+    // Begin a promise chain
+    Promise.try(() => {
+
+      // Create buffer based on input
+      if (typeof file === 'string') {
+        if (/^s3:\/\//i.test(file)) {
+          console.log('S3');
+          buffer = 'empty'
+        } else {
+          buffer = fs.readFileSync((opts.root ? opts.root : '') + file)
+          modified = fs.statSync((opts.root ? opts.root : '') + file).mtime // only if last-modified?
+          this.type(path.extname(file))
+        }
+      } else if (Buffer.isBuffer(file)) {
+        buffer = file
+      } else {
+        throw new Error('Invalid file')
+      }
+
+      // Add headers from options
+      if (typeof opts.headers === 'object') {
+        Object.keys(opts.headers).map(header => {
+          this.header(header,opts.headers[header])
+        })
+      }
+
+      // Add cache-control headers
+      if (opts.cacheControl !== false) {
+        if (opts.cacheControl !== true && opts.cacheControl !== undefined) {
+          this.header('Cache-Control', opts.cacheControl)
+        } else {
+          let maxAge = opts.maxAge && !isNaN(opts.maxAge) ? (opts.maxAge/1000|0) : 0
+          this.header('Cache-Control', (opts.private === true ? 'private, ' : '') + 'max-age=' + maxAge)
+          this.header('Expires',new Date(Date.now() + maxAge).toUTCString())
+        }
+      }
+
+      // Add last-modified headers
+      if (opts.lastModified !== false) {
+        let lastModified = opts.lastModified && typeof opts.lastModified.toUTCString === 'function' ? opts.lastModified : (modified ? modified : new Date())
+        this.header('Last-Modified', lastModified.toUTCString())
+      }
+
+    }).then(() => {
+      // Execute callback
+      return Promise.resolve(fn())
+    }).then(() => {
+      // Set base64 encoding flag
+      this._isBase64 = true
+      // Convert buffer to base64 string
+      this.send(buffer.toString('base64'))
+    }).catch(e => {
+      // Execute callback with caught error
+      return Promise.resolve(fn(e))
+    }).catch(e => {
+      // Catch any final error
+      this.error(e)
+    })
+
   }
 
 
