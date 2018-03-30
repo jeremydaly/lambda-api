@@ -29,6 +29,7 @@ module.exports = {
   map: 'application/json',
   rdf: 'application/rdf+xml',
   rss: 'application/rss+xml',
+  txt: 'text/plain',
   webmanifest: 'application/manifest+json',
   xml: 'application/xml',
   xls: 'application/xml',
