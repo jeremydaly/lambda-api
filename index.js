@@ -152,6 +152,9 @@ class API {
 
     }).catch((e) => {
 
+      // Error messages are never base64 encoded
+      response._isBase64 = false
+
       let message;
 
       if (e instanceof Error) {
