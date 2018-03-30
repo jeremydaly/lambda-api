@@ -9,6 +9,10 @@
 const escapeHtml = require('./utils.js').escapeHtml
 const encodeUrl = require('./utils.js').encodeUrl
 const encodeBody = require('./utils.js').encodeBody
+const mimeLookup = require('./utils.js').mimeLookup
+
+const fs = require('fs') // Require Node.js file system
+const path = require('path') // Require Node.js path
 
 class RESPONSE {
 
@@ -26,6 +30,9 @@ class RESPONSE {
       // Set the Content-Type by default
       "Content-Type": "application/json" //charset=UTF-8
     }
+
+    // base64 encoding flag
+    this._isBase64 = false
 
     // Default callback function
     this._callback = 'callback'
@@ -138,11 +145,44 @@ class RESPONSE {
     return this.cookie(name,'',options)
   }
 
-  // TODO: attachement
-  // TODO: download
-  // TODO: sendFile
-  // TODO: sendStatus
+
+  // Set content-disposition header and content type
+  attachment() {
+    // Check for supplied filename/path
+    let filename = arguments.length > 0 ? path.parse(arguments[0]) : undefined
+    this.header('Content-Disposition','attachment' + (filename ? '; filename="' + filename.base + '"' : ''))
+
+    // If filename exits, attempt to set the type
+    if (filename) { this.type(filename.ext) }
+    return this
+  }
+
+
+  // TODO: use attachment() to set headers
+  download(file) {
+    // file, filename, options, fn
+  }
+
+
+  sendFile(file,opts={}) {
+    let data = fs.readFileSync(file)
+    this._isBase64 = true
+    this.send(data.toString('base64'))
+  }
+
+
   // TODO: type
+  type(type) {
+    let mimeType = mimeLookup(type,this.app._mimeTypes)
+    if (mimeType) {
+      this.header('Content-Type',mimeType)
+    }
+    return this
+  }
+
+
+  // TODO: sendStatus
+
 
 
   // Sends the request to the main callback
@@ -152,7 +192,8 @@ class RESPONSE {
     const response = {
       headers: this._headers,
       statusCode: this._statusCode,
-      body: encodeBody(body)
+      body: encodeBody(body),
+      isBase64Encoded: this._isBase64
     }
 
     // Trigger the callback function
