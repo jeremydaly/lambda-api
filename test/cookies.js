@@ -131,7 +131,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=value; Path=/'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -146,7 +146,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=http%3A%2F%2F%20%5B%5D%20foo%3Bbar; Path=/'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -162,7 +162,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=%7B%22foo%22%3A%22bar%22%7D; Path=/'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -178,7 +178,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': '123=value; Path=/'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -194,7 +194,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=value; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -209,7 +209,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=value; MaxAge=3600; Expires='+ new Date(Date.now()+3600000).toUTCString() + '; Path=/'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -224,7 +224,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -239,7 +239,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; HttpOnly; Path=/'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -254,7 +254,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; Secure'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -269,7 +269,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/test; Secure'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -284,7 +284,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Strict'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -299,7 +299,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Lax'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -314,7 +314,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Test'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -338,7 +338,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-          }, statusCode: 200, body: '{"cookies":{"test":"some value"}}'
+          }, statusCode: 200, body: '{"cookies":{"test":"some value"}}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -357,7 +357,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-          }, statusCode: 200, body: '{\"cookies\":{\"test\":\"some value\",\"test2\":{\"foo\":\"bar\"}}}'
+          }, statusCode: 200, body: '{\"cookies\":{\"test\":\"some value\",\"test2\":{\"foo\":\"bar\"}}}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -377,7 +377,7 @@ describe('Cookie Tests:', function() {
         expect(result).to.deep.equal({
           headers: {
             'Content-Type': 'application/json',
-          }, statusCode: 200, body: '{\"cookies\":{\"test\":\"some value\",\"test2\":{\"foo\":\"bar\"},\"test3\":\"domain\"}}'
+          }, statusCode: 200, body: '{\"cookies\":{\"test\":\"some value\",\"test2\":{\"foo\":\"bar\"},\"test3\":\"domain\"}}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -398,7 +398,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=-1; Path=/'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it
@@ -415,7 +415,7 @@ describe('Cookie Tests:', function() {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'test=; Domain=test.com; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; MaxAge=-1; Path=/; Secure'
-          }, statusCode: 200, body: '{}'
+          }, statusCode: 200, body: '{}', isBase64Encoded: false
         })
       })
     }) // end it

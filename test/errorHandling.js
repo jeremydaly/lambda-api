@@ -100,7 +100,7 @@ describe('Error Handling Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test error message"}' })
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test error message"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -110,7 +110,7 @@ describe('Error Handling Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test thrown error"}' })
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test thrown error"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -120,7 +120,7 @@ describe('Error Handling Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 405, body: '{"error":"This is a simulated error"}' })
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 405, body: '{"error":"This is a simulated error"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -130,7 +130,7 @@ describe('Error Handling Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/plain' }, statusCode: 500, body: 'This is a test error message: 123/456' })
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/plain' }, statusCode: 500, body: 'This is a test error message: 123/456', isBase64Encoded: false })
     })
   }) // end it
 
@@ -140,7 +140,7 @@ describe('Error Handling Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/plain' }, statusCode: 500, body: 'This is a test error message: 123/456' })
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/plain' }, statusCode: 500, body: 'This is a test error message: 123/456', isBase64Encoded: false })
     })
   }) // end it
 
