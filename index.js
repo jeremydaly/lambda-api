@@ -78,6 +78,11 @@ class API {
     this.METHOD('PUT', path, handler)
   }
 
+  // PATCH: convenience method
+  patch(path, handler) {
+    this.METHOD('PATCH', path, handler)
+  }
+
   // DELETE: convenience method
   delete(path, handler) {
     this.METHOD('DELETE', path, handler)
