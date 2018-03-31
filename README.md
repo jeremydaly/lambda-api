@@ -124,12 +124,21 @@ npm i lambda-api --save
 
 ## Configuration
 
-Require the `lambda-api` module into your Lambda handler script and instantiate it. You can initialize the API with an optional `version` which can be accessed via the `REQUEST` object and a `base` path.
+Require the `lambda-api` module into your Lambda handler script and instantiate it. You can initialize the API with the following options:
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| version  | `String` | Version number accessible via the `REQUEST` object |
+| base  | `String` | Base path for all routes, e.g. `base: 'v1'` would prefix all routes with `/v1` |
+| callbackName | `String` | Override the default callback query parameter name for JSONP calls |
+| mimeTypes | `Object` | Name/value pairs of additional MIME types to be supported by the `type()`. The key should be the file extension (without the `.`) and the value should be the expected MIME type, e.g. `application/json` |
 
 ```javascript
 // Require the framework and instantiate it with optional version and base parameters
 const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ```
+
+Supported `options`: version, base, callbackName, mimeTypes
 
 ## Routes and HTTP Methods
 
@@ -251,6 +260,21 @@ api.get('/users', function(req,res) {
 })
 ```
 
+### type
+Sets the `Content-Type` header for you based on a single `String` input. There are thousands of MIME types, many of which are likely never to be used by your application. Lambda API stores a list of the most popular file types and will automatically set the correct `Content-Type` based on the input. If the `type` contains the "/" character, then it sets the `Content-Type` to the value of `type`.
+
+```javascript
+res.type('.html');              // => 'text/html'
+res.type('html');               // => 'text/html'
+res.type('json');               // => 'application/json'
+res.type('application/json');   // => 'application/json'
+res.type('png');                // => 'image/png'
+res.type('.doc');               // => 'application/msword'
+res.type('text/css');           // => 'text/css'
+```
+
+For a complete list of auto supported types, see [mimemap.js](mindmap.js). Custom MIME types can be added by using the `mimeTypes` option when instantiating Lambda API
+
 ### location
 The `location` convenience method sets the `Location:` header with the value of a single string argument. The value passed in is not validated but will be encoded before being added to the header. Values that are already encoded can be safely passed in. Note that a valid `3xx` status code must be set to trigger browser redirection. The value can be a relative/absolute path OR a FQDN.
 
@@ -319,6 +343,25 @@ res.clearCookie('fooObject', { domain: '.test.com', path: '/admin', httpOnly: tr
 res.clearCookie('fooArray', { path: '/', httpOnly: true }).send()
 ```
 **NOTE:** The `clearCookie()` method only sets the header. A execution ending method like `send()`, `json()`, etc. must be called to send the response.
+
+### attachment
+
+### download
+
+### sendFile
+
+The `sendFile()` method takes up to three arguments. The first is the file. This is either a local filename (stored within your uploaded lambda code), a reference to a file in S3 (using the `s3://{my-bucket}/{path-to-file}` format), or a JavaScript `Buffer`. You can optionally pass an `options` object using the properties below as well as a callback function `fn(err)` that can handle custom errors or manipulate the response before sending to the client.
+
+| Property | Type | Description | Default |
+| -------- | ---- | ----------- | ------- |
+| maxAge   | `Number` | Set the expiration time relative to the current time in milliseconds. Automatically sets the `Expires` header | 0 |
+| root   | `String` | Root directory for relative filenames. |  |
+| lastModified | `Boolean` or `String` | Sets the `Last-Modified` header to the last modified date of the file. This can be disabled by setting it to `false`, or overridden by setting it to a valid `Date` object | |
+| headers | `Object` |  Key value pairs of additional headers to be sent with the file | |
+| cacheControl | `Boolean` or `String` | Enable or disable setting `Cache-Control` response header. Override value with custom string. | true |
+| private | `Boolean` | Sets the `Cache-Control` to `private`. | false |
+
+
 
 ## Path Parameters
 Path parameters are extracted from the path sent in by API Gateway. Although API Gateway supports path parameters, the API doesn't use these values but insteads extracts them from the actual path. This gives you more flexibility with the API Gateway configuration. Path parameters are defined in routes using a colon `:` as a prefix.
