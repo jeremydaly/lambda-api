@@ -157,8 +157,11 @@ class API {
 
     }).catch((e) => {
 
-      // Error messages are never base64 encoded
+      // Error messages should never be base64 encoded
       response._isBase64 = false
+
+      // Strip the headers (TODO: find a better way to handle this)
+      response._headers = {}
 
       let message;
 
