@@ -150,31 +150,59 @@ class RESPONSE {
 
 
   // Set content-disposition header and content type
-  attachment() {
+  attachment(filename) {
     // Check for supplied filename/path
-    let filename = arguments.length > 0 ? path.parse(arguments[0]) : undefined
-    this.header('Content-Disposition','attachment' + (filename ? '; filename="' + filename.base + '"' : ''))
+    let name = typeof filename === 'string' && filename.trim().length > 0 ? path.parse(filename) : undefined
+    this.header('Content-Disposition','attachment' + (name ? '; filename="' + name.base + '"' : ''))
 
-    // If filename exits, attempt to set the type
-    if (filename) { this.type(filename.ext) }
+    // If name exits, attempt to set the type
+    if (name) { this.type(name.ext) }
     return this
   }
 
 
-  // TODO: use attachment() to set headers
-  download(file) {
-    // file, filename, options, fn
+  // Convenience method combining attachment() and sendFile()
+  download(file, filename, options, callback) {
+
+    let name = filename
+    let opts = typeof options === 'object' ? options : {}
+    let fn = typeof callback === 'function' ? callback : undefined
+
+    // Add optional parameter support for callback
+    if (typeof filename === 'function') {
+      name = undefined
+      fn = filename
+    } else if (typeof options === 'function') {
+      fn = options
+    }
+
+    // Add optional parameter support for options
+    if (typeof filename === 'object') {
+      name = undefined
+      opts = filename
+    }
+
+    // Add the Content-Disposition header
+    this.attachment(name ? name : (typeof file === 'string' ? path.basename(file) : null) )
+
+    // Send the file
+    this.sendFile(file, opts, fn)
+
   }
 
 
-  sendFile(file) {
+  // Convenience method for returning static files
+  sendFile(file, options, callback) {
 
     let buffer, modified
 
-    let opts = arguments.length > 1 && typeof arguments[1] === 'object' ? arguments[1] : {}
-    let fn = arguments.length > 1 && typeof arguments[1] === 'function' ? arguments[1] :
-            (arguments.length > 2 && typeof arguments[2] === 'function' ? arguments[2] :
-              e => { if(e) this.error(e) } )
+    let opts = typeof options === 'object' ? options : {}
+    let fn = typeof callback === 'function' ? callback : e => { if(e) this.error(e) }
+
+    // Add optional parameter support
+    if (typeof options === 'function') {
+      fn = options
+    }
 
     // Begin a promise chain
     Promise.try(() => {
@@ -186,7 +214,7 @@ class RESPONSE {
           buffer = 'empty'
         } else {
           buffer = fs.readFileSync((opts.root ? opts.root : '') + file)
-          modified = fs.statSync((opts.root ? opts.root : '') + file).mtime // only if last-modified?
+          modified = opts.lastModified !== false ? fs.statSync((opts.root ? opts.root : '') + file).mtime : undefined
           this.type(path.extname(file))
         }
       } else if (Buffer.isBuffer(file)) {
@@ -235,10 +263,10 @@ class RESPONSE {
       this.error(e)
     })
 
-  }
+  } // end sendFile
 
 
-  // TODO: type
+  // Convenience method for setting type
   type(type) {
     let mimeType = mimeLookup(type,this.app._mimeTypes)
     if (mimeType) {
@@ -246,6 +274,7 @@ class RESPONSE {
     }
     return this
   }
+
 
 
   // TODO: sendStatus
