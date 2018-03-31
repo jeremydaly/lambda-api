@@ -138,11 +138,9 @@ Require the `lambda-api` module into your Lambda handler script and instantiate 
 const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ```
 
-Supported `options`: version, base, callbackName, mimeTypes
-
 ## Routes and HTTP Methods
 
-Routes are defined by using convenience methods or the `METHOD` method. There are currently five convenience route methods: `get()`, `post()`, `put()`, `delete()` and `options()`. Convenience route methods require two parameters, a *route* and a function that accepts two arguments. A *route* is simply a path such as `/users`. The second parameter must be a function that accepts a `REQUEST` and a `RESPONSE` argument. These arguments can be named whatever you like, but convention dictates `req` and `res`. Examples using convenience route methods:
+Routes are defined by using convenience methods or the `METHOD` method. There are currently six convenience route methods: `get()`, `post()`, `put()`, `patch()`, `delete()` and `options()`. Convenience route methods require two parameters, a *route* and a function that accepts two arguments. A *route* is simply a path such as `/users`. The second parameter must be a function that accepts a `REQUEST` and a `RESPONSE` argument. These arguments can be named whatever you like, but convention dictates `req` and `res`. Examples using convenience route methods:
 
 ```javascript
 api.get('/users', function(req,res) {
@@ -173,7 +171,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `version`: The version set at initialization
 - `params`: Dynamic path parameters parsed from the path (see [path parameters](#path-parameters))
 - `method`: The HTTP method of the request
-- `path`: The path passed in by the request
+- `path`: The path passed in by the request including `base` and `prefix`es 
 - `query`: Querystring parameters parsed into an object
 - `headers`: An object containing the request headers (properties converted to lowercase for HTTP/2, see [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540))
 - `rawHeaders`: An object containing the original request headers (property case preserved)
