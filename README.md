@@ -389,11 +389,20 @@ res.clearCookie('fooArray', { path: '/', httpOnly: true }).send()
 **NOTE:** The `clearCookie()` method only sets the header. A execution ending method like `send()`, `json()`, etc. must be called to send the response.
 
 ### attachment
+Sets the HTTP response `Content-Disposition` header field to "attachment". If a `filename` is provided, then the `Content-Type` is set based on the file extension using the `type()` method and the "filename=" parameter is added to the `Content-Disposition` header.
+
+```javascript
+res.attachment()
+// Content-Disposition: attachment
+
+res.attachment('path/to/logo.png')
+// Content-Disposition: attachment; filename="logo.png"
+// Content-Type: image/png
+```
 
 ### download
 
 ### sendFile
-
 The `sendFile()` method takes up to three arguments. The first is the file. This is either a local filename (stored within your uploaded lambda code), a reference to a file in S3 (using the `s3://{my-bucket}/{path-to-file}` format), or a JavaScript `Buffer`. You can optionally pass an `options` object using the properties below as well as a callback function `fn(err)` that can handle custom errors or manipulate the response before sending to the client.
 
 | Property | Type | Description | Default |
