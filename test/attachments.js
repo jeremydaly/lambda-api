@@ -35,11 +35,19 @@ api.get('/attachment/png', function(req,res) {
 })
 
 api.get('/attachment/csv', function(req,res) {
-  res.attachment('/test/path/foo.csv').send('filedata')
+  res.attachment('test/path/foo.csv').send('filedata')
 })
 
 api.get('/attachment/custom', function(req,res) {
   res.attachment('/test/path/foo.test').send('filedata')
+})
+
+api.get('/attachment/empty-string', function(req,res) {
+  res.attachment(' ').send('filedata')
+})
+
+api.get('/attachment/null-string', function(req,res) {
+  res.attachment(null).send('filedata')
 })
 
 
@@ -96,6 +104,26 @@ describe('Attachment Tests:', function() {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
       expect(result).to.deep.equal({ headers: { 'Content-Disposition': 'attachment; filename=\"foo.test\"', 'Content-Type': 'text/test' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+    })
+  }) // end it
+
+  it('Empty string', function() {
+    let _event = Object.assign({},event,{ path: '/attachment/empty-string' })
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Disposition': 'attachment', 'Content-Type': 'application/json' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+    })
+  }) // end it
+
+  it('Null string', function() {
+    let _event = Object.assign({},event,{ path: '/attachment/empty-string' })
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Disposition': 'attachment', 'Content-Type': 'application/json' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
     })
   }) // end it
 
