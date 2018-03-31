@@ -236,7 +236,7 @@ The request object can be used to pass additional information through the proces
 
 The `RESPONSE` object is used to send a response back to the API Gateway. The `RESPONSE` object contains several methods to manipulate responses. All methods are chainable unless they trigger a response.
 
-### status
+### status(code)
 The `status` method allows you to set the status code that is returned to API Gateway. By default this will be set to `200` for normal requests or `500` on a thrown error. Additional built-in errors such as `404 Not Found` and `405 Method Not Allowed` may also be returned. The `status()` method accepts a single integer argument.
 
 ```javascript
@@ -245,7 +245,7 @@ api.get('/users', function(req,res) {
 })
 ```
 
-### header
+### header(field, value)
 The `header` method allows for you to set additional headers to return to the client. By default, just the `Content-Type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two string arguments. The first is the name of the header and then second is the value.
 
 ```javascript
@@ -254,10 +254,10 @@ api.get('/users', function(req,res) {
 })
 ```
 
-### send
+### send(body)
 The `send` methods triggers the API to return data to the API Gateway. The `send` method accepts one parameter and sends the contents through as is, e.g. as an object, string, integer, etc. AWS Gateway expects a string, so the data should be converted accordingly.
 
-### json
+### json(body)
 There is a `json` convenience method for the `send` method that will set the headers to `application/json` as well as perform `JSON.stringify()` on the contents passed to it.
 
 ```javascript
@@ -266,7 +266,7 @@ api.get('/users', function(req,res) {
 })
 ```
 
-### jsonp
+### jsonp(body)
 There is a `jsonp` convenience method for the `send` method that will set the headers to `application/json`, perform `JSON.stringify()` on the contents passed to it, and wrap the results in a callback function. By default, the callback function is named `callback`.
 
 ```javascript
@@ -295,7 +295,7 @@ res.jsonp({ foo: 'bar' })
 // => bar({ "foo": "bar" })
 ```
 
-### html
+### html(body)
 There is also an `html` convenience method for the `send` method that will set the headers to `text/html` and pass through the contents.
 
 ```javascript
@@ -304,7 +304,7 @@ api.get('/users', function(req,res) {
 })
 ```
 
-### type
+### type(type)
 Sets the `Content-Type` header for you based on a single `String` input. There are thousands of MIME types, many of which are likely never to be used by your application. Lambda API stores a list of the most popular file types and will automatically set the correct `Content-Type` based on the input. If the `type` contains the "/" character, then it sets the `Content-Type` to the value of `type`.
 
 ```javascript
@@ -319,7 +319,7 @@ res.type('text/css');           // => 'text/css'
 
 For a complete list of auto supported types, see [mimemap.js](mindmap.js). Custom MIME types can be added by using the `mimeTypes` option when instantiating Lambda API
 
-### location
+### location(path)
 The `location` convenience method sets the `Location:` header with the value of a single string argument. The value passed in is not validated but will be encoded before being added to the header. Values that are already encoded can be safely passed in. Note that a valid `3xx` status code must be set to trigger browser redirection. The value can be a relative/absolute path OR a FQDN.
 
 ```javascript
@@ -332,7 +332,7 @@ api.get('/redirectToGithub', function(req,res) {
 })
 ```
 
-### redirect
+### redirect([status,] path)
 The `redirect` convenience method triggers a redirection and ends the current API execution. This method is similar to the `location()` method, but it automatically sets the status code and calls `send()`. The redirection URL (relative/absolute path OR a FQDN) can be specified as the only parameter or as a second parameter when a valid `3xx` status code is supplied as the first parameter. The status code is set to `302` by default, but can be changed to `300`, `301`, `302`, `303`, `307`, or `308` by adding it as the first parameter.
 
 ```javascript
@@ -345,7 +345,7 @@ api.get('/redirectToGithub', function(req,res) {
 })
 ```
 
-### error
+### error(message)
 An error can be triggered by calling the `error` method. This will cause the API to stop execution and return the message to the client. Custom error handling can be accomplished using the [Error Handling](#error-handling) feature.
 
 ```javascript
@@ -354,7 +354,7 @@ api.get('/users', function(req,res) {
 })
 ```
 
-### cookie
+### cookie(name, value [,options])
 
 Convenience method for setting cookies. This method accepts a `name`, `value` and an optional `options` object with the following parameters:
 
@@ -378,7 +378,7 @@ res.cookie('fooObject', { foo: 'bar' }, { domain: '.test.com', path: '/admin', h
 res.cookie('fooArray', [ 'one', 'two', 'three' ], { path: '/', httpOnly: true }).send()
 ```
 
-### clearCookie
+### clearCookie(name [,options])
 Convenience method for expiring cookies. Requires the `name` and optional `options` object as specified in the [cookie](#cookie) method. This method will automatically set the expiration time. However, most browsers require the same options to clear a cookie as was used to set it. E.g. if you set the `path` to "/admin" when you set the cookie, you must use this same value to clear it.
 
 ```javascript
@@ -388,7 +388,7 @@ res.clearCookie('fooArray', { path: '/', httpOnly: true }).send()
 ```
 **NOTE:** The `clearCookie()` method only sets the header. A execution ending method like `send()`, `json()`, etc. must be called to send the response.
 
-### attachment
+### attachment([filename])
 Sets the HTTP response `Content-Disposition` header field to "attachment". If a `filename` is provided, then the `Content-Type` is set based on the file extension using the `type()` method and the "filename=" parameter is added to the `Content-Disposition` header.
 
 ```javascript
@@ -400,10 +400,25 @@ res.attachment('path/to/logo.png')
 // Content-Type: image/png
 ```
 
-### download
+### download(file [, filename] [, options] [, callback])
+This transfers the `file` (either a local path, S3 file reference, or Javascript `Buffer`) as an "attachment". This is a convenience method that combines `attachment()` and `sendFile()` to prompt the user to download the file. This method optionally takes a `filename` as a second parameter that will overwrite the "filename=" parameter of the `Content-Disposition` header, otherwise it will use the filename from the `file`. An optional `options` object passes through to the [sendFile()](#sendfile) method and takes the same parameters. Finally, a optional `callback` method can be defined which is passed through to [sendFile()](#sendfile) as well.
 
-### sendFile
-The `sendFile()` method takes up to three arguments. The first is the file. This is either a local filename (stored within your uploaded lambda code), a reference to a file in S3 (using the `s3://{my-bucket}/{path-to-file}` format), or a JavaScript `Buffer`. You can optionally pass an `options` object using the properties below as well as a callback function `fn(err)` that can handle custom errors or manipulate the response before sending to the client.
+```javascript
+res.download('/files/sales-report.pdf')
+
+res.download('/files/sales-report.pdf', 'report.pdf')
+
+res.download('s3://my-bucket/path/to/file.png', 'logo.png', { maxAge: 3600000 })
+
+res.download(<Buffer>, 'my-file.docx', { maxAge: 3600000 }, (err) => {
+  if (err) {
+    res.error('Custom File Error')
+  }
+})
+```
+
+### sendFile(file [, options] [, callback])
+The `sendFile()` method takes up to three arguments. The first is the `file`. This is either a local filename (stored within your uploaded lambda code), a reference to a file in S3 (using the `s3://{my-bucket}/{path-to-file}` format), or a JavaScript `Buffer`. You can optionally pass an `options` object using the properties below as well as a callback function `fn(err)` that can handle custom errors or manipulate the response before sending to the client.
 
 | Property | Type | Description | Default |
 | -------- | ---- | ----------- | ------- |
