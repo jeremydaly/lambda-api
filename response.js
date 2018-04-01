@@ -15,7 +15,7 @@ const fs = require('fs') // Require Node.js file system
 const path = require('path') // Require Node.js path
 
 const Promise = require('bluebird') // Promise library
-
+const AWS = require('aws-sdk') // AWS SDK (automatically available in Lambda)
 
 class RESPONSE {
 
@@ -209,19 +209,54 @@ class RESPONSE {
 
       // Create buffer based on input
       if (typeof file === 'string') {
-        if (/^s3:\/\//i.test(file)) {
-          console.log('S3');
-          buffer = 'empty'
+
+        let filepath = file.trim()
+
+        // If an S3 file identifier
+        if (/^s3:\/\//i.test(filepath)) {
+
+          let s3object = filepath.replace(/^s3:\/\//i,'').split('/')
+          let s3bucket = s3object.shift()
+          let s3key = s3object.join('/')
+
+          if (s3bucket.length > 0 && s3key.length > 0) {
+
+            // Require AWS S3 service
+            const S3 = require('./s3-service')
+
+            let params = {
+              Bucket: s3bucket,
+              Key: s3key
+            }
+
+            // Attempt to get the object from S3
+            return S3.getObjectAsync(params).then(data => {
+              buffer = data.Body
+              modified = data.LastModified
+              this.type(data.ContentType)
+              this.header('ETag',data.ETag)
+            }).catch(err => {
+              throw new Error(err)
+            })
+
+          } else {
+            throw new Error('Invalid S3 path')
+          }
+
+        // else try and load the file locally
         } else {
-          buffer = fs.readFileSync((opts.root ? opts.root : '') + file)
-          modified = opts.lastModified !== false ? fs.statSync((opts.root ? opts.root : '') + file).mtime : undefined
-          this.type(path.extname(file))
+          buffer = fs.readFileSync((opts.root ? opts.root : '') + filepath)
+          modified = opts.lastModified !== false ? fs.statSync((opts.root ? opts.root : '') + filepath).mtime : undefined
+          this.type(path.extname(filepath))
         }
+      // If the input is a buffer, pass through
       } else if (Buffer.isBuffer(file)) {
         buffer = file
       } else {
         throw new Error('Invalid file')
       }
+
+    }).then(() => {
 
       // Add headers from options
       if (typeof opts.headers === 'object') {

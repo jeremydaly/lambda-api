@@ -5,6 +5,12 @@ const expect = require('chai').expect // Assertion library
 
 const fs = require('fs') // Require Node.js file system
 
+// Require Sinon.js library
+const sinon = require('sinon')
+
+const AWS = require('aws-sdk') // AWS SDK (automatically available in Lambda)
+const S3 = require('../s3-service') // Init S3 Service
+
 // Init API instance
 const api = require('../index')({ version: 'v1.0', mimeTypes: { test: 'text/test' } })
 
@@ -43,22 +49,19 @@ api.get('/download/err', function(req,res) {
 api.get('/download/test', function(req,res) {
   res.download('test/test.txt' + (req.query.test ? req.query.test : ''), err => {
 
-    if (err) {
-      return Promise.try(() => {
-        for(let i = 0; i<40000000; i++) {}
-        return true
-      }).then((x) => {
+    // Return a promise
+    return Promise.try(() => {
+      for(let i = 0; i<40000000; i++) {}
+      return true
+    }).then((x) => {
+      if (err) {
+        // set custom error code and message on error
         res.status(501).error('Custom File Error')
-        // throw('test error')
-      })
-    } else {
-      return Promise.try(() => {
-        for(let i = 0; i<40000000; i++) {}
-        return true
-      }).then((x) => {
+      } else {
+        // else set custom response code
         res.status(201)
-      })
-    }
+      }
+    })
 
   })
 })
@@ -84,6 +87,46 @@ api.get('/download/all', function(req,res) {
   res.download('test/test.txt', 'test-file.txt', { private: true, maxAge: 3600000 }, err => { res.header('x-callback','true') })
 })
 
+// S3 file
+api.get('/download/s3', function(req,res) {
+
+  stub.withArgs({Bucket: 'my-test-bucket', Key: 'test.txt'}).resolves({
+    AcceptRanges: 'bytes',
+    LastModified: new Date('2018-04-01T13:32:58.000Z'),
+    ContentLength: 23,
+    ETag: '"ae771fbbba6a74eeeb77754355831713"',
+    ContentType: 'text/plain',
+    Metadata: {},
+    Body: Buffer.from('Test file for sendFile\n')
+  })
+
+  res.download('s3://my-test-bucket/test.txt')
+})
+
+api.get('/download/s3path', function(req,res) {
+
+  stub.withArgs({Bucket: 'my-test-bucket', Key: 'test/test.txt'}).resolves({
+    AcceptRanges: 'bytes',
+    LastModified: new Date('2018-04-01T13:32:58.000Z'),
+    ContentLength: 23,
+    ETag: '"ae771fbbba6a74eeeb77754355831713"',
+    ContentType: 'text/plain',
+    Metadata: {},
+    Body: Buffer.from('Test file for sendFile\n')
+  })
+
+  res.download('s3://my-test-bucket/test/test.txt')
+})
+
+api.get('/download/s3missing', function(req,res) {
+
+  stub.withArgs({Bucket: 'my-test-bucket', Key: 'file-does-not-exist.txt'})
+    .throws(new Error("NoSuchKey: The specified key does not exist."))
+
+  res.download('s3://my-test-bucket/file-does-not-exist.txt')
+})
+
+
 // Error Middleware
 api.use(function(err,req,res,next) {
   res.header('x-error','true')
@@ -94,7 +137,14 @@ api.use(function(err,req,res,next) {
 /***  BEGIN TESTS                                                           ***/
 /******************************************************************************/
 
+let stub
+
 describe('Download Tests:', function() {
+
+  before(function() {
+     // Stub getObjectAsync
+    stub = sinon.stub(S3,'getObjectAsync')
+  })
 
   it('Bad path', function() {
     let _event = Object.assign({},event,{ path: '/download/badpath' })
@@ -236,4 +286,58 @@ describe('Download Tests:', function() {
   }) // end it
 
 
-}) // end HEADER tests
+  it('S3 file', function() {
+    let _event = Object.assign({},event,{ path: '/download/s3' })
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({
+        headers: {
+          'Content-Type': 'text/plain',
+          'Cache-Control': 'max-age=0',
+          'Content-Disposition': 'attachment; filename="test.txt"',
+          'Expires': result.headers['Expires'],
+          'ETag': '"ae771fbbba6a74eeeb77754355831713"',
+          'Last-Modified': result.headers['Last-Modified']
+        }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
+    })
+  }) // end it
+
+  it('S3 file w/ nested path', function() {
+    let _event = Object.assign({},event,{ path: '/download/s3path' })
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({
+        headers: {
+          'Content-Type': 'text/plain',
+          'Cache-Control': 'max-age=0',
+          'Content-Disposition': 'attachment; filename="test.txt"',
+          'Expires': result.headers['Expires'],
+          'ETag': '"ae771fbbba6a74eeeb77754355831713"',
+          'Last-Modified': result.headers['Last-Modified']
+        }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
+    })
+  }) // end it
+
+  it('S3 file error', function() {
+    let _event = Object.assign({},event,{ path: '/download/s3missing' })
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({
+        headers: {
+          'Content-Type': 'application/json',
+          'x-error': 'true'
+        }, statusCode: 500, body: '{"error":"NoSuchKey: The specified key does not exist."}', isBase64Encoded: false })
+    })
+  }) // end it
+
+  after(function() {
+    stub.restore()
+  })
+
+}) // end download tests
