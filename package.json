@@ -32,6 +32,7 @@
     "bluebird": "^3.5.1"
   },
   "devDependencies": {
+    "aws-sdk": "^2.218.1",
     "chai": "^4.1.2",
     "mocha": "^4.0.1"
   },
