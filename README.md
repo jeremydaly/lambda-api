@@ -231,7 +231,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `route`: The matched route of the request
 - `requestContext`: The `requestContext` passed from the API Gateway
 - `namespace` or `ns`: A reference to modules added to the app's namespace (see [namespaces](#namespaces))
-- `cookies`: An object containing cookies sent from the browser (see the [cookie](#cookie) `RESPONSE` method)
+- `cookies`: An object containing cookies sent from the browser (see the [cookie](#cookiename-value-options) `RESPONSE` method)
 
 The request object can be used to pass additional information through the processing chain. For example, if you are using a piece of authentication middleware, you can add additional keys to the `REQUEST` object with information about the user. See [middleware](#middleware) for more information.
 
@@ -382,7 +382,7 @@ res.cookie('fooArray', [ 'one', 'two', 'three' ], { path: '/', httpOnly: true })
 ```
 
 ### clearCookie(name [,options])
-Convenience method for expiring cookies. Requires the `name` and optional `options` object as specified in the [cookie](#cookie) method. This method will automatically set the expiration time. However, most browsers require the same options to clear a cookie as was used to set it. E.g. if you set the `path` to "/admin" when you set the cookie, you must use this same value to clear it.
+Convenience method for expiring cookies. Requires the `name` and optional `options` object as specified in the [cookie](#cookiename-value-options) method. This method will automatically set the expiration time. However, most browsers require the same options to clear a cookie as was used to set it. E.g. if you set the `path` to "/admin" when you set the cookie, you must use this same value to clear it.
 
 ```javascript
 res.clearCookie('foo', { secure: true }).send()
@@ -448,13 +448,15 @@ res.sendFile(<Buffer>, 'my-file.docx', { maxAge: 3600000 }, (err) => {
 
 The `callback` function supports promises, allowing you to perform additional tasks *after* the file is successfully loaded from the source. This can be used to perform additional synchronous tasks before returning control to the API execution.
 
+**NOTE:** In order to access S3 files, your Lambda function must have `GetObject` access to the files you're attempting to access.
+
 See [Enabling Binary Support](#enabling-binary-support) for more information.
 
 ## Enabling Binary Support
-To enable binary support, you need to add `*/*` under Binary Media Types in API Gateway > APIs > [your api] -> Settings. This will also base64 encode all body content, but Lambda API will automatically decode it for you.
+To enable binary support, you need to add `*/*` under "Binary Media Types" in **API Gateway** -> **APIs** -> **[ your api ]** -> **Settings**. This will also `base64` encode all body content, but Lambda API will automatically decode it for you.
 
 ![Binary Media Types](http://jeremydaly.com//lambda-api/binary-media-types.png)
-*Add *`*/*` *to Binary Media Types*
+*Add* `*/*` *to Binary Media Types*
 
 ## Path Parameters
 Path parameters are extracted from the path sent in by API Gateway. Although API Gateway supports path parameters, the API doesn't use these values but insteads extracts them from the actual path. This gives you more flexibility with the API Gateway configuration. Path parameters are defined in routes using a colon `:` as a prefix.
@@ -586,11 +588,7 @@ Conditional route support could be added via middleware or with conditional logi
 ## Configuring Routes in API Gateway
 Routes must be configured in API Gateway in order to support routing to the Lambda function. The easiest way to support all of your routes without recreating them is to use [API Gateway's Proxy Integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-set-up-simple-proxy.html#api-gateway-proxy-resource?icmpid=docs_apigateway_console).
 
-Simply create one `{proxy+}` route that uses the `ANY` method and all requests will be routed to your Lambda function and processed by the `lambda-api` module.
+Simply create a `{proxy+}` route that uses the `ANY` method and all requests will be routed to your Lambda function and processed by the `lambda-api` module. In order for a "root" path mapping to work, you also need to create an `ANY` route for `/`.
 
 ## Contributions
 Contributions, ideas and bug reports are welcome and greatly appreciated. Please add  [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bugs reports.
-
-
-## NOTES
-In order for "root" path mapping to work, you need to also create an `ANY` route for `/` in addition to your `{proxy+}` route.
