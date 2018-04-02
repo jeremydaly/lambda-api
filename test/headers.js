@@ -4,7 +4,7 @@ const Promise = require('bluebird') // Promise library
 const expect = require('chai').expect // Assertion library
 
 // Init API instance
-const api = require('../index')({ version: 'v1.0', base: 'v1' })
+const api = require('../index')({ version: 'v1.0' })
 
 // NOTE: Set test to true
 api._test = true;
@@ -52,7 +52,7 @@ describe('Header Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json', 'test': 'testVal' }, statusCode: 200, body: '{"method":"get","status":"ok"}' })
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json', 'test': 'testVal' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -62,7 +62,7 @@ describe('Header Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html' }, statusCode: 200, body: '<div>testHTML</div>' })
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html' }, statusCode: 200, body: '<div>testHTML</div>', isBase64Encoded: false })
     })
   }) // end it
 
@@ -72,7 +72,7 @@ describe('Header Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html' }, statusCode: 200, body: '<div>testHTML</div>' })
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html' }, statusCode: 200, body: '<div>testHTML</div>', isBase64Encoded: false })
     })
   }) // end it
 

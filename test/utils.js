@@ -84,4 +84,50 @@ describe('Utility Function Tests:', function() {
   }) // end encodeBody tests
 
 
+  describe('mimeLookup:', function() {
+
+    it('.pdf', function() {
+      expect(utils.mimeLookup('.pdf')).to.equal('application/pdf')
+    }) // end it
+
+    it('application/pdf', function() {
+      expect(utils.mimeLookup('application/pdf')).to.equal('application/pdf')
+    }) // end it
+
+    it('application-x/pdf (non-standard w/ slash)', function() {
+      expect(utils.mimeLookup('application-x/pdf')).to.equal('application-x/pdf')
+    }) // end it
+
+    it('xml', function() {
+      expect(utils.mimeLookup('xml')).to.equal('application/xml')
+    }) // end it
+
+    it('.html', function() {
+      expect(utils.mimeLookup('.html')).to.equal('text/html')
+    }) // end it
+
+    it('css', function() {
+      expect(utils.mimeLookup('css')).to.equal('text/css')
+    }) // end it
+
+    it('jpg', function() {
+      expect(utils.mimeLookup('jpg')).to.equal('image/jpeg')
+    }) // end it
+
+    it('.svg', function() {
+      expect(utils.mimeLookup('.svg')).to.equal('image/svg+xml')
+    }) // end it
+
+    it('docx', function() {
+      expect(utils.mimeLookup('docx')).to.equal('application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    }) // end it
+
+    it('Custom', function() {
+      expect(utils.mimeLookup('.mpeg', { mpeg: 'video/mpeg' })).to.equal('video/mpeg')
+    }) // end it
+
+
+  }) // end encodeBody tests
+
+
 }) // end UTILITY tests

@@ -9,6 +9,13 @@
 const escapeHtml = require('./utils.js').escapeHtml
 const encodeUrl = require('./utils.js').encodeUrl
 const encodeBody = require('./utils.js').encodeBody
+const mimeLookup = require('./utils.js').mimeLookup
+
+const fs = require('fs') // Require Node.js file system
+const path = require('path') // Require Node.js path
+
+const Promise = require('bluebird') // Promise library
+const AWS = require('aws-sdk') // AWS SDK (automatically available in Lambda)
 
 class RESPONSE {
 
@@ -26,6 +33,9 @@ class RESPONSE {
       // Set the Content-Type by default
       "Content-Type": "application/json" //charset=UTF-8
     }
+
+    // base64 encoding flag
+    this._isBase64 = false
 
     // Default callback function
     this._callback = 'callback'
@@ -138,11 +148,172 @@ class RESPONSE {
     return this.cookie(name,'',options)
   }
 
-  // TODO: attachement
-  // TODO: download
-  // TODO: sendFile
+
+  // Set content-disposition header and content type
+  attachment(filename) {
+    // Check for supplied filename/path
+    let name = typeof filename === 'string' && filename.trim().length > 0 ? path.parse(filename) : undefined
+    this.header('Content-Disposition','attachment' + (name ? '; filename="' + name.base + '"' : ''))
+
+    // If name exits, attempt to set the type
+    if (name) { this.type(name.ext) }
+    return this
+  }
+
+
+  // Convenience method combining attachment() and sendFile()
+  download(file, filename, options, callback) {
+
+    let name = filename
+    let opts = typeof options === 'object' ? options : {}
+    let fn = typeof callback === 'function' ? callback : undefined
+
+    // Add optional parameter support for callback
+    if (typeof filename === 'function') {
+      name = undefined
+      fn = filename
+    } else if (typeof options === 'function') {
+      fn = options
+    }
+
+    // Add optional parameter support for options
+    if (typeof filename === 'object') {
+      name = undefined
+      opts = filename
+    }
+
+    // Add the Content-Disposition header
+    this.attachment(name ? name : (typeof file === 'string' ? path.basename(file) : null) )
+
+    // Send the file
+    this.sendFile(file, opts, fn)
+
+  }
+
+
+  // Convenience method for returning static files
+  sendFile(file, options, callback) {
+
+    let buffer, modified
+
+    let opts = typeof options === 'object' ? options : {}
+    let fn = typeof callback === 'function' ? callback : e => { if(e) this.error(e) }
+
+    // Add optional parameter support
+    if (typeof options === 'function') {
+      fn = options
+    }
+
+    // Begin a promise chain
+    Promise.try(() => {
+
+      // Create buffer based on input
+      if (typeof file === 'string') {
+
+        let filepath = file.trim()
+
+        // If an S3 file identifier
+        if (/^s3:\/\//i.test(filepath)) {
+
+          let s3object = filepath.replace(/^s3:\/\//i,'').split('/')
+          let s3bucket = s3object.shift()
+          let s3key = s3object.join('/')
+
+          if (s3bucket.length > 0 && s3key.length > 0) {
+
+            // Require AWS S3 service
+            const S3 = require('./s3-service')
+
+            let params = {
+              Bucket: s3bucket,
+              Key: s3key
+            }
+
+            // Attempt to get the object from S3
+            return S3.getObjectAsync(params).then(data => {
+              buffer = data.Body
+              modified = data.LastModified
+              this.type(data.ContentType)
+              this.header('ETag',data.ETag)
+            }).catch(err => {
+              throw new Error(err)
+            })
+
+          } else {
+            throw new Error('Invalid S3 path')
+          }
+
+        // else try and load the file locally
+        } else {
+          buffer = fs.readFileSync((opts.root ? opts.root : '') + filepath)
+          modified = opts.lastModified !== false ? fs.statSync((opts.root ? opts.root : '') + filepath).mtime : undefined
+          this.type(path.extname(filepath))
+        }
+      // If the input is a buffer, pass through
+      } else if (Buffer.isBuffer(file)) {
+        buffer = file
+      } else {
+        throw new Error('Invalid file')
+      }
+
+    }).then(() => {
+
+      // Add headers from options
+      if (typeof opts.headers === 'object') {
+        Object.keys(opts.headers).map(header => {
+          this.header(header,opts.headers[header])
+        })
+      }
+
+      // Add cache-control headers
+      if (opts.cacheControl !== false) {
+        if (opts.cacheControl !== true && opts.cacheControl !== undefined) {
+          this.header('Cache-Control', opts.cacheControl)
+        } else {
+          let maxAge = opts.maxAge && !isNaN(opts.maxAge) ? (opts.maxAge/1000|0) : 0
+          this.header('Cache-Control', (opts.private === true ? 'private, ' : '') + 'max-age=' + maxAge)
+          this.header('Expires',new Date(Date.now() + maxAge).toUTCString())
+        }
+      }
+
+      // Add last-modified headers
+      if (opts.lastModified !== false) {
+        let lastModified = opts.lastModified && typeof opts.lastModified.toUTCString === 'function' ? opts.lastModified : (modified ? modified : new Date())
+        this.header('Last-Modified', lastModified.toUTCString())
+      }
+
+    }).then(() => {
+      // Execute callback
+      return Promise.resolve(fn())
+    }).then(() => {
+      // Set base64 encoding flag
+      this._isBase64 = true
+      // Convert buffer to base64 string
+      this.send(buffer.toString('base64'))
+    }).catch(e => {
+      // Execute callback with caught error
+      return Promise.resolve(fn(e))
+    }).catch(e => {
+      // Catch any final error
+      this.error(e)
+    })
+
+  } // end sendFile
+
+
+  // Convenience method for setting type
+  type(type) {
+    let mimeType = mimeLookup(type,this.app._mimeTypes)
+    if (mimeType) {
+      this.header('Content-Type',mimeType)
+    }
+    return this
+  }
+
+
+
   // TODO: sendStatus
-  // TODO: type
+
 
 
   // Sends the request to the main callback
@@ -152,7 +323,8 @@ class RESPONSE {
     const response = {
       headers: this._headers,
       statusCode: this._statusCode,
-      body: encodeBody(body)
+      body: encodeBody(body),
+      isBase64Encoded: this._isBase64
     }
 
     // Trigger the callback function

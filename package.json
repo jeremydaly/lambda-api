@@ -1,6 +1,6 @@
 {
   "name": "lambda-api",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Lightweight web framework for your serverless applications",
   "main": "index.js",
   "scripts": {
@@ -32,8 +32,10 @@
     "bluebird": "^3.5.1"
   },
   "devDependencies": {
+    "aws-sdk": "^2.218.1",
     "chai": "^4.1.2",
-    "mocha": "^4.0.1"
+    "mocha": "^4.0.1",
+    "sinon": "^4.5.0"
   },
   "engines": {
     "node": ">= 6.10.0"

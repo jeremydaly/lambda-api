@@ -4,7 +4,7 @@ const Promise = require('bluebird') // Promise library
 const expect = require('chai').expect // Assertion library
 
 // Init API instance
-const api = require('../index')({ version: 'v1.0', base: 'v1' })
+const api = require('../index')({ version: 'v1.0' })
 
 const appTest = require('./_testApp')
 
@@ -55,7 +55,7 @@ describe('Module Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","app":"app1"}' })
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","app":"app1"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -65,7 +65,7 @@ describe('Module Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","app":"app2"}' })
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","app":"app2"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -75,7 +75,7 @@ describe('Module Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"This is a called module error"}' })
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"This is a called module error"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -85,7 +85,7 @@ describe('Module Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"This is a thrown module error"}' })
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"This is a thrown module error"}', isBase64Encoded: false })
     })
   }) // end it
 
