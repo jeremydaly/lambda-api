@@ -35,7 +35,10 @@ These other frameworks are extremely powerful, but that benefit comes with the s
 
 Lambda API has **ONE** dependency. We use [Bluebird](http://bluebirdjs.com/docs/getting-started.html) promises to serialize asynchronous execution. We use promises because AWS Lambda currently only supports Node v6.10, which doesn't support `async / await`. Bluebird is faster than native promise and it has **no dependencies** either, making it the perfect choice for Lambda API.
 
-Lambda API was written to be extremely lightweight and built specifically for serverless applications using AWS Lambda. It provides support for API routing, serving up HTML pages, issuing redirects, and much more. It has a powerful middleware and error handling system, allowing you to implement everything from custom authentication to complex logging systems. Best of all, it was designed to work with Lambda's Proxy Integration, automatically handling all the interaction with API Gateway for you. It parses **REQUESTS** and formats **RESPONSES** for you, allowing you to focus on your application's core functionality, instead of fiddling with inputs and outputs.
+Lambda API was written to be extremely lightweight and built specifically for serverless applications using AWS Lambda. It provides support for API routing, serving up HTML pages, issuing redirects, serving binary files and much more. It has a powerful middleware and error handling system, allowing you to implement everything from custom authentication to complex logging systems. Best of all, it was designed to work with Lambda's Proxy Integration, automatically handling all the interaction with API Gateway for you. It parses **REQUESTS** and formats **RESPONSES** for you, allowing you to focus on your application's core functionality, instead of fiddling with inputs and outputs.
+
+## New in v0.4 - Binary Support!
+Binary support has been added! This allows you to both send and receive binary files from API Gateway. For more information, see [Enabling Binary Support](#enabling-binary-support).
 
 ## Breaking Change in v0.3
 Please note that the invocation method has been changed. You no longer need to use the `new` keyword to instantiate Lambda API. It can now be instantiated in one line:
@@ -401,7 +404,7 @@ res.attachment('path/to/logo.png')
 ```
 
 ### download(file [, filename] [, options] [, callback])
-This transfers the `file` (either a local path, S3 file reference, or Javascript `Buffer`) as an "attachment". This is a convenience method that combines `attachment()` and `sendFile()` to prompt the user to download the file. This method optionally takes a `filename` as a second parameter that will overwrite the "filename=" parameter of the `Content-Disposition` header, otherwise it will use the filename from the `file`. An optional `options` object passes through to the [sendFile()](#sendfile) method and takes the same parameters. Finally, a optional `callback` method can be defined which is passed through to [sendFile()](#sendfile) as well.
+This transfers the `file` (either a local path, S3 file reference, or Javascript `Buffer`) as an "attachment". This is a convenience method that combines `attachment()` and `sendFile()` to prompt the user to download the file. This method optionally takes a `filename` as a second parameter that will overwrite the "filename=" parameter of the `Content-Disposition` header, otherwise it will use the filename from the `file`. An optional `options` object passes through to the [sendFile()](#sendfilefile--options--callback) method and takes the same parameters. Finally, a optional `callback` method can be defined which is passed through to [sendFile()](#sendfilefile--options--callback) as well.
 
 ```javascript
 res.download('/files/sales-report.pdf')
@@ -418,7 +421,7 @@ res.download(<Buffer>, 'my-file.docx', { maxAge: 3600000 }, (err) => {
 ```
 
 ### sendFile(file [, options] [, callback])
-The `sendFile()` method takes up to three arguments. The first is the `file`. This is either a local filename (stored within your uploaded lambda code), a reference to a file in S3 (using the `s3://{my-bucket}/{path-to-file}` format), or a JavaScript `Buffer`. You can optionally pass an `options` object using the properties below as well as a callback function `fn(err)` that can handle custom errors or manipulate the response before sending to the client.
+The `sendFile()` method takes up to three arguments. The first is the `file`. This is either a local filename (stored within your uploaded lambda code), a reference to a file in S3 (using the `s3://{my-bucket}/{path-to-file}` format), or a JavaScript `Buffer`. You can optionally pass an `options` object using the properties below as well as a callback function `callback(err)` that can handle custom errors or manipulate the response before sending to the client.
 
 | Property | Type | Description | Default |
 | -------- | ---- | ----------- | ------- |
@@ -429,7 +432,29 @@ The `sendFile()` method takes up to three arguments. The first is the `file`. Th
 | cacheControl | `Boolean` or `String` | Enable or disable setting `Cache-Control` response header. Override value with custom string. | true |
 | private | `Boolean` | Sets the `Cache-Control` to `private`. | false |
 
+```javascript
+res.sendFile('./img/logo.png')
 
+res.sendFile('./img/logo.png', { maxAge: 3600000 })
+
+res.sendFile('s3://my-bucket/path/to/file.png', { maxAge: 3600000 })
+
+res.sendFile(<Buffer>, 'my-file.docx', { maxAge: 3600000 }, (err) => {
+  if (err) {
+    res.error('Custom File Error')
+  }
+})
+```
+
+The `callback` function supports promises, allowing you to perform additional tasks *after* the file is successfully loaded from the source. This can be used to perform additional synchronous tasks before returning control to the API execution.
+
+See [Enabling Binary Support](#enabling-binary-support) for more information.
+
+## Enabling Binary Support
+To enable binary support, you need to add `*/*` under Binary Media Types in API Gateway > APIs > [your api] -> Settings. This will also base64 encode all body content, but Lambda API will automatically decode it for you.
+
+![Binary Media Types](http://jeremydaly.com//lambda-api/binary-media-types.png)
+*Add *`*/*` *to Binary Media Types*
 
 ## Path Parameters
 Path parameters are extracted from the path sent in by API Gateway. Although API Gateway supports path parameters, the API doesn't use these values but insteads extracts them from the actual path. This gives you more flexibility with the API Gateway configuration. Path parameters are defined in routes using a colon `:` as a prefix.
@@ -569,5 +594,3 @@ Contributions, ideas and bug reports are welcome and greatly appreciated. Please
 
 ## NOTES
 In order for "root" path mapping to work, you need to also create an `ANY` route for `/` in addition to your `{proxy+}` route.
-
-To enable binary support, you need to add `*/*` under Binary Media Types in API Gateway > APIs > [your api] -> Settings. This will also base64 encode all body content, but Lambda API will automatically decode it for you.
