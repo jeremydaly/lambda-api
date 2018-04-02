@@ -224,10 +224,11 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `query`: Querystring parameters parsed into an object
 - `headers`: An object containing the request headers (properties converted to lowercase for HTTP/2, see [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540))
 - `rawHeaders`: An object containing the original request headers (property case preserved)
-- `body`: The body of the request.
+- `body`: The body of the request. If the `isBase64Encoded` flag is `true`, it will be decoded automatically.
   - If the `Content-Type` header is `application/json`, it will attempt to parse the request using `JSON.parse()`
   - If the `Content-Type` header is `application/x-www-form-urlencoded`, it will attempt to parse a URL encoded string using `querystring`
   - Otherwise it will be plain text.
+- `rawBody`: If the `isBase64Encoded` flag is `true`, this is a copy of the original, base64 encoded body
 - `route`: The matched route of the request
 - `requestContext`: The `requestContext` passed from the API Gateway
 - `namespace` or `ns`: A reference to modules added to the app's namespace (see [namespaces](#namespaces))
