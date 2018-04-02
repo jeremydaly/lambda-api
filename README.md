@@ -196,7 +196,7 @@ module.exports = (api, opts) => {
 }
 ```
 
-Even though both modules create a `/product` route, Lambda API will add the `prefix` to them creating two unique routes. Your users can now access:
+Even though both modules create a `/product` route, Lambda API will add the `prefix` to them, creating two unique routes. Your users can now access:
 - `/v1/product`
 - `/v2/product`
 
@@ -407,9 +407,9 @@ res.attachment('path/to/logo.png')
 This transfers the `file` (either a local path, S3 file reference, or Javascript `Buffer`) as an "attachment". This is a convenience method that combines `attachment()` and `sendFile()` to prompt the user to download the file. This method optionally takes a `filename` as a second parameter that will overwrite the "filename=" parameter of the `Content-Disposition` header, otherwise it will use the filename from the `file`. An optional `options` object passes through to the [sendFile()](#sendfilefile--options--callback) method and takes the same parameters. Finally, a optional `callback` method can be defined which is passed through to [sendFile()](#sendfilefile--options--callback) as well.
 
 ```javascript
-res.download('/files/sales-report.pdf')
+res.download('./files/sales-report.pdf')
 
-res.download('/files/sales-report.pdf', 'report.pdf')
+res.download('./files/sales-report.pdf', 'report.pdf')
 
 res.download('s3://my-bucket/path/to/file.png', 'logo.png', { maxAge: 3600000 })
 
@@ -591,4 +591,4 @@ Routes must be configured in API Gateway in order to support routing to the Lamb
 Simply create a `{proxy+}` route that uses the `ANY` method and all requests will be routed to your Lambda function and processed by the `lambda-api` module. In order for a "root" path mapping to work, you also need to create an `ANY` route for `/`.
 
 ## Contributions
-Contributions, ideas and bug reports are welcome and greatly appreciated. Please add  [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bugs reports.
+Contributions, ideas and bug reports are welcome and greatly appreciated. Please add  [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bug reports.
