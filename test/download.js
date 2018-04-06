@@ -9,7 +9,7 @@ const fs = require('fs') // Require Node.js file system
 const sinon = require('sinon')
 
 const AWS = require('aws-sdk') // AWS SDK (automatically available in Lambda)
-const S3 = require('../s3-service') // Init S3 Service
+const S3 = require('../lib/s3-service') // Init S3 Service
 
 // Init API instance
 const api = require('../index')({ version: 'v1.0', mimeTypes: { test: 'text/test' } })
