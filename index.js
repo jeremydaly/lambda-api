@@ -7,8 +7,8 @@
  * @license MIT
  */
 
-const REQUEST = require('./request.js') // Response object
-const RESPONSE = require('./response.js') // Response object
+const REQUEST = require('./lib/request.js') // Response object
+const RESPONSE = require('./lib/response.js') // Response object
 const Promise = require('bluebird') // Promise library
 
 // Create the API class
