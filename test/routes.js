@@ -151,14 +151,25 @@ describe('Route Tests:', function() {
 
   describe('GET', function() {
 
-    it('Base path: /', function() {
+    // TODO: Sample async / await test - update all to this format?
+
+    it('Base path: /', async function() {
       let _event = Object.assign({},event,{ path: '/' })
 
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+      let result = await new Promise((resolve,reject) => api.run(_event,{}, (err,res) => { resolve(res) }))
+
+      expect(result).to.deep.equal({
+        headers: { 'Content-Type': 'application/json' },
+        statusCode: 200,
+        body: '{"method":"get","status":"ok"}',
+        isBase64Encoded: false
       })
+
+      // return new Promise((resolve,reject) => {
+      //   api.run(_event,{},function(err,res) { resolve(res) })
+      // }).then((result) => {
+      //   expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+      // })
     }) // end it
 
     it('Simple path: /test', function() {
