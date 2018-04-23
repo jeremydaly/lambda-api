@@ -49,6 +49,28 @@ api.get('/getHeader', function(req,res) {
   })
 })
 
+api.get('/cors', function(req,res) {
+  res.cors().json({})
+})
+
+api.get('/corsCustom', function(req,res) {
+  res.cors({
+    origin: 'example.com',
+    methods: 'GET, OPTIONS',
+    headers: 'Content-Type, Authorization',
+    maxAge: 84000000,
+    credentials: true,
+    exposeHeaders: 'Content-Type'
+  }).json({})
+})
+
+api.get('/corsOverride', function(req,res) {
+  res.cors().cors({
+    origin: 'example.com',
+    credentials: true
+  }).json({})
+})
+
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
@@ -99,6 +121,68 @@ describe('Header Tests:', function() {
           'TestHeader': 'test'
         }, statusCode: 200,
         body: '{"headers":{"Content-Type":"application/json","TestHeader":"test"},"typeHeader":"test","typeHeaderCase":"application/json","typeHeaderMissing":null}',
+        isBase64Encoded: false
+      })
+    })
+  }) // end it
+
+
+  it('Add Default CORS Headers', function() {
+    let _event = Object.assign({},event,{ path: '/cors'})
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Content-Length, X-Requested-With',
+          'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, OPTIONS',
+          'Access-Control-Allow-Origin': '*'
+        }, statusCode: 200,
+        body: '{}',
+        isBase64Encoded: false
+      })
+    })
+  }) // end it
+
+  it('Add Custom CORS Headers', function() {
+    let _event = Object.assign({},event,{ path: '/corsCustom'})
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          'Access-Control-Allow-Methods': 'GET, OPTIONS',
+          'Access-Control-Allow-Origin': 'example.com',
+          'Access-Control-Allow-Credentials': 'true',
+          'Access-Control-Expose-Headers': 'Content-Type',
+          'Access-Control-Max-Age': '84000'
+        }, statusCode: 200,
+        body: '{}',
+        isBase64Encoded: false
+      })
+    })
+  }) // end it
+
+  it('Override CORS Headers', function() {
+    let _event = Object.assign({},event,{ path: '/corsOverride'})
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Content-Length, X-Requested-With',
+          'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, OPTIONS',
+          'Access-Control-Allow-Origin': 'example.com',
+          'Access-Control-Allow-Credentials': 'true'
+        }, statusCode: 200,
+        body: '{}',
         isBase64Encoded: false
       })
     })
