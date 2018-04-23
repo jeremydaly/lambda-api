@@ -163,7 +163,7 @@ describe('SendFile Tests:', function() {
 
   before(function() {
      // Stub getObjectAsync
-    stub = sinon.stub(S3,'getObjectAsync')
+    stub = sinon.stub(S3,'getObject')
   })
 
   it('Bad path', function() {

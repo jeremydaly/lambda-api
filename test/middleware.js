@@ -41,10 +41,10 @@ api.use(function(req,res,next) {
   if (req.route === '/testPromise') {
     let start = Date.now()
     Promise.try(() => {
-      for(let i = 0; i<40000000; i++) {}
+      for(let i = 0; i<100000000; i++) {}
       return true
     }).then((x) => {
-      //console.log('Time:',Date.now()-start);
+      // console.log('Time:',Date.now()-start);
       req.testMiddlewarePromise = 'test'
       next()
     })

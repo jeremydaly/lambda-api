@@ -70,6 +70,10 @@ api.get('/redirect301', function(req,res) {
   res.redirect(301,'http://www.github.com')
 })
 
+api.get('/redirect310', function(req,res) {
+  res.redirect(310,'http://www.github.com')
+})
+
 api.get('/redirectHTML', function(req,res) {
   res.redirect('http://www.github.com?foo=bar&bat=baz<script>alert(\'not good\')</script>')
 })
@@ -208,6 +212,16 @@ describe('Response Tests:', function() {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
       expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html', 'Location': 'http://www.github.com' }, statusCode: 301, body: '<p>301 Redirecting to <a href="http://www.github.com">http://www.github.com</a></p>', isBase64Encoded: false })
+    })
+  }) // end it
+
+  it('Redirect (310 - Invalid Code)', function() {
+    let _event = Object.assign({},event,{ path: '/redirect310'})
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"310 is an invalid redirect status code"}', isBase64Encoded: false })
     })
   }) // end it
 
