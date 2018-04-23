@@ -261,6 +261,9 @@ api.get('/users', function(req,res) {
 })
 ```
 
+### getHeader([field])
+Retrieve the current header object or pass the optional `field` parameter and retrieve a specific header value. `field` is case insensitive.
+
 ### send(body)
 The `send` methods triggers the API to return data to the API Gateway. The `send` method accepts one parameter and sends the contents through as is, e.g. as an object, string, integer, etc. AWS Gateway expects a string, so the data should be converted accordingly.
 
