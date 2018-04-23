@@ -327,7 +327,7 @@ res.type('.doc');               // => 'application/msword'
 res.type('text/css');           // => 'text/css'
 ```
 
-For a complete list of auto supported types, see [mimemap.js](mindmap.js). Custom MIME types can be added by using the `mimeTypes` option when instantiating Lambda API
+For a complete list of auto supported types, see [mimemap.js](lib/mindmap.js). Custom MIME types can be added by using the `mimeTypes` option when instantiating Lambda API
 
 ### location(path)
 The `location` convenience method sets the `Location:` header with the value of a single string argument. The value passed in is not validated but will be encoded before being added to the header. Values that are already encoded can be safely passed in. Note that a valid `3xx` status code must be set to trigger browser redirection. The value can be a relative/absolute path OR a FQDN.
@@ -352,6 +352,44 @@ api.get('/redirectToHome', function(req,res) {
 
 api.get('/redirectToGithub', function(req,res) {
   res.redirect(301,'https://github.com')
+})
+```
+
+### cors([options])
+Convenience method for adding [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) headers to responses. An optional `options` object can be passed in to customize the defaults.
+
+The six defined **CORS** headers are as follows:
+- Access-Control-Allow-Origin (defaults to `*`)
+- Access-Control-Allow-Methods (defaults to `GET, PUT, POST, DELETE, OPTIONS`)
+- Access-Control-Allow-Headers (defaults to `Content-Type, Authorization, Content-Length, X-Requested-With`)
+- Access-Control-Expose-Headers
+- Access-Control-Max-Age
+- Access-Control-Allow-Credentials
+
+The `options` object can contain the following properties that correspond to the above headers:
+- origin *(string)*
+- methods *(string)*
+- headers *(string)*
+- exposeHeaders *(string)*
+- maxAge *(number in milliseconds)*
+- credentials *(boolean)*
+
+Defaults can be set by calling `res.cors()` with no properties, or with any combination of the above options.
+
+```javascript
+res.cors({
+  origin: 'example.com',
+  methods: 'GET, POST, OPTIONS',
+  headers: 'Content-Type, Authorization',
+  maxAge: 84000000
+})
+```
+
+You can override existing values by calling `res.cors()` with just the updated values:
+
+```javascript
+res.cors({
+  origin: 'api.example.com'
 })
 ```
 
@@ -589,6 +627,8 @@ api.options('/*', function(req,res) {
   res.status(200).send({});
 })
 ```
+
+You can also use the `cors()` ([see here](#cors--options)) convenience method to add CORS headers.
 
 Conditional route support could be added via middleware or with conditional logic within the `OPTIONS` route.
 
