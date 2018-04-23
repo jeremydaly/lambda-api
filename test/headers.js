@@ -39,6 +39,16 @@ api.get('/testJSONP', function(req,res) {
   res.status(200).html({ method: 'get', status: 'ok' })
 })
 
+api.get('/getHeader', function(req,res) {
+  res.status(200).header('TestHeader','test')
+  res.json({
+    headers: res.getHeader(),
+    typeHeader: res.getHeader('TestHeader'),
+    typeHeaderCase: res.getHeader('coNtEnt-TyPe'),
+    typeHeaderMissing: res.getHeader('test')
+  })
+})
+
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
@@ -73,6 +83,24 @@ describe('Header Tests:', function() {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
       expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html' }, statusCode: 200, body: '<div>testHTML</div>', isBase64Encoded: false })
+    })
+  }) // end it
+
+
+  it('Get Header', function() {
+    let _event = Object.assign({},event,{ path: '/getHeader'})
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({
+        headers: {
+          'Content-Type': 'application/json',
+          'TestHeader': 'test'
+        }, statusCode: 200,
+        body: '{"headers":{"Content-Type":"application/json","TestHeader":"test"},"typeHeader":"test","typeHeaderCase":"application/json","typeHeaderMissing":null}',
+        isBase64Encoded: false
+      })
     })
   }) // end it
 
