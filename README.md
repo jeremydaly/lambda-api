@@ -125,6 +125,9 @@ The API automatically parses this information to create a normalized `REQUEST` o
 npm i lambda-api --save
 ```
 
+## Requirements
+- AWS Lambda running Node 8.10+
+
 ## Configuration
 
 Require the `lambda-api` module into your Lambda handler script and instantiate it. You can initialize the API with the following options:
