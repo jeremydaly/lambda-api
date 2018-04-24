@@ -1,6 +1,5 @@
 'use strict';
 
-const Promise = require('bluebird') // Promise library
 const expect = require('chai').expect // Assertion library
 
 // Init API instance
@@ -167,112 +166,135 @@ describe('Route Tests:', function() {
 
     it('Base path: /', async function() {
       let _event = Object.assign({},event,{ path: '/' })
-
-      let result = await new Promise((resolve,reject) => api.run(_event,{}, (err,res) => { resolve(res) }))
-
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({
         headers: { 'content-type': 'application/json' },
         statusCode: 200,
         body: '{"method":"get","status":"ok"}',
         isBase64Encoded: false
       })
-
-      // return new Promise((resolve,reject) => {
-      //   api.run(_event,{},function(err,res) { resolve(res) })
-      // }).then((result) => {
-      //   expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
-      // })
     }) // end it
 
-    it('Simple path: /test', function() {
+    it('Simple path: /test', async function() {
       let _event = Object.assign({},event,{})
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
-    it('Simple path w/ trailing slash: /test/', function() {
+    it('Simple path w/ trailing slash: /test/', async function() {
       let _event = Object.assign({},event,{ path: '/test/' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
-    it('Path with parameter: /test/123', function() {
+    it('Path with parameter: /test/123', async function() {
       let _event = Object.assign({},event,{ path: '/test/123' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123"}', isBase64Encoded: false })
     }) // end it
 
-    it('Path with parameter and querystring: /test/123/query/?test=321', function() {
+    it('Path with parameter and querystring: /test/123/query/?test=321', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/query', queryStringParameters: { test: '321' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        //console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
     }) // end it
 
-    it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', function() {
+    it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/query/456', queryStringParameters: { test: '321' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
     }) // end it
 
 
-    it('Event path + querystring w/ trailing slash (this shouldn\'t happen with API Gateway)', function() {
+    it('Event path + querystring w/ trailing slash (this shouldn\'t happen with API Gateway)', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/query/?test=321', queryStringParameters: { test: '321' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        //console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
     }) // end it
 
-    it('Event path + querystring w/o trailing slash (this shouldn\'t happen with API Gateway)', function() {
+    it('Event path + querystring w/o trailing slash (this shouldn\'t happen with API Gateway)', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/query?test=321', queryStringParameters: { test: '321' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        //console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
     }) // end it
 
 
-    it('Missing path: /not_found', function() {
+    it('Missing path: /not_found', async function() {
       let _event = Object.assign({},event,{ path: '/not_found' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
     }) // end it
 
   }) // end GET tests
 
+
+  /******************/
+  /*** HEAD Tests ***/
+  /******************/
+
+  describe('HEAD', function() {
+
+    it('Base path: /', async function() {
+      let _event = Object.assign({},event,{ path: '/', httpMethod: 'head' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Simple path: /test', async function() {
+      let _event = Object.assign({},event,{ httpMethod: 'head'})
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '', isBase64Encoded: false })
+    }) // end it
+
+    it('Simple path w/ trailing slash: /test/', async function() {
+      let _event = Object.assign({},event,{ path: '/test/', httpMethod: 'head' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '', isBase64Encoded: false })
+    }) // end it
+
+    it('Path with parameter: /test/123', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123', httpMethod: 'head' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '', isBase64Encoded: false })
+    }) // end it
+
+    it('Path with parameter and querystring: /test/123/query/?test=321', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123/query', httpMethod: 'head', queryStringParameters: { test: '321' } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '', isBase64Encoded: false })
+    }) // end it
+
+    it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123/query/456', httpMethod: 'head', queryStringParameters: { test: '321' } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '', isBase64Encoded: false })
+    }) // end it
+
+
+    it('Event path + querystring w/ trailing slash (this shouldn\'t happen with API Gateway)', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123/query/?test=321', httpMethod: 'head', queryStringParameters: { test: '321' } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '', isBase64Encoded: false })
+    }) // end it
+
+    it('Event path + querystring w/o trailing slash (this shouldn\'t happen with API Gateway)', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123/query?test=321', httpMethod: 'head', queryStringParameters: { test: '321' } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '', isBase64Encoded: false })
+    }) // end it
+
+    it('Missing path: /not_found', async function() {
+      let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'head' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '', isBase64Encoded: false })
+    }) // end it
+
+  }) // end HEAD tests
 
   /******************/
   /*** POST Tests ***/
@@ -280,133 +302,76 @@ describe('Route Tests:', function() {
 
   describe('POST', function() {
 
-    it('Simple path: /test', function() {
+    it('Simple path: /test', async function() {
       let _event = Object.assign({},event,{ httpMethod: 'post' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
-    it('Simple path w/ trailing slash: /test/', function() {
+    it('Simple path w/ trailing slash: /test/', async function() {
       let _event = Object.assign({},event,{ path: '/test/', httpMethod: 'post' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
-    it('Path with parameter: /test/123', function() {
+    it('Path with parameter: /test/123', async function() {
       let _event = Object.assign({},event,{ path: '/test/123', httpMethod: 'post' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","param":"123"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","param":"123"}', isBase64Encoded: false })
     }) // end it
 
-    it('Path with parameter and querystring: /test/123/query/?test=321', function() {
+    it('Path with parameter and querystring: /test/123/query/?test=321', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/query', httpMethod: 'post', queryStringParameters: { test: '321' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        //console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
     }) // end it
 
-    it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', function() {
+    it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/query/456', httpMethod: 'post', queryStringParameters: { test: '321' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
     }) // end it
 
-    it('With JSON body: /test/json', function() {
+    it('With JSON body: /test/json', async function() {
       let _event = Object.assign({},event,{ path: '/test/json', httpMethod: 'post', body: { test: '123' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
     }) // end it
 
-    it('With stringified JSON body: /test/json', function() {
+    it('With stringified JSON body: /test/json', async function() {
       let _event = Object.assign({},event,{ path: '/test/json', httpMethod: 'post', body: JSON.stringify({ test: '123' }) })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
     }) // end it
 
-    it('With x-www-form-urlencoded body: /test/form', function() {
+    it('With x-www-form-urlencoded body: /test/form', async function() {
       let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'post', body: 'test=123&test2=456', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
     }) // end it
 
-    it('With "x-www-form-urlencoded; charset=UTF-8" body: /test/form', function() {
+    it('With "x-www-form-urlencoded; charset=UTF-8" body: /test/form', async function() {
       let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'post', body: 'test=123&test2=456', headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
     }) // end it
 
-    it('With x-www-form-urlencoded body and lowercase "Content-Type" header: /test/form', function() {
+    it('With x-www-form-urlencoded body and lowercase "Content-Type" header: /test/form', async function() {
       let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'post', body: 'test=123&test2=456', headers: { 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
     }) // end it
 
-    it('With x-www-form-urlencoded body and mixed case "Content-Type" header: /test/form', function() {
+    it('With x-www-form-urlencoded body and mixed case "Content-Type" header: /test/form', async function() {
       let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'post', body: 'test=123&test2=456', headers: { 'CoNtEnt-TYPe': 'application/x-www-form-urlencoded' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
     }) // end it
 
-    it('Missing path: /not_found', function() {
+    it('Missing path: /not_found', async function() {
       let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'post' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
     }) // end it
 
   }) // end POST tests
@@ -418,135 +383,77 @@ describe('Route Tests:', function() {
 
   describe('PUT', function() {
 
-    it('Simple path: /test', function() {
+    it('Simple path: /test', async function() {
       let _event = Object.assign({},event,{ httpMethod: 'put' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
-    it('Simple path w/ trailing slash: /test/', function() {
+    it('Simple path w/ trailing slash: /test/', async function() {
       let _event = Object.assign({},event,{ path: '/test/', httpMethod: 'put' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
-    it('Path with parameter: /test/123', function() {
+    it('Path with parameter: /test/123', async function() {
       let _event = Object.assign({},event,{ path: '/test/123', httpMethod: 'put' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","param":"123"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","param":"123"}', isBase64Encoded: false })
     }) // end it
 
-    it('Path with parameter and querystring: /test/123/query/?test=321', function() {
+    it('Path with parameter and querystring: /test/123/query/?test=321', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/query', httpMethod: 'put', queryStringParameters: { test: '321' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        //console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
     }) // end it
 
-    it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', function() {
+    it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/query/456', httpMethod: 'put', queryStringParameters: { test: '321' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
     }) // end it
 
 
-    it('With JSON body: /test/json', function() {
+    it('With JSON body: /test/json', async function() {
       let _event = Object.assign({},event,{ path: '/test/json', httpMethod: 'put', body: { test: '123' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
     }) // end it
 
-    it('With stringified JSON body: /test/json', function() {
+    it('With stringified JSON body: /test/json', async function() {
       let _event = Object.assign({},event,{ path: '/test/json', httpMethod: 'put', body: JSON.stringify({ test: '123' }) })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
     }) // end it
 
-    it('With x-www-form-urlencoded body: /test/form', function() {
+    it('With x-www-form-urlencoded body: /test/form', async function() {
       let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'put', body: 'test=123&test2=456', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
     }) // end it
 
-    it('With "x-www-form-urlencoded; charset=UTF-8" body: /test/form', function() {
+    it('With "x-www-form-urlencoded; charset=UTF-8" body: /test/form', async function() {
       let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'put', body: 'test=123&test2=456', headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
     }) // end it
 
-    it('With x-www-form-urlencoded body and lowercase "Content-Type" header: /test/form', function() {
+    it('With x-www-form-urlencoded body and lowercase "Content-Type" header: /test/form', async function() {
       let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'put', body: 'test=123&test2=456', headers: { 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
     }) // end it
 
-    it('With x-www-form-urlencoded body and mixed case "Content-Type" header: /test/form', function() {
+    it('With x-www-form-urlencoded body and mixed case "Content-Type" header: /test/form', async function() {
       let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'put', body: 'test=123&test2=456', headers: { 'CoNtEnt-TYPe': 'application/x-www-form-urlencoded' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
     }) // end it
 
-
-    it('Missing path: /not_found', function() {
+    it('Missing path: /not_found', async function() {
       let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'put' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
     }) // end it
 
   }) // end PUT tests
@@ -557,37 +464,23 @@ describe('Route Tests:', function() {
 
   describe('DELETE', function() {
 
-    it('Path with parameter: /test/123', function() {
+    it('Path with parameter: /test/123', async function() {
       let _event = Object.assign({},event,{ path: '/test/123', httpMethod: 'delete' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"delete","status":"ok","param":"123"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"delete","status":"ok","param":"123"}', isBase64Encoded: false })
     }) // end it
 
-    it('Path with multiple parameters: /test/123/456', function() {
+    it('Path with multiple parameters: /test/123/456', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/456', httpMethod: 'delete' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"delete","status":"ok","params":{"test":"123","test2":"456"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"delete","status":"ok","params":{"test":"123","test2":"456"}}', isBase64Encoded: false })
     }) // end it
 
 
-    it('Missing path: /not_found', function() {
+    it('Missing path: /not_found', async function() {
       let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'delete' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
     }) // end it
 
   }) // end DELETE tests
@@ -599,122 +492,70 @@ describe('Route Tests:', function() {
 
   describe('OPTIONS', function() {
 
-    it('Simple path: /test', function() {
+    it('Simple path: /test', async function() {
       let _event = Object.assign({},event,{ httpMethod: 'options' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
-    it('Simple path w/ trailing slash: /test/', function() {
+    it('Simple path w/ trailing slash: /test/', async function() {
       let _event = Object.assign({},event,{ path: '/test/', httpMethod: 'options' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
-    it('Path with parameter: /test/123', function() {
+    it('Path with parameter: /test/123', async function() {
       let _event = Object.assign({},event,{ path: '/test/123', httpMethod: 'options' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","param":"123"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","param":"123"}', isBase64Encoded: false })
     }) // end it
 
-    it('Path with parameter and querystring: /test/123/query/?test=321', function() {
+    it('Path with parameter and querystring: /test/123/query/?test=321', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/query', httpMethod: 'options', queryStringParameters: { test: '321' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        //console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
     }) // end it
 
-    it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', function() {
+    it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/query/456', httpMethod: 'options', queryStringParameters: { test: '321' } })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
     }) // end it
 
-    it('Wildcard: /test_options', function() {
+    it('Wildcard: /test_options', async function() {
       let _event = Object.assign({},event,{ path: '/test_options', httpMethod: 'options' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/*"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/*"}', isBase64Encoded: false })
     }) // end it
 
-    it('Wildcard with path: /test_options2/123', function() {
+    it('Wildcard with path: /test_options2/123', async function() {
       let _event = Object.assign({},event,{ path: '/test_options2/123', httpMethod: 'options' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/*"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/*"}', isBase64Encoded: false })
     }) // end it
 
-    it('Wildcard with deep path: /test/param1/queryx', function() {
+    it('Wildcard with deep path: /test/param1/queryx', async function() {
       let _event = Object.assign({},event,{ path: '/test/param1/queryx', httpMethod: 'options' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/*"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/*"}', isBase64Encoded: false })
     }) // end it
 
-    it('Nested Wildcard: /test_options2', function() {
+    it('Nested Wildcard: /test_options2', async function() {
       let _event = Object.assign({},event,{ path: '/test_options2/test', httpMethod: 'options' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        //console.log(JSON.stringify(api._routes,null,2));
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/*"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/*"}', isBase64Encoded: false })
     }) // end it
 
-    it('Nested Wildcard with parameters: /test_options2/param1/test', function() {
+    it('Nested Wildcard with parameters: /test_options2/param1/test', async function() {
       let _event = Object.assign({},event,{ path: '/test_options2/param1/test', httpMethod: 'options' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        //console.log(JSON.stringify(api._routes,null,2));
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/:param1/*","params":{"param1":"param1"}}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/:param1/*","params":{"param1":"param1"}}', isBase64Encoded: false })
     }) // end it
 
-    it('Missing path: /not_found', function() {
+    it('Missing path: /not_found', async function() {
       let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'options' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
-      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
     }) // end it
 
   }) // end OPTIONS tests
