@@ -517,10 +517,14 @@ Path parameters act as wildcards that capture the value into the `params` object
 A path can contain as many parameters as you want. E.g. `/users/:param1/:param2/:param3`.
 
 ## Wildcard Routes
-Wildcard routes are supported for methods that match an existing route. E.g. `options` on an existing `get` route. As of now, the best use case is for the OPTIONS method to provide CORS headers. Wildcards only work in the base path. `/users/*`, for example, is not supported. For additional wildcard support, use [Path Parameters](#path-parameters) instead.
+Wildcard routes are supported for methods that **match an existing route**. E.g. `options` on an existing `get` route. Wildcards only work at the *end of a route definition* such as `/*` or `/users/*`. Wildcards within a path, e.g. `/users/*/posts` is not supported. Wildcard routes do support parameters, so `/users/:id/*` would capture the `:id` parameter in your wildcard handler.
+
+Wildcard routes will match deep paths if the route exists. For example, an `OPTIONS` method for path `/users/*` would match `/users/:id/posts/latest` if that path was defined by another method.
+
+The best use case is for the `OPTIONS` method to provide CORS headers. For more control over variable paths, use [Path Parameters](#path-parameters) instead.
 
 ```javascript
-api.options('/*', function(req,res) {
+api.options('/users/*', function(req,res) {
   // Do something
   res.status(200).send({});
 })
@@ -628,7 +632,7 @@ api.options('/*', function(req,res) {
 })
 ```
 
-You can also use the `cors()` ([see here](#cors--options)) convenience method to add CORS headers.
+You can also use the `cors()` ([see here](#corsoptions)) convenience method to add CORS headers.
 
 Conditional route support could be added via middleware or with conditional logic within the `OPTIONS` route.
 
