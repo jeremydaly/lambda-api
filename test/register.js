@@ -39,7 +39,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/test-register","route":"/test-register","method":"GET"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/test-register","route":"/test-register","method":"GET"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -49,7 +49,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/test-register/sub1","route":"/test-register/sub1","method":"GET"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/test-register/sub1","route":"/test-register/sub1","method":"GET"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -59,7 +59,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/test-register/TEST/test","route":"/test-register/:param1/test","method":"GET","params":{"param1":"TEST"}}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/test-register/TEST/test","route":"/test-register/:param1/test","method":"GET","params":{"param1":"TEST"}}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -70,7 +70,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/v1/test-register","route":"/test-register","method":"GET"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/v1/test-register","route":"/test-register","method":"GET"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -80,7 +80,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/v1/test-register/sub1","route":"/test-register/sub1","method":"GET"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/v1/test-register/sub1","route":"/test-register/sub1","method":"GET"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -90,7 +90,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/v1/test-register/TEST/test","route":"/test-register/:param1/test","method":"GET","params":{"param1":"TEST"}}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/v1/test-register/TEST/test","route":"/test-register/:param1/test","method":"GET","params":{"param1":"TEST"}}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -101,7 +101,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/test-register","route":"/test-register","method":"GET"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/test-register","route":"/test-register","method":"GET"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -111,7 +111,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/test-register/sub1","route":"/test-register/sub1","method":"GET"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/test-register/sub1","route":"/test-register/sub1","method":"GET"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -121,7 +121,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/test-register/TEST/test","route":"/test-register/:param1/test","method":"GET","params":{"param1":"TEST"}}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/test-register/TEST/test","route":"/test-register/:param1/test","method":"GET","params":{"param1":"TEST"}}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -132,7 +132,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/vZ/test-register","route":"/test-register","method":"GET"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/vZ/test-register","route":"/test-register","method":"GET"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -142,7 +142,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/vZ/test-register/sub1","route":"/test-register/sub1","method":"GET"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/vZ/test-register/sub1","route":"/test-register/sub1","method":"GET"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -152,7 +152,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/vZ/test-register/TEST/test","route":"/test-register/:param1/test","method":"GET","params":{"param1":"TEST"}}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/vZ/test-register/TEST/test","route":"/test-register/:param1/test","method":"GET","params":{"param1":"TEST"}}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -162,7 +162,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/test-register/sub2","route":"/test-register/sub2","method":"GET"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/vX/vY/test-register/sub2","route":"/test-register/sub2","method":"GET"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -172,7 +172,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/v2/test-register","route":"/test-register","method":"GET"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/v2/test-register","route":"/test-register","method":"GET"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -182,7 +182,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/v2/test-register/sub1","route":"/test-register/sub1","method":"GET"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/v2/test-register/sub1","route":"/test-register/sub1","method":"GET"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -192,7 +192,7 @@ describe('Register Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"path":"/v2/test-register/TEST/test","route":"/test-register/:param1/test","method":"GET","params":{"param1":"TEST"}}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/v2/test-register/TEST/test","route":"/test-register/:param1/test","method":"GET","params":{"param1":"TEST"}}', isBase64Encoded: false })
     })
   }) // end it
 

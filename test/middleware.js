@@ -84,7 +84,7 @@ describe('Middleware Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddleware":"123","testMiddleware2":"456"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddleware":"123","testMiddleware2":"456"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -94,7 +94,7 @@ describe('Middleware Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddleware3":"123","testMiddleware4":"456","testMiddleware5":"789"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddleware3":"123","testMiddleware4":"456","testMiddleware5":"789"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -105,7 +105,7 @@ describe('Middleware Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddlewarePromise":"test"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddlewarePromise":"test"}', isBase64Encoded: false })
     })
   }) // end it
 

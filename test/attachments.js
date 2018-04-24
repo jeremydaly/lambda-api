@@ -63,7 +63,7 @@ describe('Attachment Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Disposition': 'attachment', 'Content-Type': 'application/json' }, statusCode: 200, body: '{"status":"ok"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-disposition': 'attachment', 'content-type': 'application/json' }, statusCode: 200, body: '{"status":"ok"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -73,7 +73,7 @@ describe('Attachment Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Disposition': 'attachment; filename=\"foo.pdf\"', 'Content-Type': 'application/pdf' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-disposition': 'attachment; filename=\"foo.pdf\"', 'content-type': 'application/pdf' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
     })
   }) // end it
 
@@ -83,7 +83,7 @@ describe('Attachment Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Disposition': 'attachment; filename=\"foo.png\"', 'Content-Type': 'image/png' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-disposition': 'attachment; filename=\"foo.png\"', 'content-type': 'image/png' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
     })
   }) // end it
 
@@ -93,7 +93,7 @@ describe('Attachment Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Disposition': 'attachment; filename=\"foo.csv\"', 'Content-Type': 'text/csv' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-disposition': 'attachment; filename=\"foo.csv\"', 'content-type': 'text/csv' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
     })
   }) // end it
 
@@ -103,7 +103,7 @@ describe('Attachment Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Disposition': 'attachment; filename=\"foo.test\"', 'Content-Type': 'text/test' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-disposition': 'attachment; filename=\"foo.test\"', 'content-type': 'text/test' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
     })
   }) // end it
 
@@ -113,7 +113,7 @@ describe('Attachment Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Disposition': 'attachment', 'Content-Type': 'application/json' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-disposition': 'attachment', 'content-type': 'application/json' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
     })
   }) // end it
 
@@ -123,7 +123,7 @@ describe('Attachment Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Disposition': 'attachment', 'Content-Type': 'application/json' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-disposition': 'attachment', 'content-type': 'application/json' }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
     })
   }) // end it
 

@@ -22,7 +22,7 @@ let event = {
   path: '/',
   body: {},
   headers: {
-    'Content-Type': 'application/json'
+    'content-type': 'application/json'
   }
 }
 
@@ -172,7 +172,7 @@ describe('SendFile Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json','x-error': 'true' }, statusCode: 500, body: '{"error":"Invalid file"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json','x-error': 'true' }, statusCode: 500, body: '{"error":"Invalid file"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -182,7 +182,7 @@ describe('SendFile Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json','x-error': 'true' }, statusCode: 500, body: '{"error":"ENOENT: no such file or directory, open \'./test-missing.txt\'"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json','x-error': 'true' }, statusCode: 500, body: '{"error":"ENOENT: no such file or directory, open \'./test-missing.txt\'"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -194,7 +194,7 @@ describe('SendFile Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json','x-error': 'true' }, statusCode: 404, body: '{"error":"There was an error accessing the requested file"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json','x-error': 'true' }, statusCode: 404, body: '{"error":"There was an error accessing the requested file"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -207,10 +207,10 @@ describe('SendFile Tests:', function() {
     }).then((result) => {
       expect(result).to.deep.equal({
         headers: {
-          'Content-Type': 'text/plain',
-          'Cache-Control': 'max-age=0',
-          'Expires': result.headers.Expires,
-          'Last-Modified': result.headers['Last-Modified']
+          'content-type': 'text/plain',
+          'cache-control': 'max-age=0',
+          'expires': result.headers.expires,
+          'last-modified': result.headers['last-modified']
         },
         statusCode: 201, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
     })
@@ -223,7 +223,7 @@ describe('SendFile Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json','x-error': 'true' }, statusCode: 501, body: '{"error":"Custom File Error"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json','x-error': 'true' }, statusCode: 501, body: '{"error":"Custom File Error"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -237,10 +237,10 @@ describe('SendFile Tests:', function() {
     }).then((result) => {
       expect(result).to.deep.equal({
         headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'max-age=0',
-          'Expires': result.headers.Expires,
-          'Last-Modified': result.headers['Last-Modified']
+          'content-type': 'application/json',
+          'cache-control': 'max-age=0',
+          'expires': result.headers.expires,
+          'last-modified': result.headers['last-modified']
         }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
     })
   }) // end it
@@ -254,12 +254,12 @@ describe('SendFile Tests:', function() {
     }).then((result) => {
       expect(result).to.deep.equal({
         headers: {
-          'Content-Type': 'text/plain',
+          'content-type': 'text/plain',
           'x-test': 'test',
           'x-timestamp': 1,
-          'Cache-Control': 'max-age=0',
-          'Expires': result.headers.Expires,
-          'Last-Modified': result.headers['Last-Modified']
+          'cache-control': 'max-age=0',
+          'expires': result.headers.expires,
+          'last-modified': result.headers['last-modified']
         }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
     })
   }) // end it
@@ -272,12 +272,12 @@ describe('SendFile Tests:', function() {
     }).then((result) => {
       expect(result).to.deep.equal({
         headers: {
-          'Content-Type': 'text/plain',
+          'content-type': 'text/plain',
           'x-test': 'test',
           'x-timestamp': 1,
-          'Cache-Control': 'private, max-age=0',
-          'Expires': result.headers.Expires,
-          'Last-Modified': result.headers['Last-Modified']
+          'cache-control': 'private, max-age=0',
+          'expires': result.headers.expires,
+          'last-modified': result.headers['last-modified']
         }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
     })
   }) // end it
@@ -290,10 +290,10 @@ describe('SendFile Tests:', function() {
     }).then((result) => {
       expect(result).to.deep.equal({
         headers: {
-          'Content-Type': 'text/plain',
-          'Cache-Control': 'max-age=0',
-          'Expires': result.headers.Expires,
-          'Last-Modified': 'Mon, 01 Jan 2018 00:00:00 GMT'
+          'content-type': 'text/plain',
+          'cache-control': 'max-age=0',
+          'expires': result.headers.expires,
+          'last-modified': 'Mon, 01 Jan 2018 00:00:00 GMT'
         }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
     })
   }) // end it
@@ -307,9 +307,9 @@ describe('SendFile Tests:', function() {
     }).then((result) => {
       expect(result).to.deep.equal({
         headers: {
-          'Content-Type': 'text/plain',
-          'Cache-Control': 'max-age=0',
-          'Expires': result.headers.Expires
+          'content-type': 'text/plain',
+          'cache-control': 'max-age=0',
+          'expires': result.headers.expires
         }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
     })
   }) // end it
@@ -323,8 +323,8 @@ describe('SendFile Tests:', function() {
     }).then((result) => {
       expect(result).to.deep.equal({
         headers: {
-          'Content-Type': 'text/plain',
-          'Last-Modified': result.headers['Last-Modified']
+          'content-type': 'text/plain',
+          'last-modified': result.headers['last-modified']
         }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
     })
   }) // end it
@@ -338,9 +338,9 @@ describe('SendFile Tests:', function() {
     }).then((result) => {
       expect(result).to.deep.equal({
         headers: {
-          'Content-Type': 'text/plain',
-          'Cache-Control': 'no-cache, no-store',
-          'Last-Modified': result.headers['Last-Modified']
+          'content-type': 'text/plain',
+          'cache-control': 'no-cache, no-store',
+          'last-modified': result.headers['last-modified']
         }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
     })
   }) // end it
@@ -354,11 +354,11 @@ describe('SendFile Tests:', function() {
     }).then((result) => {
       expect(result).to.deep.equal({
         headers: {
-          'Content-Type': 'text/plain',
-          'Cache-Control': 'max-age=0',
-          'Expires': result.headers['Expires'],
-          'ETag': '"ae771fbbba6a74eeeb77754355831713"',
-          'Last-Modified': result.headers['Last-Modified']
+          'content-type': 'text/plain',
+          'cache-control': 'max-age=0',
+          'expires': result.headers['expires'],
+          'etag': '"ae771fbbba6a74eeeb77754355831713"',
+          'last-modified': result.headers['last-modified']
         }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
     })
   }) // end it
@@ -371,11 +371,11 @@ describe('SendFile Tests:', function() {
     }).then((result) => {
       expect(result).to.deep.equal({
         headers: {
-          'Content-Type': 'text/plain',
-          'Cache-Control': 'max-age=0',
-          'Expires': result.headers['Expires'],
-          'ETag': '"ae771fbbba6a74eeeb77754355831713"',
-          'Last-Modified': result.headers['Last-Modified']
+          'content-type': 'text/plain',
+          'cache-control': 'max-age=0',
+          'expires': result.headers['expires'],
+          'etag': '"ae771fbbba6a74eeeb77754355831713"',
+          'last-modified': result.headers['last-modified']
         }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
     })
   }) // end it
@@ -388,7 +388,7 @@ describe('SendFile Tests:', function() {
     }).then((result) => {
       expect(result).to.deep.equal({
         headers: {
-          'Content-Type': 'application/json',
+          'content-type': 'application/json',
           'x-error': 'true'
         }, statusCode: 500, body: '{"error":"NoSuchKey: The specified key does not exist."}', isBase64Encoded: false })
     })

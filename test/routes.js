@@ -171,7 +171,7 @@ describe('Route Tests:', function() {
       let result = await new Promise((resolve,reject) => api.run(_event,{}, (err,res) => { resolve(res) }))
 
       expect(result).to.deep.equal({
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'content-type': 'application/json' },
         statusCode: 200,
         body: '{"method":"get","status":"ok"}',
         isBase64Encoded: false
@@ -180,7 +180,7 @@ describe('Route Tests:', function() {
       // return new Promise((resolve,reject) => {
       //   api.run(_event,{},function(err,res) { resolve(res) })
       // }).then((result) => {
-      //   expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+      //   expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
       // })
     }) // end it
 
@@ -190,7 +190,7 @@ describe('Route Tests:', function() {
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -200,7 +200,7 @@ describe('Route Tests:', function() {
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -210,7 +210,7 @@ describe('Route Tests:', function() {
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -221,7 +221,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         //console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -232,7 +232,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -244,7 +244,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         //console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -255,7 +255,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         //console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -267,7 +267,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -286,7 +286,7 @@ describe('Route Tests:', function() {
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -296,7 +296,7 @@ describe('Route Tests:', function() {
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -306,7 +306,7 @@ describe('Route Tests:', function() {
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","param":"123"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","param":"123"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -317,7 +317,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         //console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -328,7 +328,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -339,7 +339,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -350,7 +350,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -361,7 +361,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -372,7 +372,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -383,7 +383,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -394,7 +394,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -405,7 +405,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -424,7 +424,7 @@ describe('Route Tests:', function() {
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -434,7 +434,7 @@ describe('Route Tests:', function() {
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -444,7 +444,7 @@ describe('Route Tests:', function() {
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","param":"123"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","param":"123"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -455,7 +455,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         //console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -466,7 +466,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -478,7 +478,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -489,7 +489,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -500,7 +500,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -511,7 +511,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -522,7 +522,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -533,7 +533,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -545,7 +545,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -563,7 +563,7 @@ describe('Route Tests:', function() {
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"delete","status":"ok","param":"123"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"delete","status":"ok","param":"123"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -574,7 +574,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"delete","status":"ok","params":{"test":"123","test2":"456"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"delete","status":"ok","params":{"test":"123","test2":"456"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -586,7 +586,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -605,7 +605,7 @@ describe('Route Tests:', function() {
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -615,7 +615,7 @@ describe('Route Tests:', function() {
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -625,7 +625,7 @@ describe('Route Tests:', function() {
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","param":"123"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","param":"123"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -636,7 +636,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         //console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -647,7 +647,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","params":{"test":"123","test2":"456"},"query":"321"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -658,7 +658,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/*"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/*"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -669,7 +669,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/*"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/*"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -680,7 +680,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/*"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/*"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -691,7 +691,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         //console.log(JSON.stringify(api._routes,null,2));
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/*"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/*"}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -702,7 +702,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         //console.log(JSON.stringify(api._routes,null,2));
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/:param1/*","params":{"param1":"param1"}}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/:param1/*","params":{"param1":"param1"}}', isBase64Encoded: false })
       })
     }) // end it
 
@@ -713,7 +713,7 @@ describe('Route Tests:', function() {
         api.run(_event,{},function(err,res) { resolve(res) })
       }).then((result) => {
         // console.log(result);
-        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
+        expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
       })
     }) // end it
 

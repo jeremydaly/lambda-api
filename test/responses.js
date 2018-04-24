@@ -90,7 +90,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"object":true}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"object":true}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -100,7 +100,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '123', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '123', isBase64Encoded: false })
     })
   }) // end it
 
@@ -110,7 +110,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '[1,2,3]', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '[1,2,3]', isBase64Encoded: false })
     })
   }) // end it
 
@@ -120,7 +120,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'this is a string', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: 'this is a string', isBase64Encoded: false })
     })
   }) // end it
 
@@ -130,7 +130,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '', isBase64Encoded: false })
     })
   }) // end it
 
@@ -140,7 +140,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'callback({"foo":"bar"})', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: 'callback({"foo":"bar"})', isBase64Encoded: false })
     })
   }) // end it
 
@@ -150,7 +150,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'foo({"foo":"bar"})', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: 'foo({"foo":"bar"})', isBase64Encoded: false })
     })
   }) // end it
 
@@ -161,7 +161,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api2.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'bar({"foo":"bar"})', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: 'bar({"foo":"bar"})', isBase64Encoded: false })
     })
   }) // end it
 
@@ -171,7 +171,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: 'foo_bar({"foo":"bar"})', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: 'foo_bar({"foo":"bar"})', isBase64Encoded: false })
     })
   }) // end it
 
@@ -181,7 +181,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html', 'Location': 'http://www.github.com' }, statusCode: 200, body: 'Location header set', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'text/html', 'location': 'http://www.github.com' }, statusCode: 200, body: 'Location header set', isBase64Encoded: false })
     })
   }) // end it
 
@@ -191,7 +191,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html', 'Location': 'http://www.github.com?foo=bar%20with%20space' }, statusCode: 200, body: 'Location header set', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'text/html', 'location': 'http://www.github.com?foo=bar%20with%20space' }, statusCode: 200, body: 'Location header set', isBase64Encoded: false })
     })
   }) // end it
 
@@ -201,7 +201,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html', 'Location': 'http://www.github.com' }, statusCode: 302, body: '<p>302 Redirecting to <a href="http://www.github.com">http://www.github.com</a></p>', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'text/html', 'location': 'http://www.github.com' }, statusCode: 302, body: '<p>302 Redirecting to <a href="http://www.github.com">http://www.github.com</a></p>', isBase64Encoded: false })
     })
   }) // end it
 
@@ -211,7 +211,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html', 'Location': 'http://www.github.com' }, statusCode: 301, body: '<p>301 Redirecting to <a href="http://www.github.com">http://www.github.com</a></p>', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'text/html', 'location': 'http://www.github.com' }, statusCode: 301, body: '<p>301 Redirecting to <a href="http://www.github.com">http://www.github.com</a></p>', isBase64Encoded: false })
     })
   }) // end it
 
@@ -221,7 +221,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 500, body: '{"error":"310 is an invalid redirect status code"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 500, body: '{"error":"310 is an invalid redirect status code"}', isBase64Encoded: false })
     })
   }) // end it
 
@@ -231,7 +231,7 @@ describe('Response Tests:', function() {
     return new Promise((resolve,reject) => {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'text/html', 'Location': 'http://www.github.com?foo=bar&bat=baz%3Cscript%3Ealert(\'not%20good\')%3C/script%3E' }, statusCode: 302, body: '<p>302 Redirecting to <a href=\"http://www.github.com?foo=bar&amp;bat=baz&lt;script&gt;alert(&#39;not good&#39;)&lt;/script&gt;\">http://www.github.com?foo=bar&amp;bat=baz&lt;script&gt;alert(&#39;not good&#39;)&lt;/script&gt;</a></p>', isBase64Encoded: false })
+      expect(result).to.deep.equal({ headers: { 'content-type': 'text/html', 'location': 'http://www.github.com?foo=bar&bat=baz%3Cscript%3Ealert(\'not%20good\')%3C/script%3E' }, statusCode: 302, body: '<p>302 Redirecting to <a href=\"http://www.github.com?foo=bar&amp;bat=baz&lt;script&gt;alert(&#39;not good&#39;)&lt;/script&gt;\">http://www.github.com?foo=bar&amp;bat=baz&lt;script&gt;alert(&#39;not good&#39;)&lt;/script&gt;</a></p>', isBase64Encoded: false })
     })
   }) // end it
 
