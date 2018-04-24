@@ -26,6 +26,8 @@ module.exports.handler = (event, context, callback) => {
 }
 ```
 
+For a full tutorial see [How To: Build a Serverless API with Serverless, AWS Lambda and Lambda API](https://www.jeremydaly.com/build-serverless-api-serverless-aws-lambda-lambda-api/).
+
 ## Why Another Web Framework?
 Express.js, Fastify, Koa, Restify, and Hapi are just a few of the many amazing web frameworks out there for Node.js. So why build yet another one when there are so many great options already? One word: **DEPENDENCIES**.
 
@@ -64,12 +66,12 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
 
 ### v0.5: Remove Bluebird Promises Dependency
-Now that AWS Lambda supports Node v8.10, asynchronous operations can be handled more efficiently with `async/await` rather than with promise. The core Lambda API execution engine has be rewritten to take advantage of `async/await`, which means we no longer need to depend on Bluebird. We now have **ZERO** dependencies.
+Now that AWS Lambda supports Node v8.10, asynchronous operations can be handled more efficiently with `async/await` rather than with promises. The core Lambda API execution engine has been rewritten to take advantage of `async/await`, which means we no longer need to depend on Bluebird. We now have **ZERO** dependencies.
 
 ### v0.4: Binary Support
 Binary support has been added! This allows you to both send and receive binary files from API Gateway. For more information, see [Enabling Binary Support](#enabling-binary-support).
 
-### v0.3: Breaking Change
+### v0.3: New Instantiation Method
 Please note that the invocation method has been changed. You no longer need to use the `new` keyword to instantiate Lambda API. It can now be instantiated in one line:
 
  ```javascript
@@ -82,7 +84,7 @@ Please note that the invocation method has been changed. You no longer need to u
 const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ```
 
-**IMPORTANT:** Upgrading to v0.3.0 requires either removing the `new` keyword or switching to the one-line format. This provides more flexibility for instantiating Lambda API in future releases.
+**IMPORTANT:** Upgrading from <v0.3.0 requires either removing the `new` keyword or switching to the one-line format. This provides more flexibility for instantiating Lambda API in future releases.
 
 ## Lambda Proxy Integration
 Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled looks like this:
