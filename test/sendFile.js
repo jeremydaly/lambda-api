@@ -48,7 +48,6 @@ api.get('/sendfile/err', function(req,res) {
 
 api.get('/sendfile/test', function(req,res) {
   res.sendFile('test/test.txt' + (req.query.test ? req.query.test : ''), err => {
-
     // Return a promise
     return Promise.try(() => {
       for(let i = 0; i<40000000; i++) {}
@@ -60,6 +59,23 @@ api.get('/sendfile/test', function(req,res) {
       } else {
         // else set custom response code
         res.status(201)
+      }
+    })
+
+  })
+})
+
+api.get('/sendfile/error', function(req,res) {
+  res.sendFile('test/test.txtx', err => {
+
+    // Return a promise
+    return Promise.try(() => {
+      for(let i = 0; i<40000000; i++) {}
+      return true
+    }).then((x) => {
+      if (err) {
+        // log error
+        return true
       }
     })
 
@@ -224,6 +240,18 @@ describe('SendFile Tests:', function() {
       api.run(_event,{},function(err,res) { resolve(res) })
     }).then((result) => {
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json','x-error': 'true' }, statusCode: 501, body: '{"error":"Custom File Error"}', isBase64Encoded: false })
+    })
+  }) // end it
+
+
+
+  it('Text file error w/ callback override (promise - no end)', function() {
+    let _event = Object.assign({},event,{ path: '/sendfile/error', queryStringParameters: { test: 'x' } })
+
+    return new Promise((resolve,reject) => {
+      api.run(_event,{},function(err,res) { resolve(res) })
+    }).then((result) => {
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json','x-error': 'true' }, statusCode: 500, body: result.body, isBase64Encoded: false })
     })
   }) // end it
 
