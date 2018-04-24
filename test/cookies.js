@@ -1,6 +1,5 @@
 'use strict';
 
-const Promise = require('bluebird') // Promise library
 const expect = require('chai').expect // Assertion library
 
 // Init API instance
@@ -121,201 +120,149 @@ api.get('/cookieClearOptions', function(req,res) {
 describe('Cookie Tests:', function() {
 
   describe("Set", function() {
-    it('Basic Session Cookie', function() {
+    it('Basic Session Cookie', async function() {
       let _event = Object.assign({},event,{ path: '/cookie' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=value; Path=/'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=value; Path=/'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
-    it('Basic Session Cookie (encoded value)', function() {
+    it('Basic Session Cookie (encoded value)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieEncoded' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=http%3A%2F%2F%20%5B%5D%20foo%3Bbar; Path=/'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=http%3A%2F%2F%20%5B%5D%20foo%3Bbar; Path=/'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
 
-    it('Basic Session Cookie (object value)', function() {
+    it('Basic Session Cookie (object value)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieObject' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=%7B%22foo%22%3A%22bar%22%7D; Path=/'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=%7B%22foo%22%3A%22bar%22%7D; Path=/'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
 
-    it('Basic Session Cookie (non-string name)', function() {
+    it('Basic Session Cookie (non-string name)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieNonString' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': '123=value; Path=/'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': '123=value; Path=/'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
 
-    it('Permanent Cookie (set expires)', function() {
+    it('Permanent Cookie (set expires)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieExpire' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=value; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=value; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
-    it('Permanent Cookie (set maxAge)', function() {
+    it('Permanent Cookie (set maxAge)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieMaxAge' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=value; MaxAge=3600; Expires='+ new Date(Date.now()+3600000).toUTCString() + '; Path=/'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=value; MaxAge=3600; Expires='+ new Date(Date.now()+3600000).toUTCString() + '; Path=/'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
-    it('Permanent Cookie (set domain)', function() {
+    it('Permanent Cookie (set domain)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieDomain' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
-    it('Permanent Cookie (set httpOnly)', function() {
+    it('Permanent Cookie (set httpOnly)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieHttpOnly' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; HttpOnly; Path=/'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; HttpOnly; Path=/'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
-    it('Permanent Cookie (set secure)', function() {
+    it('Permanent Cookie (set secure)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieSecure' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; Secure'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; Secure'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
-    it('Permanent Cookie (set path)', function() {
+    it('Permanent Cookie (set path)', async function() {
       let _event = Object.assign({},event,{ path: '/cookiePath' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/test; Secure'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/test; Secure'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
-    it('Permanent Cookie (set sameSite - true)', function() {
+    it('Permanent Cookie (set sameSite - true)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieSameSiteTrue' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Strict'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Strict'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
-    it('Permanent Cookie (set sameSite - false)', function() {
+    it('Permanent Cookie (set sameSite - false)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieSameSiteFalse' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Lax'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Lax'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
-    it('Permanent Cookie (set sameSite - string)', function() {
+    it('Permanent Cookie (set sameSite - string)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieSameSiteString' })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Test'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Test'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
@@ -324,99 +271,79 @@ describe('Cookie Tests:', function() {
 
   describe("Parse", function() {
 
-    it('Parse single cookie', function() {
+    it('Parse single cookie', async function() {
       let _event = Object.assign({},event,{
         path: '/cookieParse',
         headers: {
           Cookie: "test=some%20value"
         }
       })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-          }, statusCode: 200, body: '{"cookies":{"test":"some value"}}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+        }, statusCode: 200, body: '{"cookies":{"test":"some value"}}', isBase64Encoded: false
       })
     }) // end it
 
-    it('Parse & decode two cookies', function() {
+    it('Parse & decode two cookies', async function() {
       let _event = Object.assign({},event,{
         path: '/cookieParse',
         headers: {
           Cookie: "test=some%20value; test2=%7B%22foo%22%3A%22bar%22%7D"
         }
       })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-          }, statusCode: 200, body: '{\"cookies\":{\"test\":\"some value\",\"test2\":{\"foo\":\"bar\"}}}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+        }, statusCode: 200, body: '{\"cookies\":{\"test\":\"some value\",\"test2\":{\"foo\":\"bar\"}}}', isBase64Encoded: false
       })
     }) // end it
 
 
-    it('Parse & decode multiple cookies', function() {
+    it('Parse & decode multiple cookies', async function() {
       let _event = Object.assign({},event,{
         path: '/cookieParse',
         headers: {
           Cookie: "test=some%20value; test2=%7B%22foo%22%3A%22bar%22%7D; test3=domain"
         }
       })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-          }, statusCode: 200, body: '{\"cookies\":{\"test\":\"some value\",\"test2\":{\"foo\":\"bar\"},\"test3\":\"domain\"}}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+        }, statusCode: 200, body: '{\"cookies\":{\"test\":\"some value\",\"test2\":{\"foo\":\"bar\"},\"test3\":\"domain\"}}', isBase64Encoded: false
       })
     }) // end it
 
   }) // end parse tests
 
-  describe("Clear", function() {
+  describe("Clear", async function() {
 
-    it('Clear cookie (no options)', function() {
+    it('Clear cookie (no options)', async function() {
       let _event = Object.assign({},event,{
         path: '/cookieClear'
       })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=-1; Path=/'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=-1; Path=/'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
-    it('Clear cookie (w/ options)', function() {
+    it('Clear cookie (w/ options)', async function() {
       let _event = Object.assign({},event,{
         path: '/cookieClearOptions'
       })
-
-      return new Promise((resolve,reject) => {
-        api.run(_event,{},function(err,res) { resolve(res) })
-      }).then((result) => {
-        expect(result).to.deep.equal({
-          headers: {
-            'content-type': 'application/json',
-            'set-cookie': 'test=; Domain=test.com; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; MaxAge=-1; Path=/; Secure'
-          }, statusCode: 200, body: '{}', isBase64Encoded: false
-        })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': 'test=; Domain=test.com; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; MaxAge=-1; Path=/; Secure'
+        }, statusCode: 200, body: '{}', isBase64Encoded: false
       })
     }) // end it
 
