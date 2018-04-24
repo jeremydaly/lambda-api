@@ -6,7 +6,7 @@
 
 ### Lightweight web framework for your serverless applications
 
-Lambda API is a lightweight web framework for use with AWS API Gateway and AWS Lambda using Lambda Proxy integration. This closely mirrors (and is based on) other web frameworks like Express.js and Fastify, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
+Lambda API is a lightweight web framework for use with AWS API Gateway and AWS Lambda using Lambda Proxy Integration. This closely mirrors (and is based on) other web frameworks like Express.js and Fastify, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
 
 ## Simple Example
 
@@ -31,14 +31,45 @@ Express.js, Fastify, Koa, Restify, and Hapi are just a few of the many amazing w
 
 These other frameworks are extremely powerful, but that benefit comes with the steep price of requiring several additional Node.js modules. Not only is this a bit of a security issue (see Beware of Third-Party Packages in [Securing Serverless](https://www.jeremydaly.com/securing-serverless-a-newbies-guide/)), but it also adds bloat to your codebase, filling your `node_modules` directory with a ton of extra files. For serverless applications that need to load quickly, all of these extra dependencies slow down execution and use more memory than necessary. Express.js has **30 dependencies**, Fastify has **12**, and Hapi has **17**! These numbers don't even include their dependencies' dependencies.
 
-Lambda API has **ZERO** dependencies. Now that AWS Lambda supports Node v8.10, we can use `async / await` to serialize asynchronous processes.
+Lambda API has **ZERO** dependencies.
 
 Lambda API was written to be extremely lightweight and built specifically for serverless applications using AWS Lambda. It provides support for API routing, serving up HTML pages, issuing redirects, serving binary files and much more. It has a powerful middleware and error handling system, allowing you to implement everything from custom authentication to complex logging systems. Best of all, it was designed to work with Lambda's Proxy Integration, automatically handling all the interaction with API Gateway for you. It parses **REQUESTS** and formats **RESPONSES** for you, allowing you to focus on your application's core functionality, instead of fiddling with inputs and outputs.
 
-## New in v0.4 - Binary Support!
+
+## Installation
+```
+npm i lambda-api --save
+```
+
+## Requirements
+- AWS Lambda running **Node 8.10+**
+- AWS Gateway using [Proxy Integration](#lambda-proxy-integration)
+
+## Configuration
+Require the `lambda-api` module into your Lambda handler script and instantiate it. You can initialize the API with the following options:
+
+| Property | Type | Description |
+| -------- | ---- | ----------- |
+| version  | `String` | Version number accessible via the `REQUEST` object |
+| base  | `String` | Base path for all routes, e.g. `base: 'v1'` would prefix all routes with `/v1` |
+| callbackName | `String` | Override the default callback query parameter name for JSONP calls |
+| mimeTypes | `Object` | Name/value pairs of additional MIME types to be supported by the `type()`. The key should be the file extension (without the `.`) and the value should be the expected MIME type, e.g. `application/json` |
+
+```javascript
+// Require the framework and instantiate it with optional version and base parameters
+const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
+```
+
+## Recent Updates
+For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
+
+### v0.5: Remove Bluebird Promises Dependency
+Now that AWS Lambda supports Node v8.10, asynchronous operations can be handled more efficiently with `async/await` rather than with promise. The core Lambda API execution engine has be rewritten to take advantage of `async/await`, which means we no longer need to depend on Bluebird. We now have **ZERO** dependencies.
+
+### v0.4: Binary Support
 Binary support has been added! This allows you to both send and receive binary files from API Gateway. For more information, see [Enabling Binary Support](#enabling-binary-support).
 
-## Breaking Change in v0.3
+### v0.3: Breaking Change
 Please note that the invocation method has been changed. You no longer need to use the `new` keyword to instantiate Lambda API. It can now be instantiated in one line:
 
  ```javascript
@@ -53,7 +84,7 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 
 **IMPORTANT:** Upgrading to v0.3.0 requires either removing the `new` keyword or switching to the one-line format. This provides more flexibility for instantiating Lambda API in future releases.
 
-## Lambda Proxy integration
+## Lambda Proxy Integration
 Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled looks like this:
 
 ```javascript
@@ -116,31 +147,6 @@ Lambda Proxy Integration is an option in API Gateway that allows the details of 
 ```
 
 The API automatically parses this information to create a normalized `REQUEST` object. The request can then be routed using the APIs methods.
-
-## Install
-
-```
-npm i lambda-api --save
-```
-
-## Requirements
-- AWS Lambda running Node 8.10+
-
-## Configuration
-
-Require the `lambda-api` module into your Lambda handler script and instantiate it. You can initialize the API with the following options:
-
-| Property | Type | Description |
-| -------- | ---- | ----------- |
-| version  | `String` | Version number accessible via the `REQUEST` object |
-| base  | `String` | Base path for all routes, e.g. `base: 'v1'` would prefix all routes with `/v1` |
-| callbackName | `String` | Override the default callback query parameter name for JSONP calls |
-| mimeTypes | `Object` | Name/value pairs of additional MIME types to be supported by the `type()`. The key should be the file extension (without the `.`) and the value should be the expected MIME type, e.g. `application/json` |
-
-```javascript
-// Require the framework and instantiate it with optional version and base parameters
-const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
-```
 
 ## Routes and HTTP Methods
 
@@ -525,7 +531,7 @@ Path parameters act as wildcards that capture the value into the `params` object
 A path can contain as many parameters as you want. E.g. `/users/:param1/:param2/:param3`.
 
 ## Wildcard Routes
-Wildcard routes are supported for methods that **match an existing route**. E.g. `options` on an existing `get` route. Wildcards only work at the *end of a route definition* such as `/*` or `/users/*`. Wildcards within a path, e.g. `/users/*/posts` is not supported. Wildcard routes do support parameters, so `/users/:id/*` would capture the `:id` parameter in your wildcard handler.
+Wildcard routes are supported for methods that **match an existing route**. E.g. `options` on an existing `get` route. Wildcards only work at the *end of a route definition* such as `/*` or `/users/*`. Wildcards within a path, e.g. `/users/*/posts` are not supported. Wildcard routes do support parameters, so `/users/:id/*` would capture the `:id` parameter in your wildcard handler.
 
 Wildcard routes will match deep paths if the route exists. For example, an `OPTIONS` method for path `/users/*` would match `/users/:id/posts/latest` if that path was defined by another method.
 
