@@ -252,7 +252,7 @@ api.get('/users', function(req,res) {
 })
 ```
 
-### header(field, value)
+### header(key, value)
 The `header` method allows for you to set additional headers to return to the client. By default, just the `Content-Type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two string arguments. The first is the name of the header and then second is the value.
 
 ```javascript
@@ -261,8 +261,16 @@ api.get('/users', function(req,res) {
 })
 ```
 
-### getHeader([field])
-Retrieve the current header object or pass the optional `field` parameter and retrieve a specific header value. `field` is case insensitive.
+**NOTE:** Header keys are converted and stored as lowercase in compliance with [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540)) for HTTP/2. Header convenience methods (`getHeader`, `hasHeader`, and `removeHeader`) automatically ignore case.
+
+### getHeader([key])
+Retrieve the current header object or pass the optional `key` parameter and retrieve a specific header value. `key` is case insensitive.
+
+### hasHeader(key)
+Returns a boolean indicating the existence of `key` in the response headers. `key` is case insensitive.
+
+### removeHeader(key)
+Removes header matching `key` from the response headers. `key` is case insensitive. This method is chainable.
 
 ### send(body)
 The `send` methods triggers the API to return data to the API Gateway. The `send` method accepts one parameter and sends the contents through as is, e.g. as an object, string, integer, etc. AWS Gateway expects a string, so the data should be converted accordingly.
