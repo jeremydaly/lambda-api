@@ -8,8 +8,6 @@
 
 Lambda API is a lightweight web framework for use with AWS API Gateway and AWS Lambda using Lambda Proxy integration. This closely mirrors (and is based on) other routers like Express.js, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
 
-**IMPORTANT:** There is a [breaking change](#breaking-change-in-v03) in v0.3 that affects instantiation.
-
 ## Simple Example
 
 ```javascript
@@ -33,7 +31,7 @@ Express.js, Fastify, Koa, Restify, and Hapi are just a few of the many amazing w
 
 These other frameworks are extremely powerful, but that benefit comes with the steep price of requiring several additional Node.js modules. Not only is this a bit of a security issue (see Beware of Third-Party Packages in [Securing Serverless](https://www.jeremydaly.com/securing-serverless-a-newbies-guide/)), but it also adds bloat to your codebase, filling your `node_modules` directory with a ton of extra files. For serverless applications that need to load quickly, all of these extra dependencies slow down execution and use more memory than necessary. Express.js has **30 dependencies**, Fastify has **12**, and Hapi has **17**! These numbers don't even include their dependencies' dependencies.
 
-Lambda API has **ONE** dependency. We use [Bluebird](http://bluebirdjs.com/docs/getting-started.html) promises to serialize asynchronous execution. We use promises because AWS Lambda currently only supports Node v6.10, which doesn't support `async / await`. Bluebird is faster than native promise and it has **no dependencies** either, making it the perfect choice for Lambda API.
+Lambda API has **ZERO** dependencies. Now that AWS Lambda supports Node v8.10, we can use `async / await` to serialize asynchronous processes.
 
 Lambda API was written to be extremely lightweight and built specifically for serverless applications using AWS Lambda. It provides support for API routing, serving up HTML pages, issuing redirects, serving binary files and much more. It has a powerful middleware and error handling system, allowing you to implement everything from custom authentication to complex logging systems. Best of all, it was designed to work with Lambda's Proxy Integration, automatically handling all the interaction with API Gateway for you. It parses **REQUESTS** and formats **RESPONSES** for you, allowing you to focus on your application's core functionality, instead of fiddling with inputs and outputs.
 
@@ -164,10 +162,12 @@ api.delete('/users', function(req,res) {
 Additional methods are support by calling the `METHOD` method with three arguments. The first argument is the HTTP method, a *route*, and a function that accepts a `REQUEST` and a `RESPONSE` argument.
 
 ```javascript
-api.METHOD('patch','/users', function(req,res) {
+api.METHOD('trace','/users', function(req,res) {
   // do something
 })
 ```
+
+All `GET` methods have a `HEAD` alias that executes the `GET` request but returns a blank `body`. `GET` requests should be idempotent with no side effects.
 
 ## Route Prefixing
 
@@ -261,7 +261,7 @@ api.get('/users', function(req,res) {
 })
 ```
 
-**NOTE:** Header keys are converted and stored as lowercase in compliance with [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540)) for HTTP/2. Header convenience methods (`getHeader`, `hasHeader`, and `removeHeader`) automatically ignore case.
+**NOTE:** Header keys are converted and stored as lowercase in compliance with [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540) for HTTP/2. Header convenience methods (`getHeader`, `hasHeader`, and `removeHeader`) automatically ignore case.
 
 ### getHeader([key])
 Retrieve the current header object or pass the optional `key` parameter and retrieve a specific header value. `key` is case insensitive.
@@ -499,7 +499,7 @@ res.sendFile(<Buffer>, 'my-file.docx', { maxAge: 3600000 }, (err) => {
 })
 ```
 
-The `callback` function supports promises, allowing you to perform additional tasks *after* the file is successfully loaded from the source. This can be used to perform additional synchronous tasks before returning control to the API execution.
+The `callback` function supports returning a promise, allowing you to perform additional tasks *after* the file is successfully loaded from the source. This can be used to perform additional synchronous tasks before returning control to the API execution.
 
 **NOTE:** In order to access S3 files, your Lambda function must have `GetObject` access to the files you're attempting to access.
 
@@ -573,7 +573,7 @@ api.finally(function(req,res) {
 })
 ```
 
-The `RESPONSE` **CANNOT** be manipulated since it has already been generated. Only one `finally()` method can be defined. This uses the Bluebird `finally()` method internally and will execute after properly handled errors as well.
+The `RESPONSE` **CANNOT** be manipulated since it has already been generated. Only one `finally()` method can be defined and will execute after properly handled errors as well.
 
 ## Error Handling
 The API has simple built-in error handling that will log the error using `console.log`. These will be available via CloudWatch Logs. By default, errors will trigger a JSON response with the error message. If you would like to define additional error handling, you can define them using the `use` method similar to middleware. Error handling middleware must be defined as a function with **four** arguments instead of three like normal middleware. An additional `error` parameter must be added as the first parameter. This will contain the error object generated.
@@ -621,11 +621,6 @@ api.app({
   'namespace2': require('./lib/ns2-functions.js')
 })
 ```
-
-## Promises
-The API uses Bluebird promises to manage asynchronous script execution. The API will wait for a request ending call before returning data back to the client. Middleware will wait for the `next()` callback before proceeding to the next step.
-
-**NOTE:** AWS Lambda currently only supports Node v6.10, which doesn't support `async / await`. If you'd like to use `async / await`, you'll need to polyfill.
 
 ## CORS Support
 CORS can be implemented using the [wildcard routes](#wildcard-routes) feature. A typical implementation would be as follows:
