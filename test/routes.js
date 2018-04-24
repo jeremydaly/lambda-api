@@ -131,13 +131,25 @@ api.put('/test/form', function(req,res) {
   res.status(200).json({ method: 'put', status: 'ok', body: req.body })
 })
 
+api.METHOD('TEST','/test/:param1/queryx', function(req,res) {
+  res.status(200).json({ method: 'test', status: 'ok', body: req.body })
+})
+
+api.METHOD('TEST','/test_options2/:param1/test', function(req,res) {
+  res.status(200).json({ method: 'test', status: 'ok', body: req.body })
+})
+
 api.options('/*', function(req,res) {
   res.status(200).json({ method: 'options', status: 'ok', path: '/*'})
 })
 
-// api.options('/test_options2/*', function(req,res) {
-//   res.status(200).json({ method: 'options', status: 'ok', path: '/test_options2/*'})
-// })
+api.options('/test_options2/*', function(req,res) {
+  res.status(200).json({ method: 'options', status: 'ok', path: '/test_options2/*'})
+})
+
+api.options('/test_options2/:param1/*', function(req,res) {
+  res.status(200).json({ method: 'options', status: 'ok', path: '/test_options2/:param1/*', params:req.params})
+})
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
@@ -650,8 +662,19 @@ describe('Route Tests:', function() {
       })
     }) // end it
 
-    it('Wildcard with parameter: /test_options2/123', function() {
+    it('Wildcard with path: /test_options2/123', function() {
       let _event = Object.assign({},event,{ path: '/test_options2/123', httpMethod: 'options' })
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        // console.log(result);
+        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/*"}', isBase64Encoded: false })
+      })
+    }) // end it
+
+    it('Wildcard with deep path: /test/param1/queryx', function() {
+      let _event = Object.assign({},event,{ path: '/test/param1/queryx', httpMethod: 'options' })
 
       return new Promise((resolve,reject) => {
         api.run(_event,{},function(err,res) { resolve(res) })
@@ -661,16 +684,27 @@ describe('Route Tests:', function() {
       })
     }) // end it
 
-    // it('Nested Wildcard: /test_options2', function() {
-    //   let _event = Object.assign({},event,{ path: '/test_options2/test', httpMethod: 'options' })
-    //
-    //   return new Promise((resolve,reject) => {
-    //     api.run(_event,{},function(err,res) { resolve(res) })
-    //   }).then((result) => {
-    //     // console.log(result);
-    //     expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/*"}' })
-    //   })
-    // }) // end it
+    it('Nested Wildcard: /test_options2', function() {
+      let _event = Object.assign({},event,{ path: '/test_options2/test', httpMethod: 'options' })
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        //console.log(JSON.stringify(api._routes,null,2));
+        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/*"}', isBase64Encoded: false })
+      })
+    }) // end it
+
+    it('Nested Wildcard with parameters: /test_options2/param1/test', function() {
+      let _event = Object.assign({},event,{ path: '/test_options2/param1/test', httpMethod: 'options' })
+
+      return new Promise((resolve,reject) => {
+        api.run(_event,{},function(err,res) { resolve(res) })
+      }).then((result) => {
+        //console.log(JSON.stringify(api._routes,null,2));
+        expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","path":"/test_options2/:param1/*","params":{"param1":"param1"}}', isBase64Encoded: false })
+      })
+    }) // end it
 
     it('Missing path: /not_found', function() {
       let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'options' })
@@ -683,6 +717,6 @@ describe('Route Tests:', function() {
       })
     }) // end it
 
-  }) // end DELETE tests
+  }) // end OPTIONS tests
 
 }) // end ROUTE tests
