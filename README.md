@@ -6,7 +6,7 @@
 
 ### Lightweight web framework for your serverless applications
 
-Lambda API is a lightweight web framework for use with AWS API Gateway and AWS Lambda using Lambda Proxy integration. This closely mirrors (and is based on) other routers like Express.js, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
+Lambda API is a lightweight web framework for use with AWS API Gateway and AWS Lambda using Lambda Proxy integration. This closely mirrors (and is based on) other web frameworks like Express.js and Fastify, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
 
 ## Simple Example
 
