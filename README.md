@@ -15,8 +15,8 @@ Lambda API is a lightweight web framework for use with AWS API Gateway and AWS L
 const api = require('lambda-api')()
 
 // Define a route
-api.get('/test', function(req,res) {
-  res.status(200).json({ status: 'ok' })
+api.get('/status', (req,res) => {
+  res.json({ status: 'ok' })
 })
 
 // Declare your Lambda handler
@@ -85,70 +85,6 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ```
 
 **IMPORTANT:** Upgrading from <v0.3.0 requires either removing the `new` keyword or switching to the one-line format. This provides more flexibility for instantiating Lambda API in future releases.
-
-## Lambda Proxy Integration
-Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled looks like this:
-
-```javascript
-{
-  "resource": "/v1/posts",
-  "path": "/v1/posts",
-  "httpMethod": "GET",
-  "headers": {
-    "Authorization": "Bearer ...",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Encoding": "gzip, deflate",
-    "Accept-Language": "en-us",
-    "cache-control": "max-age=0",
-    "CloudFront-Forwarded-Proto": "https",
-    "CloudFront-Is-Desktop-Viewer": "true",
-    "CloudFront-Is-Mobile-Viewer": "false",
-    "CloudFront-Is-SmartTV-Viewer": "false",
-    "CloudFront-Is-Tablet-Viewer": "false",
-    "CloudFront-Viewer-Country": "US",
-    "Cookie": "...",
-    "Host": "...",
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) ...",
-    "Via": "2.0 ... (CloudFront)",
-    "X-Amz-Cf-Id": "...",
-    "X-Amzn-Trace-Id": "...",
-    "X-Forwarded-For": "xxx.xxx.xxx.xxx",
-    "X-Forwarded-Port": "443",
-    "X-Forwarded-Proto": "https"
-  },
-  "queryStringParameters": {
-    "qs1": "q1"
-  },
-  "stageVariables": null,
-  "requestContext": {
-    "accountId": "...",
-    "resourceId": "...",
-    "stage": "prod",
-    "requestId": "...",
-    "identity": {
-      "cognitoIdentityPoolId": null,
-      "accountId": null,
-      "cognitoIdentityId": null,
-      "caller": null,
-      "apiKey": null,
-      "sourceIp": "xxx.xxx.xxx.xxx",
-      "accessKey": null,
-      "cognitoAuthenticationType": null,
-      "cognitoAuthenticationProvider": null,
-      "userArn": null,
-      "userAgent": "...",
-      "user": null
-    },
-    "resourcePath": "/v1/posts",
-    "httpMethod": "GET",
-    "apiId": "..."
-  },
-  "body": null,
-  "isBase64Encoded": false
-}
-```
-
-The API automatically parses this information to create a normalized `REQUEST` object. The request can then be routed using the APIs methods.
 
 ## Routes and HTTP Methods
 
@@ -646,6 +582,70 @@ api.options('/*', (req,res) => {
 You can also use the `cors()` ([see here](#corsoptions)) convenience method to add CORS headers.
 
 Conditional route support could be added via middleware or with conditional logic within the `OPTIONS` route.
+
+## Lambda Proxy Integration
+Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled looks like this:
+
+```javascript
+{
+  "resource": "/v1/posts",
+  "path": "/v1/posts",
+  "httpMethod": "GET",
+  "headers": {
+    "Authorization": "Bearer ...",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Encoding": "gzip, deflate",
+    "Accept-Language": "en-us",
+    "cache-control": "max-age=0",
+    "CloudFront-Forwarded-Proto": "https",
+    "CloudFront-Is-Desktop-Viewer": "true",
+    "CloudFront-Is-Mobile-Viewer": "false",
+    "CloudFront-Is-SmartTV-Viewer": "false",
+    "CloudFront-Is-Tablet-Viewer": "false",
+    "CloudFront-Viewer-Country": "US",
+    "Cookie": "...",
+    "Host": "...",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) ...",
+    "Via": "2.0 ... (CloudFront)",
+    "X-Amz-Cf-Id": "...",
+    "X-Amzn-Trace-Id": "...",
+    "X-Forwarded-For": "xxx.xxx.xxx.xxx",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "queryStringParameters": {
+    "qs1": "q1"
+  },
+  "stageVariables": null,
+  "requestContext": {
+    "accountId": "...",
+    "resourceId": "...",
+    "stage": "prod",
+    "requestId": "...",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "apiKey": null,
+      "sourceIp": "xxx.xxx.xxx.xxx",
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "...",
+      "user": null
+    },
+    "resourcePath": "/v1/posts",
+    "httpMethod": "GET",
+    "apiId": "..."
+  },
+  "body": null,
+  "isBase64Encoded": false
+}
+```
+
+The API automatically parses this information to create a normalized `REQUEST` object. The request can then be routed using the APIs methods.
 
 ## Configuring Routes in API Gateway
 Routes must be configured in API Gateway in order to support routing to the Lambda function. The easiest way to support all of your routes without recreating them is to use [API Gateway's Proxy Integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-set-up-simple-proxy.html#api-gateway-proxy-resource?icmpid=docs_apigateway_console).
