@@ -1,6 +1,5 @@
 'use strict';
 
-const Promise = require('bluebird') // Promise library
 const expect = require('chai').expect // Assertion library
 
 // Init API instance
@@ -28,7 +27,7 @@ api.get('/test', function(req,res) {
   res.status(200).json({
     method: 'get',
     status: 'ok',
-    connected: fakeDatabase.connected
+    connected: fakeDatabase.connected.toString()
   })
 })
 
@@ -45,25 +44,16 @@ api.finally(function(req,res) {
 
 describe('Finally Tests:', function() {
 
-  it('Connected on first execution and after callback', function() {
+  it('Connected on first execution and after callback', async function() {
     let _event = Object.assign({},event,{})
-
-    return new Promise((resolve,reject) => {
-      api.run(_event,{},function(err,res) { resolve(res) })
-    }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","connected":true}', isBase64Encoded: false })
-      expect(fakeDatabase).to.deep.equal({ connected: true })
-    })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","connected":"true"}', isBase64Encoded: false })
   }) // end it
 
-  it('Disconnected on second execution', function() {
+  it('Disconnected on second execution', async function() {
     let _event = Object.assign({},event,{})
-
-    return new Promise((resolve,reject) => {
-      api.run(_event,{},function(err,res) { resolve(res) })
-    }).then((result) => {
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","connected":false}', isBase64Encoded: false })
-    })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","connected":"false"}', isBase64Encoded: false })
   }) // end it
 
 }) // end FINALLY tests

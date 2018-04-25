@@ -6,9 +6,7 @@
 
 ### Lightweight web framework for your serverless applications
 
-Lambda API is a lightweight web framework for use with AWS API Gateway and AWS Lambda using Lambda Proxy integration. This closely mirrors (and is based on) other routers like Express.js, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
-
-**IMPORTANT:** There is a [breaking change](#breaking-change-in-v03) in v0.3 that affects instantiation.
+Lambda API is a lightweight web framework for use with AWS API Gateway and AWS Lambda using Lambda Proxy Integration. This closely mirrors (and is based on) other web frameworks like Express.js and Fastify, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
 
 ## Simple Example
 
@@ -17,8 +15,8 @@ Lambda API is a lightweight web framework for use with AWS API Gateway and AWS L
 const api = require('lambda-api')()
 
 // Define a route
-api.get('/test', function(req,res) {
-  res.status(200).json({ status: 'ok' })
+api.get('/status', (req,res) => {
+  res.json({ status: 'ok' })
 })
 
 // Declare your Lambda handler
@@ -28,105 +26,28 @@ module.exports.handler = (event, context, callback) => {
 }
 ```
 
+For a full tutorial see [How To: Build a Serverless API with Serverless, AWS Lambda and Lambda API](https://www.jeremydaly.com/build-serverless-api-serverless-aws-lambda-lambda-api/).
+
 ## Why Another Web Framework?
 Express.js, Fastify, Koa, Restify, and Hapi are just a few of the many amazing web frameworks out there for Node.js. So why build yet another one when there are so many great options already? One word: **DEPENDENCIES**.
 
 These other frameworks are extremely powerful, but that benefit comes with the steep price of requiring several additional Node.js modules. Not only is this a bit of a security issue (see Beware of Third-Party Packages in [Securing Serverless](https://www.jeremydaly.com/securing-serverless-a-newbies-guide/)), but it also adds bloat to your codebase, filling your `node_modules` directory with a ton of extra files. For serverless applications that need to load quickly, all of these extra dependencies slow down execution and use more memory than necessary. Express.js has **30 dependencies**, Fastify has **12**, and Hapi has **17**! These numbers don't even include their dependencies' dependencies.
 
-Lambda API has **ONE** dependency. We use [Bluebird](http://bluebirdjs.com/docs/getting-started.html) promises to serialize asynchronous execution. We use promises because AWS Lambda currently only supports Node v6.10, which doesn't support `async / await`. Bluebird is faster than native promise and it has **no dependencies** either, making it the perfect choice for Lambda API.
+Lambda API has **ZERO** dependencies.
 
 Lambda API was written to be extremely lightweight and built specifically for serverless applications using AWS Lambda. It provides support for API routing, serving up HTML pages, issuing redirects, serving binary files and much more. It has a powerful middleware and error handling system, allowing you to implement everything from custom authentication to complex logging systems. Best of all, it was designed to work with Lambda's Proxy Integration, automatically handling all the interaction with API Gateway for you. It parses **REQUESTS** and formats **RESPONSES** for you, allowing you to focus on your application's core functionality, instead of fiddling with inputs and outputs.
 
-## New in v0.4 - Binary Support!
-Binary support has been added! This allows you to both send and receive binary files from API Gateway. For more information, see [Enabling Binary Support](#enabling-binary-support).
 
-## Breaking Change in v0.3
-Please note that the invocation method has been changed. You no longer need to use the `new` keyword to instantiate Lambda API. It can now be instantiated in one line:
-
- ```javascript
- const api = require('lambda-api')()
- ```
-
-`lambda-api` returns a `function` now instead of a `class`, so options can be passed in as its only argument:
-
-```javascript
-const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
-```
-
-**IMPORTANT:** Upgrading to v0.3.0 requires either removing the `new` keyword or switching to the one-line format. This provides more flexibility for instantiating Lambda API in future releases.
-
-## Lambda Proxy integration
-Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled looks like this:
-
-```javascript
-{
-  "resource": "/v1/posts",
-  "path": "/v1/posts",
-  "httpMethod": "GET",
-  "headers": {
-    "Authorization": "Bearer ...",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Encoding": "gzip, deflate",
-    "Accept-Language": "en-us",
-    "cache-control": "max-age=0",
-    "CloudFront-Forwarded-Proto": "https",
-    "CloudFront-Is-Desktop-Viewer": "true",
-    "CloudFront-Is-Mobile-Viewer": "false",
-    "CloudFront-Is-SmartTV-Viewer": "false",
-    "CloudFront-Is-Tablet-Viewer": "false",
-    "CloudFront-Viewer-Country": "US",
-    "Cookie": "...",
-    "Host": "...",
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) ...",
-    "Via": "2.0 ... (CloudFront)",
-    "X-Amz-Cf-Id": "...",
-    "X-Amzn-Trace-Id": "...",
-    "X-Forwarded-For": "xxx.xxx.xxx.xxx",
-    "X-Forwarded-Port": "443",
-    "X-Forwarded-Proto": "https"
-  },
-  "queryStringParameters": {
-    "qs1": "q1"
-  },
-  "stageVariables": null,
-  "requestContext": {
-    "accountId": "...",
-    "resourceId": "...",
-    "stage": "prod",
-    "requestId": "...",
-    "identity": {
-      "cognitoIdentityPoolId": null,
-      "accountId": null,
-      "cognitoIdentityId": null,
-      "caller": null,
-      "apiKey": null,
-      "sourceIp": "xxx.xxx.xxx.xxx",
-      "accessKey": null,
-      "cognitoAuthenticationType": null,
-      "cognitoAuthenticationProvider": null,
-      "userArn": null,
-      "userAgent": "...",
-      "user": null
-    },
-    "resourcePath": "/v1/posts",
-    "httpMethod": "GET",
-    "apiId": "..."
-  },
-  "body": null,
-  "isBase64Encoded": false
-}
-```
-
-The API automatically parses this information to create a normalized `REQUEST` object. The request can then be routed using the APIs methods.
-
-## Install
-
+## Installation
 ```
 npm i lambda-api --save
 ```
 
-## Configuration
+## Requirements
+- AWS Lambda running **Node 8.10+**
+- AWS Gateway using [Proxy Integration](#lambda-proxy-integration)
 
+## Configuration
 Require the `lambda-api` module into your Lambda handler script and instantiate it. You can initialize the API with the following options:
 
 | Property | Type | Description |
@@ -141,30 +62,56 @@ Require the `lambda-api` module into your Lambda handler script and instantiate 
 const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ```
 
+## Recent Updates
+For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
+
+### v0.5: Remove Bluebird Promises Dependency
+Now that AWS Lambda supports Node v8.10, asynchronous operations can be handled more efficiently with `async/await` rather than with promises. The core Lambda API execution engine has been rewritten to take advantage of `async/await`, which means we no longer need to depend on Bluebird. We now have **ZERO** dependencies.
+
+### v0.4: Binary Support
+Binary support has been added! This allows you to both send and receive binary files from API Gateway. For more information, see [Enabling Binary Support](#enabling-binary-support).
+
+### v0.3: New Instantiation Method
+Please note that the invocation method has been changed. You no longer need to use the `new` keyword to instantiate Lambda API. It can now be instantiated in one line:
+
+ ```javascript
+ const api = require('lambda-api')()
+ ```
+
+`lambda-api` returns a `function` now instead of a `class`, so options can be passed in as its only argument:
+
+```javascript
+const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
+```
+
+**IMPORTANT:** Upgrading from <v0.3.0 requires either removing the `new` keyword or switching to the one-line format. This provides more flexibility for instantiating Lambda API in future releases.
+
 ## Routes and HTTP Methods
 
 Routes are defined by using convenience methods or the `METHOD` method. There are currently six convenience route methods: `get()`, `post()`, `put()`, `patch()`, `delete()` and `options()`. Convenience route methods require two parameters, a *route* and a function that accepts two arguments. A *route* is simply a path such as `/users`. The second parameter must be a function that accepts a `REQUEST` and a `RESPONSE` argument. These arguments can be named whatever you like, but convention dictates `req` and `res`. Examples using convenience route methods:
 
 ```javascript
-api.get('/users', function(req,res) {
+api.get('/users', (req,res) => {
   // do something
 })
 
-api.post('/users', function(req,res) {
+api.post('/users', (req,res) => {
   // do something
 })
 
-api.delete('/users', function(req,res) {
+api.delete('/users', (req,res) => {
   // do something
 })
 ```
 Additional methods are support by calling the `METHOD` method with three arguments. The first argument is the HTTP method, a *route*, and a function that accepts a `REQUEST` and a `RESPONSE` argument.
 
 ```javascript
-api.METHOD('patch','/users', function(req,res) {
+api.METHOD('trace','/users', (req,res) => {
   // do something
 })
 ```
+
+All `GET` methods have a `HEAD` alias that executes the `GET` request but returns a blank `body`. `GET` requests should be idempotent with no side effects.
 
 ## Route Prefixing
 
@@ -244,19 +191,30 @@ The `RESPONSE` object is used to send a response back to the API Gateway. The `R
 The `status` method allows you to set the status code that is returned to API Gateway. By default this will be set to `200` for normal requests or `500` on a thrown error. Additional built-in errors such as `404 Not Found` and `405 Method Not Allowed` may also be returned. The `status()` method accepts a single integer argument.
 
 ```javascript
-api.get('/users', function(req,res) {
+api.get('/users', (req,res) => {
   res.status(401).error('Not Authorized')
 })
 ```
 
-### header(field, value)
+### header(key, value)
 The `header` method allows for you to set additional headers to return to the client. By default, just the `Content-Type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two string arguments. The first is the name of the header and then second is the value.
 
 ```javascript
-api.get('/users', function(req,res) {
+api.get('/users', (req,res) => {
   res.header('Content-Type','text/html').send('<div>This is HTML</div>')
 })
 ```
+
+**NOTE:** Header keys are converted and stored as lowercase in compliance with [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540) for HTTP/2. Header convenience methods (`getHeader`, `hasHeader`, and `removeHeader`) automatically ignore case.
+
+### getHeader([key])
+Retrieve the current header object or pass the optional `key` parameter and retrieve a specific header value. `key` is case insensitive.
+
+### hasHeader(key)
+Returns a boolean indicating the existence of `key` in the response headers. `key` is case insensitive.
+
+### removeHeader(key)
+Removes header matching `key` from the response headers. `key` is case insensitive. This method is chainable.
 
 ### send(body)
 The `send` methods triggers the API to return data to the API Gateway. The `send` method accepts one parameter and sends the contents through as is, e.g. as an object, string, integer, etc. AWS Gateway expects a string, so the data should be converted accordingly.
@@ -265,7 +223,7 @@ The `send` methods triggers the API to return data to the API Gateway. The `send
 There is a `json` convenience method for the `send` method that will set the headers to `application/json` as well as perform `JSON.stringify()` on the contents passed to it.
 
 ```javascript
-api.get('/users', function(req,res) {
+api.get('/users', (req,res) => {
   res.json({ message: 'This will be converted automatically' })
 })
 ```
@@ -303,7 +261,7 @@ res.jsonp({ foo: 'bar' })
 There is also an `html` convenience method for the `send` method that will set the headers to `text/html` and pass through the contents.
 
 ```javascript
-api.get('/users', function(req,res) {
+api.get('/users', (req,res) => {
   res.html('<div>This is HTML</div>')
 })
 ```
@@ -321,17 +279,17 @@ res.type('.doc');               // => 'application/msword'
 res.type('text/css');           // => 'text/css'
 ```
 
-For a complete list of auto supported types, see [mimemap.js](mindmap.js). Custom MIME types can be added by using the `mimeTypes` option when instantiating Lambda API
+For a complete list of auto supported types, see [mimemap.js](lib/mindmap.js). Custom MIME types can be added by using the `mimeTypes` option when instantiating Lambda API
 
 ### location(path)
 The `location` convenience method sets the `Location:` header with the value of a single string argument. The value passed in is not validated but will be encoded before being added to the header. Values that are already encoded can be safely passed in. Note that a valid `3xx` status code must be set to trigger browser redirection. The value can be a relative/absolute path OR a FQDN.
 
 ```javascript
-api.get('/redirectToHome', function(req,res) {
+api.get('/redirectToHome', (req,res) => {
   res.location('/home').status(302).html('<div>Redirect to Home</div>')
 })
 
-api.get('/redirectToGithub', function(req,res) {
+api.get('/redirectToGithub', (req,res) => {
   res.location('https://github.com').status(302).html('<div>Redirect to GitHub</div>')
 })
 ```
@@ -340,12 +298,50 @@ api.get('/redirectToGithub', function(req,res) {
 The `redirect` convenience method triggers a redirection and ends the current API execution. This method is similar to the `location()` method, but it automatically sets the status code and calls `send()`. The redirection URL (relative/absolute path OR a FQDN) can be specified as the only parameter or as a second parameter when a valid `3xx` status code is supplied as the first parameter. The status code is set to `302` by default, but can be changed to `300`, `301`, `302`, `303`, `307`, or `308` by adding it as the first parameter.
 
 ```javascript
-api.get('/redirectToHome', function(req,res) {
+api.get('/redirectToHome', (req,res) => {
   res.redirect('/home')
 })
 
-api.get('/redirectToGithub', function(req,res) {
+api.get('/redirectToGithub', (req,res) => {
   res.redirect(301,'https://github.com')
+})
+```
+
+### cors([options])
+Convenience method for adding [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) headers to responses. An optional `options` object can be passed in to customize the defaults.
+
+The six defined **CORS** headers are as follows:
+- Access-Control-Allow-Origin (defaults to `*`)
+- Access-Control-Allow-Methods (defaults to `GET, PUT, POST, DELETE, OPTIONS`)
+- Access-Control-Allow-Headers (defaults to `Content-Type, Authorization, Content-Length, X-Requested-With`)
+- Access-Control-Expose-Headers
+- Access-Control-Max-Age
+- Access-Control-Allow-Credentials
+
+The `options` object can contain the following properties that correspond to the above headers:
+- origin *(string)*
+- methods *(string)*
+- headers *(string)*
+- exposeHeaders *(string)*
+- maxAge *(number in milliseconds)*
+- credentials *(boolean)*
+
+Defaults can be set by calling `res.cors()` with no properties, or with any combination of the above options.
+
+```javascript
+res.cors({
+  origin: 'example.com',
+  methods: 'GET, POST, OPTIONS',
+  headers: 'Content-Type, Authorization',
+  maxAge: 84000000
+})
+```
+
+You can override existing values by calling `res.cors()` with just the updated values:
+
+```javascript
+res.cors({
+  origin: 'api.example.com'
 })
 ```
 
@@ -353,7 +349,7 @@ api.get('/redirectToGithub', function(req,res) {
 An error can be triggered by calling the `error` method. This will cause the API to stop execution and return the message to the client. Custom error handling can be accomplished using the [Error Handling](#error-handling) feature.
 
 ```javascript
-api.get('/users', function(req,res) {
+api.get('/users', (req,res) => {
   res.error('This is an error')
 })
 ```
@@ -447,7 +443,7 @@ res.sendFile(<Buffer>, 'my-file.docx', { maxAge: 3600000 }, (err) => {
 })
 ```
 
-The `callback` function supports promises, allowing you to perform additional tasks *after* the file is successfully loaded from the source. This can be used to perform additional synchronous tasks before returning control to the API execution.
+The `callback` function supports returning a promise, allowing you to perform additional tasks *after* the file is successfully loaded from the source. This can be used to perform additional synchronous tasks before returning control to the API execution.
 
 **NOTE:** In order to access S3 files, your Lambda function must have `GetObject` access to the files you're attempting to access.
 
@@ -463,7 +459,7 @@ To enable binary support, you need to add `*/*` under "Binary Media Types" in **
 Path parameters are extracted from the path sent in by API Gateway. Although API Gateway supports path parameters, the API doesn't use these values but insteads extracts them from the actual path. This gives you more flexibility with the API Gateway configuration. Path parameters are defined in routes using a colon `:` as a prefix.
 
 ```javascript
-api.get('/users/:userId', function(req,res) {
+api.get('/users/:userId', (req,res) => {
   res.send('User ID: ' + req.params.userId)
 })
 ```
@@ -473,12 +469,16 @@ Path parameters act as wildcards that capture the value into the `params` object
 A path can contain as many parameters as you want. E.g. `/users/:param1/:param2/:param3`.
 
 ## Wildcard Routes
-Wildcard routes are supported for methods that match an existing route. E.g. `options` on an existing `get` route. As of now, the best use case is for the OPTIONS method to provide CORS headers. Wildcards only work in the base path. `/users/*`, for example, is not supported. For additional wildcard support, use [Path Parameters](#path-parameters) instead.
+Wildcard routes are supported for methods that **match an existing route**. E.g. `options` on an existing `get` route. Wildcards only work at the *end of a route definition* such as `/*` or `/users/*`. Wildcards within a path, e.g. `/users/*/posts` are not supported. Wildcard routes do support parameters, so `/users/:id/*` would capture the `:id` parameter in your wildcard handler.
+
+Wildcard routes will match deep paths if the route exists. For example, an `OPTIONS` method for path `/users/*` would match `/users/:id/posts/latest` if that path was defined by another method.
+
+The best use case is for the `OPTIONS` method to provide CORS headers. For more control over variable paths, use [Path Parameters](#path-parameters) instead.
 
 ```javascript
-api.options('/*', function(req,res) {
+api.options('/users/*', (req,res) => {
   // Do something
-  res.status(200).send({});
+  res.status(200).send({})
 })
 ```
 
@@ -486,7 +486,7 @@ api.options('/*', function(req,res) {
 The API supports middleware to preprocess requests before they execute their matching routes. Middleware is defined using the `use` method and require a function with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
 
 ```javascript
-api.use(function(req,res,next) {
+api.use((req,res,next) => {
   // do something
   next()
 })
@@ -496,7 +496,7 @@ Middleware can be used to authenticate requests, log API calls, etc. The `REQUES
 
 ```javascript
 // Auth User
-api.use(function(req,res,next) {
+api.use((req,res,next) => {
   if (req.headers.Authorization === 'some value') {
     req.authorized = true
     next() // continue execution
@@ -512,18 +512,18 @@ The `next()` callback tells the system to continue executing. If this is not cal
 The API has a built-in clean up method called 'finally()' that will execute after all middleware and routes have been completed, but before execution is complete. This can be used to close database connections or to perform other clean up functions. A clean up function can be defined using the `finally` method and requires a function with two parameters for the REQUEST and the RESPONSE as its only argument. For example:
 
 ```javascript
-api.finally(function(req,res) {
+api.finally((req,res) => {
   // close unneeded database connections and perform clean up
 })
 ```
 
-The `RESPONSE` **CANNOT** be manipulated since it has already been generated. Only one `finally()` method can be defined. This uses the Bluebird `finally()` method internally and will execute after properly handled errors as well.
+The `RESPONSE` **CANNOT** be manipulated since it has already been generated. Only one `finally()` method can be defined and will execute after properly handled errors as well.
 
 ## Error Handling
 The API has simple built-in error handling that will log the error using `console.log`. These will be available via CloudWatch Logs. By default, errors will trigger a JSON response with the error message. If you would like to define additional error handling, you can define them using the `use` method similar to middleware. Error handling middleware must be defined as a function with **four** arguments instead of three like normal middleware. An additional `error` parameter must be added as the first parameter. This will contain the error object generated.
 
 ```javascript
-api.use(function(err,req,res,next) {
+api.use((err,req,res,next) => {
   // do something with the error
   next()
 })
@@ -547,10 +547,10 @@ api.get('/users/:userId', require('./lib/users.js'))
 The users.js module might look like this:
 
 ```javascript
-module.exports = function(req, res) {
+module.exports = (req, res) => {
   let userInfo = req.namespace.data.getUser(req.params.userId)
   res.json({ 'userInfo': userInfo })
-});
+}
 ```
 
 By saving references in namespaces, you can access them without needing to require them in every module. Namespaces can be added using the `app()` method of the API. `app()` accepts either two parameters: a string representing the name of the namespace and a function reference *OR* an object with string names as keys and function references as the values. For example:
@@ -566,16 +566,11 @@ api.app({
 })
 ```
 
-## Promises
-The API uses Bluebird promises to manage asynchronous script execution. The API will wait for a request ending call before returning data back to the client. Middleware will wait for the `next()` callback before proceeding to the next step.
-
-**NOTE:** AWS Lambda currently only supports Node v6.10, which doesn't support `async / await`. If you'd like to use `async / await`, you'll need to polyfill.
-
 ## CORS Support
 CORS can be implemented using the [wildcard routes](#wildcard-routes) feature. A typical implementation would be as follows:
 
 ```javascript
-api.options('/*', function(req,res) {
+api.options('/*', (req,res) => {
   // Add CORS headers
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
@@ -584,7 +579,73 @@ api.options('/*', function(req,res) {
 })
 ```
 
+You can also use the `cors()` ([see here](#corsoptions)) convenience method to add CORS headers.
+
 Conditional route support could be added via middleware or with conditional logic within the `OPTIONS` route.
+
+## Lambda Proxy Integration
+Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled looks like this:
+
+```javascript
+{
+  "resource": "/v1/posts",
+  "path": "/v1/posts",
+  "httpMethod": "GET",
+  "headers": {
+    "Authorization": "Bearer ...",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Encoding": "gzip, deflate",
+    "Accept-Language": "en-us",
+    "cache-control": "max-age=0",
+    "CloudFront-Forwarded-Proto": "https",
+    "CloudFront-Is-Desktop-Viewer": "true",
+    "CloudFront-Is-Mobile-Viewer": "false",
+    "CloudFront-Is-SmartTV-Viewer": "false",
+    "CloudFront-Is-Tablet-Viewer": "false",
+    "CloudFront-Viewer-Country": "US",
+    "Cookie": "...",
+    "Host": "...",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) ...",
+    "Via": "2.0 ... (CloudFront)",
+    "X-Amz-Cf-Id": "...",
+    "X-Amzn-Trace-Id": "...",
+    "X-Forwarded-For": "xxx.xxx.xxx.xxx",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "queryStringParameters": {
+    "qs1": "q1"
+  },
+  "stageVariables": null,
+  "requestContext": {
+    "accountId": "...",
+    "resourceId": "...",
+    "stage": "prod",
+    "requestId": "...",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "apiKey": null,
+      "sourceIp": "xxx.xxx.xxx.xxx",
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "...",
+      "user": null
+    },
+    "resourcePath": "/v1/posts",
+    "httpMethod": "GET",
+    "apiId": "..."
+  },
+  "body": null,
+  "isBase64Encoded": false
+}
+```
+
+The API automatically parses this information to create a normalized `REQUEST` object. The request can then be routed using the APIs methods.
 
 ## Configuring Routes in API Gateway
 Routes must be configured in API Gateway in order to support routing to the Lambda function. The easiest way to support all of your routes without recreating them is to use [API Gateway's Proxy Integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-set-up-simple-proxy.html#api-gateway-proxy-resource?icmpid=docs_apigateway_console).

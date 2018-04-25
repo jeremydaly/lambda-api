@@ -1,9 +1,8 @@
 'use strict';
 
-const Promise = require('bluebird') // Promise library
 const expect = require('chai').expect // Assertion library
 
-const utils = require('../utils')
+const utils = require('../lib/utils')
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/

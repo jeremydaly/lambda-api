@@ -1,6 +1,5 @@
 'use strict';
 
-const Promise = require('bluebird') // Promise library
 const expect = require('chai').expect // Assertion library
 
 // Init API instance
@@ -57,26 +56,16 @@ describe('Namespace Tests:', function() {
       expect(api._app.data).to.have.property('dataCall')
   }) // end it
 
-  it('Invoke namespace', function() {
+  it('Invoke namespace', async function() {
     let _event = Object.assign({},event,{ path:'/testData' })
-
-    return new Promise((resolve,reject) => {
-      api.run(_event,{},function(err,res) { resolve(res) })
-    }).then((result) => {
-      // console.log("RESULTS:",result);
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","data":{"foo":"sample data","bar":"additional sample data"}}', isBase64Encoded: false })
-    })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","data":{"foo":"sample data","bar":"additional sample data"}}', isBase64Encoded: false })
   }) // end it
 
-  it('Invoke namespace via required module', function() {
+  it('Invoke namespace via required module', async function() {
     let _event = Object.assign({},event,{ path:'/testAppData' })
-
-    return new Promise((resolve,reject) => {
-      api.run(_event,{},function(err,res) { resolve(res) })
-    }).then((result) => {
-      // console.log("RESULTS:",result);
-      expect(result).to.deep.equal({ headers: { 'Content-Type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","data":{"foo":"sample data","bar":"additional sample data"}}', isBase64Encoded: false })
-    })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","data":{"foo":"sample data","bar":"additional sample data"}}', isBase64Encoded: false })
   }) // end it
 
 }) // end MODULE tests

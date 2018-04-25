@@ -3,13 +3,12 @@
 /**
  * Lightweight web framework for your serverless applications
  * @author Jeremy Daly <jeremy@jeremydaly.com>
- * @version 0.3.0
+ * @version 0.5.0
  * @license MIT
  */
 
-const REQUEST = require('./request.js') // Response object
-const RESPONSE = require('./response.js') // Response object
-const Promise = require('bluebird') // Promise library
+const REQUEST = require('./lib/request.js') // Response object
+const RESPONSE = require('./lib/response.js') // Response object
 
 // Create the API class
 class API {
@@ -51,47 +50,24 @@ class API {
     // Executed after the callback
     this._finally = () => {}
 
-    // Promise placeholder for final route promise resolution
-    this._promise = function() { console.log('no promise to resolve') }
-    this._reject = function() { console.log('no promise to reject') }
-
     // Global error status
     this._errorStatus = 500
 
-    // Testing flag
+    // Testing flag (disables logging)
     this._test = false
 
   } // end constructor
 
-  // GET: convenience method
-  get(path, handler) {
-    this.METHOD('GET', path, handler)
-  }
 
-  // POST: convenience method
-  post(path, handler) {
-    this.METHOD('POST', path, handler)
-  }
 
-  // PUT: convenience method
-  put(path, handler) {
-    this.METHOD('PUT', path, handler)
-  }
+  // Convenience methods (path, handler)
+  get(p,h) { this.METHOD('GET',p,h) }
+  post(p,h) { this.METHOD('POST',p,h) }
+  put(p,h) { this.METHOD('PUT',p,h) }
+  patch(p,h) { this.METHOD('PATCH',p,h) }
+  delete(p,h) { this.METHOD('DELETE',p,h) }
+  options(p,h) { this.METHOD('OPTIONS',p,h) }
 
-  // PATCH: convenience method
-  patch(path, handler) {
-    this.METHOD('PATCH', path, handler)
-  }
-
-  // DELETE: convenience method
-  delete(path, handler) {
-    this.METHOD('DELETE', path, handler)
-  }
-
-  // OPTIONS: convenience method
-  options(path, handler) {
-    this.METHOD('OPTIONS', path, handler)
-  }
 
   // METHOD: Adds method and handler to routes
   METHOD(method, path, handler) {
@@ -124,110 +100,86 @@ class API {
         this._routes,
         (i === route.length-1 ? { ['__'+method.toUpperCase()]: { vars: pathVars, handler: handler, route: '/'+parsedPath.join('/') } } : {}),
         route.slice(0,i+1)
-      );
+      )
 
     } // end for loop
 
   } // end main METHOD function
 
 
+
   // RUN: This runs the routes
-  run(event,context,cb) { // TODO: Make this dynamic
-
-    this.startTimer('total')
-
-    this._done = false
+  async run(event,context,cb) {
 
     // Set the event, context and callback
     this._event = event
     this._context = context
     this._cb = cb
 
-    // Initalize response object
-    let response = new RESPONSE(this)
-    let request = {}
+    try {
+      // Initalize response and request objects
+      this.response = new RESPONSE(this)
+      this.request = new REQUEST(this)
 
-    Promise.try(() => { // Start a promise
+      // Loop through the middleware and await response
+      for (const mw of this._middleware) {
+        await new Promise(r => { mw(this.request,this.response,() => { r() }) })
+      } // end for
 
-      // Initalize the request object
-      request = new REQUEST(this)
+      // Execute the primary handler
+      await this.handler(this.request,this.response)
 
-      // Execute the request
-      return this.execute(request,response)
+    } catch(e) {
+      this.catchErrors(e)
+    }
 
-    }).catch((e) => {
-
-      // Error messages should never be base64 encoded
-      response._isBase64 = false
-
-      // Strip the headers (TODO: find a better way to handle this)
-      response._headers = {}
-
-      let message;
-
-      if (e instanceof Error) {
-        response.status(this._errorStatus)
-        message = e.message
-        !this._test && console.log(e)
-      } else {
-        message = e
-        !this._test && console.log('API Error:',e)
-      }
-
-      // Execute error middleware
-      if (this._errors.length > 0) {
-
-        // Init stack queue
-        let queue = []
-
-        // Loop through the middleware and queue promises
-        for (let i in this._errors) {
-          queue.push(() => {
-            return new Promise((resolve, reject) => {
-              this._promise = () => { resolve() } // keep track of the last resolve()
-              this._reject = (e) => { reject(e) } // keep track of the last reject()
-              this._errors[i](e,request,response,() => { resolve() }) // execute the errors with the resolve callback
-            }) // end promise
-          }) // end queue
-        } // end for
-
-        // Return Promise.each serialially
-        return Promise.each(queue, function(queue_item) {
-          return queue_item()
-        }).then(() => {
-          response.json({'error':message})
-        })
-
-      } else {
-        response.json({'error':message})
-      }
-
-    }).finally(() => {
-      this._finally(request,response)
-    })
   } // end run function
 
 
-  // Custom callback
-  _callback(err, res) {
 
-    // Resolve any outstanding promise
-    this._promise()
+  // Catch all async/sync errors
+  async catchErrors(e) {
 
-    this._done = true
+    // Error messages should never be base64 encoded
+    this.response._isBase64 = false
 
-    this.endTimer('total')
+    // Strip the headers (TODO: find a better way to handle this)
+    this.response._headers = {}
 
-    if (res) {
-      if (this._debug) {
-        console.log(this._procTimes)
-      }
+    let message;
+
+    if (e instanceof Error) {
+      this.response.status(this._errorStatus)
+      message = e.message
+      !this._test && console.log(e)
+    } else {
+      message = e
+      !this._test && console.log('API Error:',e)
     }
+
+    // Execute error middleware
+    for (const err of this._errors) {
+      // Promisify error middleware
+      await new Promise(r => { err(e,this.request,this.response,() => { r() }) })
+    } // end for
+
+    this.response.json({'error':message})
+
+  } // end catch
+
+
+
+  // Custom callback
+  async _callback(err, res) {
+
+    // Execute finally
+    await this._finally(this.request,this.response)
 
     // Execute the primary callback
     this._cb(err,res)
 
   } // end _callback
+
 
 
   // Middleware handler
@@ -241,79 +193,12 @@ class API {
     }
   } // end use
 
-  // Finally function
+
+  // Finally handler
   finally(fn) {
     this._finally = fn
   }
 
-  // Process
-  execute(req,res) {
-
-    // Init stack queue
-    let queue = []
-
-    // If execute is called after the app is done, just return out
-    if (this._done) { return; }
-
-    // If there is middleware
-    if (this._middleware.length > 0) {
-      // Loop through the middleware and queue promises
-      for (let i in this._middleware) {
-        queue.push(() => {
-          return new Promise((resolve, reject) => {
-            this._promise = () => { resolve() } // keep track of the last resolve()
-            this._reject = (e) => { reject(e) } // keep track of the last reject()
-            this._middleware[i](req,res,() => { resolve() }) // execute the middleware with the resolve callback
-          }) // end promise
-        }) // end queue
-      } // end for
-    } // end if
-
-    // Push the main execution path to the queue stack
-    queue.push(() => {
-      return new Promise((resolve, reject) => {
-        this._promise = () => { resolve() } // keep track of the last resolve()
-        this._reject = (e) => { reject(e) } // keep track of the last reject()
-        this.handler(req,res) // execute the handler with no callback
-      })
-    })
-
-    // Return Promise.each serialially
-    return Promise.each(queue, function(queue_item) {
-      return queue_item()
-    })
-
-  } // end execute
-
-
-
-  //-------------------------------------------------------------------------//
-  // TIMER FUNCTIONS
-  //-------------------------------------------------------------------------//
-
-  // Returns the calculated processing times from all stopped timers
-  getTimers(timer) {
-    if (timer) {
-      return this._procTimes[timer]
-    } else {
-      return this._procTimes
-    }
-  } // end getTimers
-
-  // Starts a timer for debugging purposes
-  startTimer(name) {
-    this._timers[name] = Date.now()
-  } // end startTimer
-
-  // Ends a timer and calculates the total processing time
-  endTimer(name) {
-    try {
-      this._procTimes[name] = (Date.now()-this._timers[name]) + ' ms'
-      delete this._timers[name]
-    } catch(e) {
-      console.error('Could not end timer: ' + name)
-    }
-  } // end endTimer
 
 
   //-------------------------------------------------------------------------//
@@ -324,7 +209,7 @@ class API {
     return path.trim().replace(/^\/(.*?)(\/)*$/,'$1').split('/').filter(x => x.trim() !== '')
   }
 
-
+  // Recursive function to create routes object
   setRoute(obj, value, path) {
     if (typeof path === "string") {
         let path = path.split('.')
@@ -332,12 +217,12 @@ class API {
 
     if (path.length > 1){
       let p = path.shift()
-      if (obj[p] === null) { // || typeof obj[p] !== 'object') {
+      if (obj[p] === null) {
         obj[p] = {}
       }
       this.setRoute(obj[p], value, path)
     } else {
-      if (obj[path[0]] === null) { // || typeof obj[path[0]] !== 'object') {
+      if (obj[path[0]] === null) {
         obj[path[0]] = value
       } else {
         obj[path[0]] = Object.assign(value,obj[path[0]])
@@ -386,7 +271,9 @@ class API {
 
   } // end register
 
+
 } // end API class
 
-// Export the API class
+
+// Export the API class as a new instance
 module.exports = opts => new API(opts)
