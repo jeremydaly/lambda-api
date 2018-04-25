@@ -155,22 +155,22 @@ The API automatically parses this information to create a normalized `REQUEST` o
 Routes are defined by using convenience methods or the `METHOD` method. There are currently six convenience route methods: `get()`, `post()`, `put()`, `patch()`, `delete()` and `options()`. Convenience route methods require two parameters, a *route* and a function that accepts two arguments. A *route* is simply a path such as `/users`. The second parameter must be a function that accepts a `REQUEST` and a `RESPONSE` argument. These arguments can be named whatever you like, but convention dictates `req` and `res`. Examples using convenience route methods:
 
 ```javascript
-api.get('/users', function(req,res) {
+api.get('/users', (req,res) => {
   // do something
 })
 
-api.post('/users', function(req,res) {
+api.post('/users', (req,res) => {
   // do something
 })
 
-api.delete('/users', function(req,res) {
+api.delete('/users', (req,res) => {
   // do something
 })
 ```
 Additional methods are support by calling the `METHOD` method with three arguments. The first argument is the HTTP method, a *route*, and a function that accepts a `REQUEST` and a `RESPONSE` argument.
 
 ```javascript
-api.METHOD('trace','/users', function(req,res) {
+api.METHOD('trace','/users', (req,res) => {
   // do something
 })
 ```
@@ -255,7 +255,7 @@ The `RESPONSE` object is used to send a response back to the API Gateway. The `R
 The `status` method allows you to set the status code that is returned to API Gateway. By default this will be set to `200` for normal requests or `500` on a thrown error. Additional built-in errors such as `404 Not Found` and `405 Method Not Allowed` may also be returned. The `status()` method accepts a single integer argument.
 
 ```javascript
-api.get('/users', function(req,res) {
+api.get('/users', (req,res) => {
   res.status(401).error('Not Authorized')
 })
 ```
@@ -264,7 +264,7 @@ api.get('/users', function(req,res) {
 The `header` method allows for you to set additional headers to return to the client. By default, just the `Content-Type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two string arguments. The first is the name of the header and then second is the value.
 
 ```javascript
-api.get('/users', function(req,res) {
+api.get('/users', (req,res) => {
   res.header('Content-Type','text/html').send('<div>This is HTML</div>')
 })
 ```
@@ -287,7 +287,7 @@ The `send` methods triggers the API to return data to the API Gateway. The `send
 There is a `json` convenience method for the `send` method that will set the headers to `application/json` as well as perform `JSON.stringify()` on the contents passed to it.
 
 ```javascript
-api.get('/users', function(req,res) {
+api.get('/users', (req,res) => {
   res.json({ message: 'This will be converted automatically' })
 })
 ```
@@ -325,7 +325,7 @@ res.jsonp({ foo: 'bar' })
 There is also an `html` convenience method for the `send` method that will set the headers to `text/html` and pass through the contents.
 
 ```javascript
-api.get('/users', function(req,res) {
+api.get('/users', (req,res) => {
   res.html('<div>This is HTML</div>')
 })
 ```
@@ -349,11 +349,11 @@ For a complete list of auto supported types, see [mimemap.js](lib/mindmap.js). C
 The `location` convenience method sets the `Location:` header with the value of a single string argument. The value passed in is not validated but will be encoded before being added to the header. Values that are already encoded can be safely passed in. Note that a valid `3xx` status code must be set to trigger browser redirection. The value can be a relative/absolute path OR a FQDN.
 
 ```javascript
-api.get('/redirectToHome', function(req,res) {
+api.get('/redirectToHome', (req,res) => {
   res.location('/home').status(302).html('<div>Redirect to Home</div>')
 })
 
-api.get('/redirectToGithub', function(req,res) {
+api.get('/redirectToGithub', (req,res) => {
   res.location('https://github.com').status(302).html('<div>Redirect to GitHub</div>')
 })
 ```
@@ -362,11 +362,11 @@ api.get('/redirectToGithub', function(req,res) {
 The `redirect` convenience method triggers a redirection and ends the current API execution. This method is similar to the `location()` method, but it automatically sets the status code and calls `send()`. The redirection URL (relative/absolute path OR a FQDN) can be specified as the only parameter or as a second parameter when a valid `3xx` status code is supplied as the first parameter. The status code is set to `302` by default, but can be changed to `300`, `301`, `302`, `303`, `307`, or `308` by adding it as the first parameter.
 
 ```javascript
-api.get('/redirectToHome', function(req,res) {
+api.get('/redirectToHome', (req,res) => {
   res.redirect('/home')
 })
 
-api.get('/redirectToGithub', function(req,res) {
+api.get('/redirectToGithub', (req,res) => {
   res.redirect(301,'https://github.com')
 })
 ```
@@ -413,7 +413,7 @@ res.cors({
 An error can be triggered by calling the `error` method. This will cause the API to stop execution and return the message to the client. Custom error handling can be accomplished using the [Error Handling](#error-handling) feature.
 
 ```javascript
-api.get('/users', function(req,res) {
+api.get('/users', (req,res) => {
   res.error('This is an error')
 })
 ```
@@ -523,7 +523,7 @@ To enable binary support, you need to add `*/*` under "Binary Media Types" in **
 Path parameters are extracted from the path sent in by API Gateway. Although API Gateway supports path parameters, the API doesn't use these values but insteads extracts them from the actual path. This gives you more flexibility with the API Gateway configuration. Path parameters are defined in routes using a colon `:` as a prefix.
 
 ```javascript
-api.get('/users/:userId', function(req,res) {
+api.get('/users/:userId', (req,res) => {
   res.send('User ID: ' + req.params.userId)
 })
 ```
@@ -540,9 +540,9 @@ Wildcard routes will match deep paths if the route exists. For example, an `OPTI
 The best use case is for the `OPTIONS` method to provide CORS headers. For more control over variable paths, use [Path Parameters](#path-parameters) instead.
 
 ```javascript
-api.options('/users/*', function(req,res) {
+api.options('/users/*', (req,res) => {
   // Do something
-  res.status(200).send({});
+  res.status(200).send({})
 })
 ```
 
@@ -550,7 +550,7 @@ api.options('/users/*', function(req,res) {
 The API supports middleware to preprocess requests before they execute their matching routes. Middleware is defined using the `use` method and require a function with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
 
 ```javascript
-api.use(function(req,res,next) {
+api.use((req,res,next) => {
   // do something
   next()
 })
@@ -560,7 +560,7 @@ Middleware can be used to authenticate requests, log API calls, etc. The `REQUES
 
 ```javascript
 // Auth User
-api.use(function(req,res,next) {
+api.use((req,res,next) => {
   if (req.headers.Authorization === 'some value') {
     req.authorized = true
     next() // continue execution
@@ -576,7 +576,7 @@ The `next()` callback tells the system to continue executing. If this is not cal
 The API has a built-in clean up method called 'finally()' that will execute after all middleware and routes have been completed, but before execution is complete. This can be used to close database connections or to perform other clean up functions. A clean up function can be defined using the `finally` method and requires a function with two parameters for the REQUEST and the RESPONSE as its only argument. For example:
 
 ```javascript
-api.finally(function(req,res) {
+api.finally((req,res) => {
   // close unneeded database connections and perform clean up
 })
 ```
@@ -587,7 +587,7 @@ The `RESPONSE` **CANNOT** be manipulated since it has already been generated. On
 The API has simple built-in error handling that will log the error using `console.log`. These will be available via CloudWatch Logs. By default, errors will trigger a JSON response with the error message. If you would like to define additional error handling, you can define them using the `use` method similar to middleware. Error handling middleware must be defined as a function with **four** arguments instead of three like normal middleware. An additional `error` parameter must be added as the first parameter. This will contain the error object generated.
 
 ```javascript
-api.use(function(err,req,res,next) {
+api.use((err,req,res,next) => {
   // do something with the error
   next()
 })
@@ -611,10 +611,10 @@ api.get('/users/:userId', require('./lib/users.js'))
 The users.js module might look like this:
 
 ```javascript
-module.exports = function(req, res) {
+module.exports = (req, res) => {
   let userInfo = req.namespace.data.getUser(req.params.userId)
   res.json({ 'userInfo': userInfo })
-});
+}
 ```
 
 By saving references in namespaces, you can access them without needing to require them in every module. Namespaces can be added using the `app()` method of the API. `app()` accepts either two parameters: a string representing the name of the namespace and a function reference *OR* an object with string names as keys and function references as the values. For example:
@@ -634,7 +634,7 @@ api.app({
 CORS can be implemented using the [wildcard routes](#wildcard-routes) feature. A typical implementation would be as follows:
 
 ```javascript
-api.options('/*', function(req,res) {
+api.options('/*', (req,res) => {
   // Add CORS headers
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
