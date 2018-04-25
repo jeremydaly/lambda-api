@@ -4,9 +4,11 @@ const expect = require('chai').expect // Assertion library
 
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
+const api2 = require('../index')({ version: 'v1.0' })
 
 // NOTE: Set test to true
 api._test = true;
+api2._test = true;
 
 let event = {
   httpMethod: 'get',
@@ -22,6 +24,10 @@ let event = {
 /******************************************************************************/
 
 api.get('/', function(req,res) {
+  res.status(200).json({ method: 'get', status: 'ok' })
+})
+
+api2.get('/', function(req,res) {
   res.status(200).json({ method: 'get', status: 'ok' })
 })
 
@@ -162,8 +168,6 @@ describe('Route Tests:', function() {
 
   describe('GET', function() {
 
-    // TODO: Sample async / await test - update all to this format?
-
     it('Base path: /', async function() {
       let _event = Object.assign({},event,{ path: '/' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
@@ -222,6 +226,12 @@ describe('Route Tests:', function() {
     it('Missing path: /not_found', async function() {
       let _event = Object.assign({},event,{ path: '/not_found' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Missing path: /not_found (new api instance)', async function() {
+      let _event = Object.assign({},event,{ path: '/not_found' })
+      let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
     }) // end it
 
@@ -559,5 +569,22 @@ describe('Route Tests:', function() {
     }) // end it
 
   }) // end OPTIONS tests
+
+
+  describe('METHOD', function() {
+
+    it('Invalid method (new api instance)', async function() {
+      let _event = Object.assign({},event,{ path: '/', httpMethod: 'test' })
+      let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 405,
+        body: '{"error":"Method not allowed"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+  }) // end method tests
+
 
 }) // end ROUTE tests
