@@ -9,6 +9,9 @@ const fs = require('fs') // Require Node.js file system
 const sinon = require('sinon')
 
 const AWS = require('aws-sdk') // AWS SDK (automatically available in Lambda)
+
+// AWS.config.credentials = new AWS.SharedIniFileCredentials({profile: 'madlucas'})
+
 const S3 = require('../lib/s3-service') // Init S3 Service
 
 // Init API instance
@@ -126,14 +129,16 @@ api.get('/sendfile/custom-cache-control', function(req,res) {
 // S3 file
 api.get('/sendfile/s3', function(req,res) {
 
-  stub.withArgs({Bucket: 'my-test-bucket', Key: 'test.txt'}).resolves({
-    AcceptRanges: 'bytes',
-    LastModified: new Date('2018-04-01T13:32:58.000Z'),
-    ContentLength: 23,
-    ETag: '"ae771fbbba6a74eeeb77754355831713"',
-    ContentType: 'text/plain',
-    Metadata: {},
-    Body: Buffer.from('Test file for sendFile\n')
+  stub.withArgs({Bucket: 'my-test-bucket', Key: 'test.txt'}).returns({
+    promise: () => { return {
+      AcceptRanges: 'bytes',
+      LastModified: new Date('2018-04-01T13:32:58.000Z'),
+      ContentLength: 23,
+      ETag: '"ae771fbbba6a74eeeb77754355831713"',
+      ContentType: 'text/plain',
+      Metadata: {},
+      Body: Buffer.from('Test file for sendFile\n')
+    }}
   })
 
   res.sendFile('s3://my-test-bucket/test.txt')
@@ -141,14 +146,16 @@ api.get('/sendfile/s3', function(req,res) {
 
 api.get('/sendfile/s3path', function(req,res) {
 
-  stub.withArgs({Bucket: 'my-test-bucket', Key: 'test/test.txt'}).resolves({
-    AcceptRanges: 'bytes',
-    LastModified: new Date('2018-04-01T13:32:58.000Z'),
-    ContentLength: 23,
-    ETag: '"ae771fbbba6a74eeeb77754355831713"',
-    ContentType: 'text/plain',
-    Metadata: {},
-    Body: Buffer.from('Test file for sendFile\n')
+  stub.withArgs({Bucket: 'my-test-bucket', Key: 'test/test.txt'}).returns({
+    promise: () => { return {
+      AcceptRanges: 'bytes',
+      LastModified: new Date('2018-04-01T13:32:58.000Z'),
+      ContentLength: 23,
+      ETag: '"ae771fbbba6a74eeeb77754355831713"',
+      ContentType: 'text/plain',
+      Metadata: {},
+      Body: Buffer.from('Test file for sendFile\n')
+    }}
   })
 
   res.sendFile('s3://my-test-bucket/test/test.txt')
@@ -180,6 +187,10 @@ describe('SendFile Tests:', function() {
   before(function() {
      // Stub getObjectAsync
     stub = sinon.stub(S3,'getObject')
+    //stub.prototype.promise = function() { console.log('test') }
+    //console.log('proto:',);
+    //S3.getObject.promise = () => { }
+    //stub.promise = () => {}
   })
 
   it('Bad path', async function() {

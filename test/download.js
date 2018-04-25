@@ -90,14 +90,16 @@ api.get('/download/all', function(req,res) {
 // S3 file
 api.get('/download/s3', function(req,res) {
 
-  stub.withArgs({Bucket: 'my-test-bucket', Key: 'test.txt'}).resolves({
-    AcceptRanges: 'bytes',
-    LastModified: new Date('2018-04-01T13:32:58.000Z'),
-    ContentLength: 23,
-    ETag: '"ae771fbbba6a74eeeb77754355831713"',
-    ContentType: 'text/plain',
-    Metadata: {},
-    Body: Buffer.from('Test file for sendFile\n')
+  stub.withArgs({Bucket: 'my-test-bucket', Key: 'test.txt'}).returns({
+    promise: () => { return {
+      AcceptRanges: 'bytes',
+      LastModified: new Date('2018-04-01T13:32:58.000Z'),
+      ContentLength: 23,
+      ETag: '"ae771fbbba6a74eeeb77754355831713"',
+      ContentType: 'text/plain',
+      Metadata: {},
+      Body: Buffer.from('Test file for sendFile\n')
+    }}
   })
 
   res.download('s3://my-test-bucket/test.txt')
@@ -105,14 +107,16 @@ api.get('/download/s3', function(req,res) {
 
 api.get('/download/s3path', function(req,res) {
 
-  stub.withArgs({Bucket: 'my-test-bucket', Key: 'test/test.txt'}).resolves({
-    AcceptRanges: 'bytes',
-    LastModified: new Date('2018-04-01T13:32:58.000Z'),
-    ContentLength: 23,
-    ETag: '"ae771fbbba6a74eeeb77754355831713"',
-    ContentType: 'text/plain',
-    Metadata: {},
-    Body: Buffer.from('Test file for sendFile\n')
+  stub.withArgs({Bucket: 'my-test-bucket', Key: 'test/test.txt'}).returns({
+    promise: () => { return {
+      AcceptRanges: 'bytes',
+      LastModified: new Date('2018-04-01T13:32:58.000Z'),
+      ContentLength: 23,
+      ETag: '"ae771fbbba6a74eeeb77754355831713"',
+      ContentType: 'text/plain',
+      Metadata: {},
+      Body: Buffer.from('Test file for sendFile\n')
+    }}
   })
 
   res.download('s3://my-test-bucket/test/test.txt')
