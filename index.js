@@ -3,7 +3,7 @@
 /**
  * Lightweight web framework for your serverless applications
  * @author Jeremy Daly <jeremy@jeremydaly.com>
- * @version 0.5.0
+ * @version 0.5.1
  * @license MIT
  */
 
@@ -46,6 +46,9 @@ class API {
 
     // Keep track of callback execution
     this._done = false
+
+    // Keep track of triggered errors
+    this._error = false
 
     // Executed after the callback
     this._finally = () => {}
@@ -115,6 +118,8 @@ class API {
     this._event = event
     this._context = context
     this._cb = cb
+    this._done = false
+    this._error = false
 
     try {
       // Initalize response and request objects
@@ -123,11 +128,13 @@ class API {
 
       // Loop through the middleware and await response
       for (const mw of this._middleware) {
+        if (this._done || this._error) break
+        // Promisify middleware
         await new Promise(r => { mw(this.request,this.response,() => { r() }) })
       } // end for
 
       // Execute the primary handler
-      await this.handler(this.request,this.response)
+      if (!this._done && !this._error) await this.handler(this.request,this.response)
 
     } catch(e) {
       this.catchErrors(e)
@@ -157,13 +164,22 @@ class API {
       !this._test && console.log('API Error:',e)
     }
 
-    // Execute error middleware
-    for (const err of this._errors) {
-      // Promisify error middleware
-      await new Promise(r => { err(e,this.request,this.response,() => { r() }) })
-    } // end for
+    // If first time through, process error middleware
+    if (!this._error) {
 
-    this.response.json({'error':message})
+      // Flag error state (this will avoid infinite error loops)
+      this._error = true
+
+      // Execute error middleware
+      for (const err of this._errors) {
+        if (this._done) break
+        // Promisify error middleware
+        await new Promise(r => { err(e,this.request,this.response,() => { r() }) })
+      } // end for
+    }
+
+    // Throw standard error unless callback has already been executed
+    if (!this._done) this.response.json({'error':message})
 
   } // end catch
 
@@ -171,6 +187,9 @@ class API {
 
   // Custom callback
   async _callback(err, res) {
+
+    // Set done status
+    this._done = true
 
     // Execute finally
     await this._finally(this.request,this.response)
