@@ -3,11 +3,11 @@
 /**
  * Lightweight web framework for your serverless applications
  * @author Jeremy Daly <jeremy@jeremydaly.com>
- * @version 0.5.1
+ * @version 0.6.0
  * @license MIT
  */
 
-const REQUEST = require('./lib/request.js') // Response object
+const REQUEST = require('./lib/request.js') // Resquest object
 const RESPONSE = require('./lib/response.js') // Response object
 
 // Create the API class
