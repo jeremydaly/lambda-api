@@ -83,6 +83,70 @@ describe('Utility Function Tests:', function() {
   }) // end encodeBody tests
 
 
+  describe('parseAuth:', function() {
+
+    it('None: undefined', function() {
+      let result = utils.parseAuth(undefined)
+      expect(result).to.deep.equal({ type: 'none', value: null })
+    }) // end it
+
+    it('None: empty', function() {
+      let result = utils.parseAuth('')
+      expect(result).to.deep.equal({ type: 'none', value: null })
+    }) // end it
+
+    it('Invalid schema', function() {
+      let result = utils.parseAuth('Test 12345')
+      expect(result).to.deep.equal({ type: 'none', value: null })
+    }) // end it
+
+    it('Missing value/token', function() {
+      let result = utils.parseAuth('Bearer')
+      expect(result).to.deep.equal({ type: 'none', value: null })
+    }) // end it
+
+    it('Bearer Token (OAuth2/JWT)', function() {
+      let result = utils.parseAuth('Bearer XYZ')
+      expect(result).to.deep.equal({ type: 'Bearer', value: 'XYZ' })
+    }) // end it
+
+    it('Digest', function() {
+      let result = utils.parseAuth('Digest XYZ')
+      expect(result).to.deep.equal({ type: 'Digest', value: 'XYZ' })
+    }) // end it
+
+    it('OAuth 1.0', function() {
+      let result = utils.parseAuth('OAuth realm="Example", oauth_consumer_key="xyz", oauth_token="abc", oauth_version="1.0"')
+      expect(result).to.deep.equal({
+        type: 'OAuth',
+        value: 'realm="Example", oauth_consumer_key="xyz", oauth_token="abc", oauth_version="1.0"',
+        realm: 'Example',
+        oauth_consumer_key: 'xyz',
+        oauth_token: 'abc',
+        oauth_version: '1.0'
+      })
+    }) // end it
+
+    it('Basic', function() {
+      let creds = new Buffer('test:testing').toString('base64')
+      let result = utils.parseAuth('Basic ' + creds)
+      expect(result).to.deep.equal({ type: 'Basic', value: creds, username: 'test', password: 'testing' })
+    }) // end it
+
+    it('Basic (no password)', function() {
+      let creds = new Buffer('test').toString('base64')
+      let result = utils.parseAuth('Basic ' + creds)
+      expect(result).to.deep.equal({ type: 'Basic', value: creds, username: 'test', password: null })
+    }) // end it
+
+    it('Invalid type', function() {
+      let result = utils.parseAuth(123)
+      expect(result).to.deep.equal({ type: 'none', value: null })
+    }) // end it
+
+  }) // end encodeBody tests
+
+
   describe('mimeLookup:', function() {
 
     it('.pdf', function() {
