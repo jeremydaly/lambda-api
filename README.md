@@ -178,6 +178,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `rawBody`: If the `isBase64Encoded` flag is `true`, this is a copy of the original, base64 encoded body
 - `route`: The matched route of the request
 - `requestContext`: The `requestContext` passed from the API Gateway
+- `auth`: An object containing the `type` and `value` of an authorization header. Currently supports `Bearer`, `Basic`, `Oauth`, and `Digest` schemas. For the `Basic` schema, the object is extended with additional fields for username/password. For the `OAuth` schema, the object is extended with key/value pairs of the supplied OAuth 1.0 values.
 - `namespace` or `ns`: A reference to modules added to the app's namespace (see [namespaces](#namespaces))
 - `cookies`: An object containing cookies sent from the browser (see the [cookie](#cookiename-value-options) `RESPONSE` method)
 
