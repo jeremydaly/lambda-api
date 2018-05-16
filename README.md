@@ -103,11 +103,15 @@ api.delete('/users', (req,res) => {
   // do something
 })
 ```
-Additional methods are support by calling the `METHOD` method with three arguments. The first argument is the HTTP method, a *route*, and a function that accepts a `REQUEST` and a `RESPONSE` argument.
+Additional methods are support by calling the `METHOD` method with three arguments. The first argument is the HTTP method (or array of methods), a *route*, and a function that accepts a `REQUEST` and a `RESPONSE` argument.
 
 ```javascript
 api.METHOD('trace','/users', (req,res) => {
-  // do something
+  // do something on TRACE
+})
+
+api.METHOD(['post','put'],'/users', (req,res) => {
+  // do something on POST -or- PUT
 })
 ```
 
