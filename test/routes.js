@@ -35,6 +35,10 @@ api.get('/test', function(req,res) {
   res.status(200).json({ method: 'get', status: 'ok' })
 })
 
+api.patch('/test', function(req,res) {
+  res.status(200).json({ method: 'patch', status: 'ok' })
+})
+
 api.get('/test_options', function(req,res) {
   res.status(200).json({ method: 'get', status: 'ok' })
 })
@@ -70,6 +74,11 @@ api.put('/test/:test', function(req,res) {
   res.status(200).json({ method: 'put', status: 'ok', param: req.params.test })
 })
 
+api.patch('/test/:test', function(req,res) {
+  // console.log(req)
+  res.status(200).json({ method: 'patch', status: 'ok', param: req.params.test })
+})
+
 api.delete('/test/:test', function(req,res) {
   // console.log(req)
   res.status(200).json({ method: 'delete', status: 'ok', param: req.params.test })
@@ -78,6 +87,11 @@ api.delete('/test/:test', function(req,res) {
 api.options('/test/:test', function(req,res) {
   // console.log(req)
   res.status(200).json({ method: 'options', status: 'ok', param: req.params.test })
+})
+
+api.patch('/test/:test/:test2', function(req,res) {
+  // console.log(req)
+  res.status(200).json({ method: 'patch', status: 'ok', params: req.params })
 })
 
 api.delete('/test/:test/:test2', function(req,res) {
@@ -482,6 +496,39 @@ describe('Route Tests:', function() {
 
   }) // end PUT tests
 
+
+  /********************/
+  /*** PATCH Tests ***/
+  /********************/
+
+  describe('PATCH', function() {
+
+    it('Simple path: /test', async function() {
+      let _event = Object.assign({},event,{ path: '/test', httpMethod: 'patch'})
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"patch","status":"ok"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Path with parameter: /test/123', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123', httpMethod: 'patch' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"patch","status":"ok","param":"123"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Path with multiple parameters: /test/123/456', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123/456', httpMethod: 'patch' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"patch","status":"ok","params":{"test":"123","test2":"456"}}', isBase64Encoded: false })
+    }) // end it
+
+    it('Missing path: /not_found', async function() {
+      let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'patch' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
+    }) // end it
+
+  }) // end PATCH tests
+
   /********************/
   /*** DELETE Tests ***/
   /********************/
@@ -499,7 +546,6 @@ describe('Route Tests:', function() {
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"delete","status":"ok","params":{"test":"123","test2":"456"}}', isBase64Encoded: false })
     }) // end it
-
 
     it('Missing path: /not_found', async function() {
       let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'delete' })
@@ -602,18 +648,22 @@ describe('Route Tests:', function() {
 
   describe('routes() (debug method)', function() {
     it('Extract routes', async function() {
+      // console.log(api.routes());
       expect(api.routes()).to.deep.equal([
         [ 'GET', '/' ],
         [ 'OPTIONS', '/test' ],
         [ 'PUT', '/test' ],
         [ 'POST', '/test' ],
+        [ 'PATCH', '/test' ],
         [ 'GET', '/test' ],
         [ 'OPTIONS', '/test/:test' ],
         [ 'DELETE', '/test/:test' ],
+        [ 'PATCH', '/test/:test' ],
         [ 'PUT', '/test/:test' ],
         [ 'POST', '/test/:test' ],
         [ 'GET', '/test/:test' ],
         [ 'DELETE', '/test/:test/:test2' ],
+        [ 'PATCH', '/test/:test/:test2' ],
         [ 'OPTIONS', '/test/:test/query' ],
         [ 'PUT', '/test/:test/query' ],
         [ 'POST', '/test/:test/query' ],
