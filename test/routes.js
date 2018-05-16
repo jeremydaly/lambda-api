@@ -600,5 +600,59 @@ describe('Route Tests:', function() {
 
   }) // end method tests
 
+  describe('routes() (debug method)', function() {
+    it('Extract routes', async function() {
+      expect(api.routes()).to.deep.equal([
+        [ 'GET', '/' ],
+        [ 'OPTIONS', '/test' ],
+        [ 'PUT', '/test' ],
+        [ 'POST', '/test' ],
+        [ 'GET', '/test' ],
+        [ 'OPTIONS', '/test/:test' ],
+        [ 'DELETE', '/test/:test' ],
+        [ 'PUT', '/test/:test' ],
+        [ 'POST', '/test/:test' ],
+        [ 'GET', '/test/:test' ],
+        [ 'DELETE', '/test/:test/:test2' ],
+        [ 'OPTIONS', '/test/:test/query' ],
+        [ 'PUT', '/test/:test/query' ],
+        [ 'POST', '/test/:test/query' ],
+        [ 'GET', '/test/:test/query' ],
+        [ 'OPTIONS', '/test/:test/query/:test2' ],
+        [ 'PUT', '/test/:test/query/:test2' ],
+        [ 'POST', '/test/:test/query/:test2' ],
+        [ 'GET', '/test/:test/query/:test2' ],
+        [ 'TEST', '/test/:param1/queryx' ],
+        [ 'PUT', '/test/json' ],
+        [ 'POST', '/test/json' ],
+        [ 'PUT', '/test/form' ],
+        [ 'POST', '/test/form' ],
+        [ 'GET', '/test_options' ],
+        [ 'GET', '/test_options2/:test' ],
+        [ 'TEST', '/test_options2/:param1/test' ],
+        [ 'OPTIONS', '/test_options2/:param1/*' ],
+        [ 'OPTIONS', '/test_options2/*' ],
+        [ 'OPTIONS', '/*' ],
+        [ 'HEAD', '/override/head/request' ],
+        [ 'GET', '/override/head/request' ]
+      ])
+    })
+
+    it('Sample routes', function() {
+      // Create an api instance
+      let api2 = require('../index')()
+      api2.get('/', (req,res) => {})
+      api2.post('/test', (req,res) => {})
+      api2.put('/test/put', (req,res) => {})
+      api2.delete('/test/:var/delete', (req,res) => {})
+
+      expect(api2.routes()).to.deep.equal([
+        [ 'GET', '/' ],
+        [ 'POST', '/test' ],
+        [ 'PUT', '/test/put' ],
+        [ 'DELETE', '/test/:var/delete' ]
+      ])
+    }) // end it
+  }) // end routes() test
 
 }) // end ROUTE tests

@@ -9,6 +9,8 @@
 
 const REQUEST = require('./lib/request.js') // Resquest object
 const RESPONSE = require('./lib/response.js') // Response object
+const UTILS = require('./lib/utils.js') // Require utils library
+const prettyPrint = require('./lib/prettyPrint') // Pretty print for debugging
 
 // Create the API class
 class API {
@@ -102,7 +104,13 @@ class API {
       // Add the route to the global _routes
       this.setRoute(
         this._routes,
-        (i === route.length-1 ? { ['__'+method.toUpperCase()]: { vars: pathVars, handler: handler, route: '/'+parsedPath.join('/') } } : {}),
+        (i === route.length-1 ? {
+          ['__'+method.toUpperCase()]: {
+            vars: pathVars,
+            handler: handler,
+            route: '/'+parsedPath.join('/'),
+            path: '/'+this._prefix.concat(parsedPath).join('/') }
+          } : {}),
         route.slice(0,i+1)
       )
 
@@ -292,8 +300,19 @@ class API {
   } // end register
 
 
-} // end API class
+  // prettyPrint debugger
+  routes(format) {
+    // Parse the routes
+    let routes = UTILS.extractRoutes(this._routes)
 
+    if (format) {
+      prettyPrint(routes)
+    } else {
+      return routes
+    }
+  }
+
+} // end API class
 
 // Export the API class as a new instance
 module.exports = opts => new API(opts)

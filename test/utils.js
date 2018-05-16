@@ -189,8 +189,73 @@ describe('Utility Function Tests:', function() {
       expect(utils.mimeLookup('.mpeg', { mpeg: 'video/mpeg' })).to.equal('video/mpeg')
     }) // end it
 
-
   }) // end encodeBody tests
 
+
+  describe('extractRoutes:', function() {
+
+    it('Sample routes', function() {
+      // Create an api instance
+      let api = require('../index')()
+      api.get('/', (req,res) => {})
+      api.post('/test', (req,res) => {})
+      api.put('/test/put', (req,res) => {})
+      api.delete('/test/:var/delete', (req,res) => {})
+
+      expect(utils.extractRoutes(api._routes)).to.deep.equal([
+        [ 'GET', '/' ],
+        [ 'POST', '/test' ],
+        [ 'PUT', '/test/put' ],
+        [ 'DELETE', '/test/:var/delete' ]
+      ])
+    }) // end it
+
+    it('No routes', function() {
+      // Create an api instance
+      let api = require('../index')()
+
+      expect(utils.extractRoutes(api._routes)).to.deep.equal([])
+    }) // end it
+
+    it('Prefixed routes', function() {
+      // Create an api instance
+      let api = require('../index')()
+
+      api.register((apix,opts) => {
+        apix.get('/', (req,res) => {})
+        apix.post('/test', (req,res) => {})
+      }, { prefix: '/v1' })
+      api.get('/', (req,res) => {})
+      api.post('/test', (req,res) => {})
+      api.put('/test/put', (req,res) => {})
+      api.delete('/test/:var/delete', (req,res) => {})
+
+      expect(utils.extractRoutes(api._routes)).to.deep.equal([
+        [ 'GET', '/v1' ],
+        [ 'POST', '/v1/test' ],
+        [ 'GET', '/' ],
+        [ 'POST', '/test' ],
+        [ 'PUT', '/test/put' ],
+        [ 'DELETE', '/test/:var/delete' ]
+      ])
+    }) // end it
+
+    it('Base routes', function() {
+      // Create an api instance
+      let api = require('../index')({ base: 'v2' })
+      api.get('/', (req,res) => {})
+      api.post('/test', (req,res) => {})
+      api.put('/test/put', (req,res) => {})
+      api.delete('/test/:var/delete', (req,res) => {})
+
+      expect(utils.extractRoutes(api._routes)).to.deep.equal([
+        [ 'GET', '/v2' ],
+        [ 'POST', '/v2/test' ],
+        [ 'PUT', '/v2/test/put' ],
+        [ 'DELETE', '/v2/test/:var/delete' ]
+      ])
+    }) // end it
+
+  }) // end extractRoutes
 
 }) // end UTILITY tests
