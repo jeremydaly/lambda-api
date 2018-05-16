@@ -422,6 +422,9 @@ res.clearCookie('fooArray', { path: '/', httpOnly: true }).send()
 ```
 **NOTE:** The `clearCookie()` method only sets the header. A execution ending method like `send()`, `json()`, etc. must be called to send the response.
 
+### etag([boolean])
+Enables Etag generation for the response if at value of `true` is passed in. Lambda API will generate an Etag based on the body of the response and return the appropriate header. If the request contains an `If-No-Match` header that matches the generated Etag, a `304 Not Modified` response will be returned with a blank body.
+
 ### attachment([filename])
 Sets the HTTP response `Content-Disposition` header field to "attachment". If a `filename` is provided, then the `Content-Type` is set based on the file extension using the `type()` method and the "filename=" parameter is added to the `Content-Disposition` header.
 
