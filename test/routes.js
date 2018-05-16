@@ -5,10 +5,12 @@ const expect = require('chai').expect // Assertion library
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
 const api2 = require('../index')({ version: 'v1.0' })
+const api3 = require('../index')({ version: 'v1.0' })
 
 // NOTE: Set test to true
 api._test = true;
 api2._test = true;
+api3._test = true;
 
 let event = {
   httpMethod: 'get',
@@ -206,6 +208,16 @@ api.head('/head/*', (req,res) => {
   res.status(200).header('wildcard',true).json({ })
 })
 
+// Multi methods
+api3.METHOD('get,post','/multimethod/test', (req,res) => {
+  res.status(200).json({ method: req.method, path: '/multimethod/test' })
+})
+api3.METHOD(['get','put','delete'],'/multimethod/:var', (req,res) => {
+  res.status(200).json({ method: req.method, path: '/multimethod/:var' })
+})
+api3.METHOD([1,'DELETE'],'/multimethod/badtype', (req,res) => {
+  res.status(200).json({ method: req.method, path: '/multimethod/badtype' })
+})
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
@@ -742,6 +754,72 @@ describe('Route Tests:', function() {
         body: '{"error":"Method not allowed"}',
         isBase64Encoded: false
       })
+    }) // end it
+
+    it('Multiple methods GET (string creation)', async function() {
+      let _event = Object.assign({},event,{ path: '/multimethod/test', httpMethod: 'get' })
+      let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"method":"GET","path":"/multimethod/test"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Multiple methods POST (string creation)', async function() {
+      let _event = Object.assign({},event,{ path: '/multimethod/test', httpMethod: 'post' })
+      let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"method":"POST","path":"/multimethod/test"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Multiple methods GET (array creation)', async function() {
+      let _event = Object.assign({},event,{ path: '/multimethod/x', httpMethod: 'get' })
+      let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"method":"GET","path":"/multimethod/:var"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Multiple methods PUT (array creation)', async function() {
+      let _event = Object.assign({},event,{ path: '/multimethod/x', httpMethod: 'put' })
+      let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"method":"PUT","path":"/multimethod/:var"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Multiple methods POST (method not allowed)', async function() {
+      let _event = Object.assign({},event,{ path: '/multimethod/x', httpMethod: 'post' })
+      let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 405,
+        body: '{"error":"Method not allowed"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Expected routes', function() {
+      expect(api3.routes()).to.deep.equal([
+        [ 'POST', '/multimethod/test' ],
+        [ 'GET', '/multimethod/test' ],
+        [ 'DELETE', '/multimethod/:var' ],
+        [ 'PUT', '/multimethod/:var' ],
+        [ 'GET', '/multimethod/:var' ],
+        [ 'DELETE', '/multimethod/badtype' ]
+      ])
     }) // end it
 
   }) // end method tests

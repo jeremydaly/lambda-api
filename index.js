@@ -79,6 +79,9 @@ class API {
   // METHOD: Adds method and handler to routes
   METHOD(method, path, handler) {
 
+    // Ensure method is an array
+    let methods = Array.isArray(method) ? method : method.split(',')
+
     // Parse the path
     let parsedPath = this.parseRoute(path)
 
@@ -102,18 +105,23 @@ class API {
         route[i] = '__VAR__'
       } // end if variable
 
-      // Add the route to the global _routes
-      this.setRoute(
-        this._routes,
-        (i === route.length-1 ? {
-          ['__'+method.toUpperCase()]: {
-            vars: pathVars,
-            handler: handler,
-            route: '/'+parsedPath.join('/'),
-            path: '/'+this._prefix.concat(parsedPath).join('/') }
-          } : {}),
-        route.slice(0,i+1)
-      )
+      methods.forEach(_method => {
+        if (typeof _method === 'string') {
+          // Add the route to the global _routes
+          this.setRoute(
+            this._routes,
+            (i === route.length-1 ? {
+              ['__'+_method.trim().toUpperCase()]: {
+                vars: pathVars,
+                handler: handler,
+                route: '/'+parsedPath.join('/'),
+                path: '/'+this._prefix.concat(parsedPath).join('/') }
+              } : {}),
+            route.slice(0,i+1)
+          )
+        }
+      }) // end methods loop
+
 
     } // end for loop
 
