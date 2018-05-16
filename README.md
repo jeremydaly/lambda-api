@@ -88,7 +88,7 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 
 ## Routes and HTTP Methods
 
-Routes are defined by using convenience methods or the `METHOD` method. There are currently seven convenience route methods: `get()`, `post()`, `put()`, `patch()`, `delete()`, `head()` and `options()`. Convenience route methods require two parameters, a *route* and a function that accepts two arguments. A *route* is simply a path such as `/users`. The second parameter must be a function that accepts a `REQUEST` and a `RESPONSE` argument. These arguments can be named whatever you like, but convention dictates `req` and `res`. Examples using convenience route methods:
+Routes are defined by using convenience methods or the `METHOD` method. There are currently eight convenience route methods: `get()`, `post()`, `put()`, `patch()`, `delete()`, `head()`, `options()` and `any()`. Convenience route methods require two parameters, a *route* and a function that accepts two arguments. A *route* is simply a path such as `/users`. The second parameter must be a function that accepts a `REQUEST` and a `RESPONSE` argument. These arguments can be named whatever you like, but convention dictates `req` and `res`. Examples using convenience route methods:
 
 ```javascript
 api.get('/users', (req,res) => {
@@ -112,6 +112,15 @@ api.METHOD('trace','/users', (req,res) => {
 ```
 
 All `GET` methods have a `HEAD` alias that executes the `GET` request but returns a blank `body`. `GET` requests should be idempotent with no side effects. The `head()` convenience method can be used to set specific paths for `HEAD` requests or to override default `GET` aliasing.
+
+Routes that use the `any()` method or pass `ANY` to `api.METHOD` will respond to all HTTP methods. Routes that specify a specific method (such as `GET` or `POST`), will override the route for that method. For example:
+
+```javascript
+api.any('/users', (req,res) => { res.send('any') })
+api.get('/users', (req,res) => { res.send('get') })
+```
+
+A `POST` to `/users` will return "any", but a `GET` request would return "get". Please note that routes defined with an `ANY` method will override default `HEAD` aliasing for `GET` routes.
 
 ## Route Prefixing
 
