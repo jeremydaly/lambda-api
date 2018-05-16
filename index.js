@@ -70,6 +70,7 @@ class API {
   patch(p,h) { this.METHOD('PATCH',p,h) }
   delete(p,h) { this.METHOD('DELETE',p,h) }
   options(p,h) { this.METHOD('OPTIONS',p,h) }
+  head(p,h) { this.METHOD('HEAD',p,h) }
 
 
   // METHOD: Adds method and handler to routes

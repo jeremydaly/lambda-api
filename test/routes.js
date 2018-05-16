@@ -156,6 +156,14 @@ api.options('/test_options2/:param1/*', function(req,res) {
   res.status(200).json({ method: 'options', status: 'ok', path: '/test_options2/:param1/*', params:req.params})
 })
 
+api.get('/override/head/request', (req,res) => {
+  res.status(200).header('method','get').json({ method: 'get', path: '/override/head/request' })
+})
+
+api.head('/override/head/request', (req,res) => {
+  res.status(200).header('method','head').json({ method: 'head', path: '/override/head/request' })
+})
+
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
 /******************************************************************************/
@@ -302,6 +310,12 @@ describe('Route Tests:', function() {
       let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'head' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '', isBase64Encoded: false })
+    }) // end it
+
+    it('Override HEAD request', async function() {
+      let _event = Object.assign({},event,{ path: '/override/head/request', httpMethod: 'head' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json', 'method': 'head' }, statusCode: 200, body: '', isBase64Encoded: false })
     }) // end it
 
   }) // end HEAD tests
