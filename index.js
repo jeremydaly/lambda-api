@@ -73,6 +73,7 @@ class API {
   delete(p,h) { this.METHOD('DELETE',p,h) }
   options(p,h) { this.METHOD('OPTIONS',p,h) }
   head(p,h) { this.METHOD('HEAD',p,h) }
+  any(p,h) { this.METHOD('ANY',p,h) }
 
 
   // METHOD: Adds method and handler to routes
