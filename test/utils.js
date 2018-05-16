@@ -258,4 +258,36 @@ describe('Utility Function Tests:', function() {
 
   }) // end extractRoutes
 
+
+  describe('generateEtag:', function() {
+
+    it('Sample text', function() {
+      expect(utils.generateEtag('this is a test string')).to.equal('f6774519d1c7a3389ef327e9c04766b9')
+    }) // end it
+
+    it('Sample object', function() {
+      expect(utils.generateEtag({ test: true, foo: 'bar' })).to.equal('def7648849c1e7f30c9a9c0ac79e4e52')
+    }) // end it
+
+    it('Sample JSON string object', function() {
+      expect(utils.generateEtag(JSON.stringify({ test: true, foo: 'bar' }))).to.equal('def7648849c1e7f30c9a9c0ac79e4e52')
+    }) // end it
+
+    it('Sample buffer', function() {
+      expect(utils.generateEtag(Buffer.from('this is a test string as a buffer'))).to.equal('6a2f7473a72cfebc96ae8cf93d643b70')
+    }) // end it
+
+    it('Long string', function() {
+      let longString = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+      expect(utils.generateEtag(longString)).to.equal('2d8c2f6d978ca21712b5f6de36c9d31f')
+    }) // end it
+
+    it('Long string (minor variant)', function() {
+      let longString = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est Laborum.'
+      expect(utils.generateEtag(longString)).to.equal('bc82a4065a8ab48ade900c6466b19ccd')
+    }) // end it
+
+  }) // end generateEtag tests
+
+
 }) // end UTILITY tests
