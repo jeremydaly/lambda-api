@@ -158,6 +158,39 @@ module.exports = (api, opts) => {
 
 This would create a `/v1/product` and `/v1/v2/product` route. You can also use `register()` to load routes from an external file without the `prefix`. This will just add routes to your `base` path. **NOTE:** Prefixed routes are built off of your `base` path if one is set. If your `base` was set to `/api`, then the first example above would produce the routes: `/api/v1/product` and `/api/v2/product`.
 
+## Debugging Routes
+
+Lambda API has a `routes()` method that can be called on the main instance that will return an array containing the `METHOD` and full `PATH` of every configured route. This will include base paths and prefixed routes. This is helpful for debugging your routes.
+
+```javascript
+ const api = require('lambda-api')()
+
+ api.get('/', (req,res) => {})
+ api.post('/test', (req,res) => {})
+
+ api.routes() // => [ [ 'GET', '/' ], [ 'POST', '/test' ] ]
+```
+
+You can also log the paths in table form to the console by passing in `true` as the only parameter.
+
+```javascript
+ const api = require('lambda-api')()
+
+ api.get('/', (req,res) => {})
+ api.post('/test', (req,res) => {})
+
+ api.routes(true)
+
+// Outputs to console
+╔═══════════╤═════════════════╗
+║  METHOD   │  ROUTE          ║
+╟───────────┼─────────────────╢
+║  GET      │  /              ║
+╟───────────┼─────────────────╢
+║  POST     │  /test          ║
+╚═══════════╧═════════════════╝
+```
+
 
 ## REQUEST
 
