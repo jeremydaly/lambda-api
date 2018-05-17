@@ -27,10 +27,6 @@ class API {
     // Prefix stack w/ base
     this._prefix = this.parseRoute(this._base)
 
-    // Stores timers for debugging
-    this._timers = {}
-    this._procTimes = {}
-
     // Stores route mappings
     this._routes = {}
 
@@ -136,26 +132,28 @@ class API {
     this._event = event
     this._context = context
     this._cb = cb
-    this._done = false
-    this._error = false
+
+    // Initalize request and response objects
+    let request = new REQUEST(this)
+    let response = new RESPONSE(this,request)
 
     try {
-      // Initalize response and request objects
-      this.response = new RESPONSE(this)
-      this.request = new REQUEST(this)
+
+      // Parse the request
+      request.parseRequest()
 
       // Loop through the middleware and await response
       for (const mw of this._middleware) {
-        if (this._done || this._error) break
+        if (response._state !== 'processing') break
         // Promisify middleware
-        await new Promise(r => { mw(this.request,this.response,() => { r() }) })
+        await new Promise(r => { mw(request,response,() => { r() }) })
       } // end for
 
       // Execute the primary handler
-      if (!this._done && !this._error) await this.handler(this.request,this.response)
+      if (response._state === 'processing') await request._handler(request,response)
 
     } catch(e) {
-      this.catchErrors(e)
+      this.catchErrors(e,response)
     }
 
   } // end run function
@@ -163,18 +161,18 @@ class API {
 
 
   // Catch all async/sync errors
-  async catchErrors(e) {
+  async catchErrors(e,response) {
 
     // Error messages should never be base64 encoded
-    this.response._isBase64 = false
+    response._isBase64 = false
 
     // Strip the headers (TODO: find a better way to handle this)
-    this.response._headers = {}
+    response._headers = {}
 
     let message;
 
     if (e instanceof Error) {
-      this.response.status(this._errorStatus)
+      response.status(this._errorStatus)
       message = e.message
       !this._test && console.log(e)
     } else {
@@ -183,34 +181,34 @@ class API {
     }
 
     // If first time through, process error middleware
-    if (!this._error) {
+    if (response._state === 'processing') {
 
       // Flag error state (this will avoid infinite error loops)
-      this._error = true
+      response._state === 'error'
 
       // Execute error middleware
       for (const err of this._errors) {
-        if (this._done) break
+        if (response._state === 'done') break
         // Promisify error middleware
-        await new Promise(r => { err(e,this.request,this.response,() => { r() }) })
+        await new Promise(r => { err(e,response._request,response,() => { r() }) })
       } // end for
     }
 
     // Throw standard error unless callback has already been executed
-    if (!this._done) this.response.json({'error':message})
+    if (response._state !== 'done') response.json({'error':message})
 
   } // end catch
 
 
 
   // Custom callback
-  async _callback(err, res) {
+  async _callback(err, res, response) {
 
     // Set done status
-    this._done = true
+    response._state = 'done'
 
     // Execute finally
-    await this._finally(this.request,this.response)
+    await this._finally(response._request,response)
 
     // Execute the primary callback
     this._cb(err,res)
