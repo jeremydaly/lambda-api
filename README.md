@@ -65,6 +65,9 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ## Recent Updates
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
 
+### v0.6: Responses now supports both `callback-style` and `async-await`
+In additional to `res.send()`, you can now simply `return` the body from your route and middleware functions. See [Returning Responses](#returning-responses) for more information.
+
 ### v0.5: Remove Bluebird Promises Dependency
 Now that AWS Lambda supports Node v8.10, asynchronous operations can be handled more efficiently with `async/await` rather than with promises. The core Lambda API execution engine has been rewritten to take advantage of `async/await`, which means we no longer need to depend on Bluebird. We now have **ZERO** dependencies.
 
@@ -125,6 +128,68 @@ api.get('/users', (req,res) => { res.send('get') })
 ```
 
 A `POST` to `/users` will return "any", but a `GET` request would return "get". Please note that routes defined with an `ANY` method will override default `HEAD` aliasing for `GET` routes.
+
+## Returning Responses
+
+Lambda API supports both `callback-style` and `async-await` for returning responses to users. The [RESPONSE](#response) object has several callbacks that will trigger a response (`send()`, `json()`, `html()`, etc.) You can use any of these callbacks from within route functions and middleware to send the response:
+
+```javascript
+api.get('/users', (req,res) => {
+  res.send({ foo: 'bar' })
+})
+```
+
+You can also `return` data from route functions and middleware. The contents will be sent as the body:
+
+```javascript
+api.get('/users', (req,res) => {
+  return { foo: 'bar' }
+})
+```
+
+### Async/Await  
+
+If you prefer to use `async/await`, you can easily apply this to your route functions.
+
+Using `return`:
+```javascript
+api.get('/users', async (req,res) => {
+  let users = await getUsers()
+  return users
+})
+```
+
+Or using callbacks:
+```javascript
+api.get('/users', async (req,res) => {
+  let users = await getUsers()
+  res.send(users)
+})
+```
+
+### Promises
+
+If you like promises, you can either use a callback like `res.send()` at the end of your promise chain, or you can simple `return` the resolved promise:
+
+```javascript
+api.get('/users', (req,res) => {
+  getUsers().then(users => {
+    res.send(users)
+  })
+})
+```
+
+OR
+
+```javascript
+api.get('/users', (req,res) => {
+  return getUsers().then(users => {
+    return users
+  })
+})
+```
+
+**IMPORTANT:** You must either use a callback like `res.send()` **OR** `return` a value. Otherwise the execution will hang and no data will be sent to the user. Also, be sure not to return `undefined`, otherwise it will assume no response.
 
 ## Route Prefixing
 
