@@ -42,12 +42,6 @@ class API {
     // Store app packages and namespaces
     this._app = {}
 
-    // Keep track of callback execution
-    this._done = false
-
-    // Keep track of triggered errors
-    this._error = false
-
     // Executed after the callback
     this._finally = () => {}
 
@@ -144,13 +138,20 @@ class API {
 
       // Loop through the middleware and await response
       for (const mw of this._middleware) {
+        // Only run middleware if in processing state
         if (response._state !== 'processing') break
         // Promisify middleware
-        await new Promise(r => { mw(request,response,() => { r() }) })
+        await new Promise(r => {
+          let rtn = mw(request,response,() => { r() })
+          if (rtn) response.send(rtn)
+        })
       } // end for
 
-      // Execute the primary handler
-      if (response._state === 'processing') await request._handler(request,response)
+      // Execute the primary handler if in processing state
+      if (response._state === 'processing') {
+        let rtn = await request._handler(request,response)
+        if (rtn) response.send(rtn)
+      }
 
     } catch(e) {
       this.catchErrors(e,response)
@@ -190,7 +191,10 @@ class API {
       for (const err of this._errors) {
         if (response._state === 'done') break
         // Promisify error middleware
-        await new Promise(r => { err(e,response._request,response,() => { r() }) })
+        await new Promise(r => {
+          let rtn = err(e,response._request,response,() => { r() })
+          if (rtn) response.send(rtn)
+        })
       } // end for
     }
 
