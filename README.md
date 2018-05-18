@@ -65,7 +65,7 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ## Recent Updates
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
 
-### v0.6: Responses now supports both `callback-style` and `async-await`
+### v0.6: Support for both `callback-style` and `async-await`
 In additional to `res.send()`, you can now simply `return` the body from your route and middleware functions. See [Returning Responses](#returning-responses) for more information.
 
 ### v0.5: Remove Bluebird Promises Dependency
@@ -169,7 +169,7 @@ api.get('/users', async (req,res) => {
 
 ### Promises
 
-If you like promises, you can either use a callback like `res.send()` at the end of your promise chain, or you can simple `return` the resolved promise:
+If you like promises, you can either use a callback like `res.send()` at the end of your promise chain, or you can simply `return` the resolved promise:
 
 ```javascript
 api.get('/users', (req,res) => {
@@ -623,6 +623,8 @@ api.use((req,res,next) => {
 
 The `next()` callback tells the system to continue executing. If this is not called then the system will hang and eventually timeout unless another request ending call such as `error` is called. You can define as many middleware functions as you want. They will execute serially and synchronously in the order in which they are defined.
 
+**NOTE:** Middleware can use either callbacks like `res.send()` or `return` to trigger a response to the user. Please note that calling either one of these from within a middleware function will terminate execution and return the response immediately.
+
 ## Clean Up
 The API has a built-in clean up method called 'finally()' that will execute after all middleware and routes have been completed, but before execution is complete. This can be used to close database connections or to perform other clean up functions. A clean up function can be defined using the `finally` method and requires a function with two parameters for the REQUEST and the RESPONSE as its only argument. For example:
 
@@ -644,7 +646,7 @@ api.use((err,req,res,next) => {
 })
 ```
 
-The `next()` callback will cause the script to continue executing and eventually call the standard error handling function. You can short-circuit the default handler by calling a request ending method such as `send`, `html`, or `json`.
+The `next()` callback will cause the script to continue executing and eventually call the standard error handling function. You can short-circuit the default handler by calling a request ending method such as `send`, `html`, or `json` OR by `return`ing data from your handler.
 
 ## Namespaces
 Lambda API allows you to map specific modules to namespaces that can be accessed from the `REQUEST` object. This is helpful when using the pattern in which you create a module that exports middleware, error, or route functions. In the example below, the `data` namespace is added to the API and then accessed by reference within an included module.
