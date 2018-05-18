@@ -41,7 +41,7 @@ Lambda API was written to be extremely lightweight and built specifically for se
 - [Installation](#installation)
 - [Requirements](#requirements)
 - [Configuration](#configuration)
-- [Recent Updates](##recent-updates)
+- [Recent Updates](#recent-updates)
 - [Routes and HTTP Methods](#routes-and-http-methods)
 - [Returning Responses](#returning-responses)
   - [Async/Await](#asyncawait)
