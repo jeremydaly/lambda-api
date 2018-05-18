@@ -89,6 +89,12 @@ api.get('/corsOverride', function(req,res) {
   }).json({})
 })
 
+api.get('/auth', function(req,res) {
+  res.json({
+    auth: req.auth
+  })
+})
+
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
@@ -207,6 +213,54 @@ describe('Header Tests:', function() {
         isBase64Encoded: false
       })
     }) // end it
-
   }) // end CORS tests
+
+
+  describe('Authorization Tests:', function() {
+
+    it('Bearer (OAuth2/JWT)', async function() {
+      let _event = Object.assign({},event,{ path: '/auth', headers: { authorization: "Bearer XYZ" } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"auth":{"type":"Bearer","value":"XYZ"}}', isBase64Encoded: false })
+    }) // end it
+
+    it('Digest', async function() {
+      let _event = Object.assign({},event,{ path: '/auth', headers: { authorization: "Digest XYZ" } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"auth":{"type":"Digest","value":"XYZ"}}', isBase64Encoded: false })
+    }) // end it
+
+    it('Basic Auth', async function() {
+      let creds = new Buffer('test:testing').toString('base64')
+      let _event = Object.assign({},event,{ path: '/auth', headers: { authorization: "Basic " + creds } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"auth":{"type":"Basic","value":"dGVzdDp0ZXN0aW5n","username":"test","password":"testing"}}', isBase64Encoded: false })
+    }) // end it
+
+    it('OAuth 1.0', async function() {
+      let _event = Object.assign({},event,{ path: '/auth', headers: { authorization: 'OAuth realm="Example", oauth_consumer_key="xyz", oauth_token="abc", oauth_version="1.0"' } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{\"auth\":{\"type\":\"OAuth\",\"value\":\"realm=\\\"Example\\\", oauth_consumer_key=\\\"xyz\\\", oauth_token=\\\"abc\\\", oauth_version=\\\"1.0\\\"\",\"realm\":\"Example\",\"oauth_consumer_key\":\"xyz\",\"oauth_token\":\"abc\",\"oauth_version\":\"1.0\"}}', isBase64Encoded: false })
+    }) // end it
+
+    it('Missing Authorization Header', async function() {
+      let _event = Object.assign({},event,{ path: '/auth', headers: { } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"auth":{"type":"none","value":null}}', isBase64Encoded: false })
+    }) // end it
+
+    it('Invalid Schema', async function() {
+      let _event = Object.assign({},event,{ path: '/auth', headers: { authorization: "Test XYZ" } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"auth":{"type":"none","value":null}}', isBase64Encoded: false })
+    }) // end it
+
+    it('Incomplete Header', async function() {
+      let _event = Object.assign({},event,{ path: '/auth', headers: { authorization: "Bearer" } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"auth":{"type":"none","value":null}}', isBase64Encoded: false })
+    }) // end it
+
+  }) // end Auth tests
+
 }) // end HEADER tests

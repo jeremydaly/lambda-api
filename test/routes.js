@@ -5,10 +5,12 @@ const expect = require('chai').expect // Assertion library
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
 const api2 = require('../index')({ version: 'v1.0' })
+const api3 = require('../index')({ version: 'v1.0' })
 
 // NOTE: Set test to true
 api._test = true;
 api2._test = true;
+api3._test = true;
 
 let event = {
   httpMethod: 'get',
@@ -33,6 +35,10 @@ api2.get('/', function(req,res) {
 
 api.get('/test', function(req,res) {
   res.status(200).json({ method: 'get', status: 'ok' })
+})
+
+api.patch('/test', function(req,res) {
+  res.status(200).json({ method: 'patch', status: 'ok' })
 })
 
 api.get('/test_options', function(req,res) {
@@ -70,6 +76,11 @@ api.put('/test/:test', function(req,res) {
   res.status(200).json({ method: 'put', status: 'ok', param: req.params.test })
 })
 
+api.patch('/test/:test', function(req,res) {
+  // console.log(req)
+  res.status(200).json({ method: 'patch', status: 'ok', param: req.params.test })
+})
+
 api.delete('/test/:test', function(req,res) {
   // console.log(req)
   res.status(200).json({ method: 'delete', status: 'ok', param: req.params.test })
@@ -78,6 +89,11 @@ api.delete('/test/:test', function(req,res) {
 api.options('/test/:test', function(req,res) {
   // console.log(req)
   res.status(200).json({ method: 'options', status: 'ok', param: req.params.test })
+})
+
+api.patch('/test/:test/:test2', function(req,res) {
+  // console.log(req)
+  res.status(200).json({ method: 'patch', status: 'ok', params: req.params })
 })
 
 api.delete('/test/:test/:test2', function(req,res) {
@@ -154,6 +170,53 @@ api.options('/test_options2/*', function(req,res) {
 
 api.options('/test_options2/:param1/*', function(req,res) {
   res.status(200).json({ method: 'options', status: 'ok', path: '/test_options2/:param1/*', params:req.params})
+})
+
+api.get('/override/head/request', (req,res) => {
+  res.status(200).header('method','get').json({ method: 'get', path: '/override/head/request' })
+})
+
+api.head('/override/head/request', (req,res) => {
+  res.status(200).header('method','head').json({ method: 'head', path: '/override/head/request' })
+})
+
+api.any('/any', (req,res) => {
+  res.status(200).json({ method: req.method, path: '/any', anyRoute: true })
+})
+
+api.any('/any2', (req,res) => {
+  res.status(200).json({ method: req.method, path: '/any2', anyRoute: true })
+})
+
+api.post('/any2', (req,res) => {
+  res.status(200).json({ method: req.method, path: '/any2', anyRoute: false })
+})
+
+api.options('/anywildcard/test', (req,res) => {
+  res.status(200).json({ method: req.method, path: '/anywildcard', anyRoute: true })
+})
+
+api.any('/anywildcard/*', (req,res) => {
+  res.status(200).json({ method: req.method, path: '/anywildcard', anyRoute: true })
+})
+
+api.get('/head/override', (req,res) => {
+  res.status(200).header('wildcard',false).json({ })
+})
+
+api.head('/head/*', (req,res) => {
+  res.status(200).header('wildcard',true).json({ })
+})
+
+// Multi methods
+api3.METHOD('get,post','/multimethod/test', (req,res) => {
+  res.status(200).json({ method: req.method, path: '/multimethod/test' })
+})
+api3.METHOD(['get','put','delete'],'/multimethod/:var', (req,res) => {
+  res.status(200).json({ method: req.method, path: '/multimethod/:var' })
+})
+api3.METHOD([1,'DELETE'],'/multimethod/badtype', (req,res) => {
+  res.status(200).json({ method: req.method, path: '/multimethod/badtype' })
 })
 
 /******************************************************************************/
@@ -285,7 +348,6 @@ describe('Route Tests:', function() {
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '', isBase64Encoded: false })
     }) // end it
 
-
     it('Event path + querystring w/ trailing slash (this shouldn\'t happen with API Gateway)', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/query/?test=321', httpMethod: 'head', queryStringParameters: { test: '321' } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
@@ -302,6 +364,18 @@ describe('Route Tests:', function() {
       let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'head' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '', isBase64Encoded: false })
+    }) // end it
+
+    it('Override HEAD request', async function() {
+      let _event = Object.assign({},event,{ path: '/override/head/request', httpMethod: 'head' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json', 'method': 'head' }, statusCode: 200, body: '', isBase64Encoded: false })
+    }) // end it
+
+    it('Wildcard HEAD request', async function() {
+      let _event = Object.assign({},event,{ path: '/head/override', httpMethod: 'head' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json', 'wildcard': true }, statusCode: 200, body: '', isBase64Encoded: false })
     }) // end it
 
   }) // end HEAD tests
@@ -468,6 +542,39 @@ describe('Route Tests:', function() {
 
   }) // end PUT tests
 
+
+  /********************/
+  /*** PATCH Tests ***/
+  /********************/
+
+  describe('PATCH', function() {
+
+    it('Simple path: /test', async function() {
+      let _event = Object.assign({},event,{ path: '/test', httpMethod: 'patch'})
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"patch","status":"ok"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Path with parameter: /test/123', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123', httpMethod: 'patch' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"patch","status":"ok","param":"123"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Path with multiple parameters: /test/123/456', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123/456', httpMethod: 'patch' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"patch","status":"ok","params":{"test":"123","test2":"456"}}', isBase64Encoded: false })
+    }) // end it
+
+    it('Missing path: /not_found', async function() {
+      let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'patch' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
+    }) // end it
+
+  }) // end PATCH tests
+
   /********************/
   /*** DELETE Tests ***/
   /********************/
@@ -485,7 +592,6 @@ describe('Route Tests:', function() {
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"delete","status":"ok","params":{"test":"123","test2":"456"}}', isBase64Encoded: false })
     }) // end it
-
 
     it('Missing path: /not_found', async function() {
       let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'delete' })
@@ -571,6 +677,72 @@ describe('Route Tests:', function() {
   }) // end OPTIONS tests
 
 
+
+  /*********************/
+  /*** ANY Tests ***/
+  /*********************/
+
+  describe('ANY', function() {
+
+    it('GET request on ANY route', async function() {
+      let _event = Object.assign({},event,{ path: '/any', httpMethod: 'get' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"GET","path":"/any","anyRoute":true}', isBase64Encoded: false })
+    }) // end it
+
+    it('POST request on ANY route', async function() {
+      let _event = Object.assign({},event,{ path: '/any', httpMethod: 'post' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"POST","path":"/any","anyRoute":true}', isBase64Encoded: false })
+    }) // end it
+
+    it('PUT request on ANY route', async function() {
+      let _event = Object.assign({},event,{ path: '/any', httpMethod: 'put' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"PUT","path":"/any","anyRoute":true}', isBase64Encoded: false })
+    }) // end it
+
+    it('DELETE request on ANY route', async function() {
+      let _event = Object.assign({},event,{ path: '/any', httpMethod: 'delete' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"DELETE","path":"/any","anyRoute":true}', isBase64Encoded: false })
+    }) // end it
+
+    it('PATCH request on ANY route', async function() {
+      let _event = Object.assign({},event,{ path: '/any', httpMethod: 'patch' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"PATCH","path":"/any","anyRoute":true}', isBase64Encoded: false })
+    }) // end it
+
+    it('HEAD request on ANY route', async function() {
+      let _event = Object.assign({},event,{ path: '/any', httpMethod: 'head' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '', isBase64Encoded: false })
+    }) // end it
+
+
+    it('GET request on ANY route: /any2', async function() {
+      let _event = Object.assign({},event,{ path: '/any2', httpMethod: 'get' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"GET","path":"/any2","anyRoute":true}', isBase64Encoded: false })
+    }) // end it
+
+    it('POST request that overrides ANY route: /any2', async function() {
+      let _event = Object.assign({},event,{ path: '/any2', httpMethod: 'post' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"POST","path":"/any2","anyRoute":false}', isBase64Encoded: false })
+    }) // end it
+
+    it('GET request on ANY wildcard route: /anywildcard', async function() {
+      let _event = Object.assign({},event,{ path: '/anywildcard/test', httpMethod: 'get' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"GET","path":"/anywildcard","anyRoute":true}', isBase64Encoded: false })
+    }) // end it
+
+  }) // end ANY tests
+
+
+
   describe('METHOD', function() {
 
     it('Invalid method (new api instance)', async function() {
@@ -584,7 +756,91 @@ describe('Route Tests:', function() {
       })
     }) // end it
 
+    it('Multiple methods GET (string creation)', async function() {
+      let _event = Object.assign({},event,{ path: '/multimethod/test', httpMethod: 'get' })
+      let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"method":"GET","path":"/multimethod/test"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Multiple methods POST (string creation)', async function() {
+      let _event = Object.assign({},event,{ path: '/multimethod/test', httpMethod: 'post' })
+      let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"method":"POST","path":"/multimethod/test"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Multiple methods GET (array creation)', async function() {
+      let _event = Object.assign({},event,{ path: '/multimethod/x', httpMethod: 'get' })
+      let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"method":"GET","path":"/multimethod/:var"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Multiple methods PUT (array creation)', async function() {
+      let _event = Object.assign({},event,{ path: '/multimethod/x', httpMethod: 'put' })
+      let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"method":"PUT","path":"/multimethod/:var"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Multiple methods POST (method not allowed)', async function() {
+      let _event = Object.assign({},event,{ path: '/multimethod/x', httpMethod: 'post' })
+      let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 405,
+        body: '{"error":"Method not allowed"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Expected routes', function() {
+      expect(api3.routes()).to.deep.equal([
+        [ 'POST', '/multimethod/test' ],
+        [ 'GET', '/multimethod/test' ],
+        [ 'DELETE', '/multimethod/:var' ],
+        [ 'PUT', '/multimethod/:var' ],
+        [ 'GET', '/multimethod/:var' ],
+        [ 'DELETE', '/multimethod/badtype' ]
+      ])
+    }) // end it
+
   }) // end method tests
 
+  describe('routes() (debug method)', function() {
+
+    it('Sample routes', function() {
+      // Create an api instance
+      let api2 = require('../index')()
+      api2.get('/', (req,res) => {})
+      api2.post('/test', (req,res) => {})
+      api2.put('/test/put', (req,res) => {})
+      api2.delete('/test/:var/delete', (req,res) => {})
+
+      expect(api2.routes()).to.deep.equal([
+        [ 'GET', '/' ],
+        [ 'POST', '/test' ],
+        [ 'PUT', '/test/put' ],
+        [ 'DELETE', '/test/:var/delete' ]
+      ])
+    }) // end it
+  }) // end routes() test
 
 }) // end ROUTE tests

@@ -37,6 +37,50 @@ Lambda API has **ZERO** dependencies.
 
 Lambda API was written to be extremely lightweight and built specifically for serverless applications using AWS Lambda. It provides support for API routing, serving up HTML pages, issuing redirects, serving binary files and much more. It has a powerful middleware and error handling system, allowing you to implement everything from custom authentication to complex logging systems. Best of all, it was designed to work with Lambda's Proxy Integration, automatically handling all the interaction with API Gateway for you. It parses **REQUESTS** and formats **RESPONSES** for you, allowing you to focus on your application's core functionality, instead of fiddling with inputs and outputs.
 
+## Table of Contents
+- [Installation](#installation)
+- [Requirements](#requirements)
+- [Configuration](#configuration)
+- [Recent Updates](#recent-updates)
+- [Routes and HTTP Methods](#routes-and-http-methods)
+- [Returning Responses](#returning-responses)
+  - [Async/Await](#asyncawait)
+  - [Promises](#promises)
+- [Route Prefixing](#route-prefixing)
+- [Debugging Routes](#debugging-routes)
+- [REQUEST](#request)
+- [RESPONSE](#response)
+  - [attachment()](#attachmentfilename)
+  - [clearCookie()](#clearcookiename-options)
+  - [cookie()](#cookiename-value-options)
+  - [cors()](#corsoptions)
+  - [download()](#downloadfile--filename--options--callback)
+  - [error()](#errormessage)
+  - [etag()](#etagboolean)
+  - [getHeader()](#getheaderkey)
+  - [hasHeader()](#hasheaderkey)
+  - [header()](#headerkey-value)
+  - [html()](#htmlbody)
+  - [json()](#jsonbody)
+  - [jsonp()](#jsonpbody)
+  - [location](#locationpath)
+  - [redirect()](#redirectstatus-path)
+  - [removeHeader()](#removeheaderkey)
+  - [send()](#sendbody)
+  - [sendFile()](#sendfilefile--options--callback)
+  - [status()](#statuscode)
+  - [type()](#typetype)
+- [Enabling Binary Support](#enabling-binary-support)
+- [Path Parameters](#path-parameters)
+- [Wildcard Routes](#wildcard-routes)
+- [Middleware](#middleware)
+- [Clean Up](#clean-up)
+- [Error Handling](#error-handling)
+- [Namespaces](#namespaces)
+- [CORS Support](#cors-support)
+- [Lambda Proxy Integration](#lambda-proxy-integration)
+- [Configuring Routes in API Gateway](#configuring-routes-in-api-gateway)
+- [Contributions](#contributions)
 
 ## Installation
 ```
@@ -65,6 +109,9 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ## Recent Updates
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
 
+### v0.6: Support for both `callback-style` and `async-await`
+In additional to `res.send()`, you can now simply `return` the body from your route and middleware functions. See [Returning Responses](#returning-responses) for more information.
+
 ### v0.5: Remove Bluebird Promises Dependency
 Now that AWS Lambda supports Node v8.10, asynchronous operations can be handled more efficiently with `async/await` rather than with promises. The core Lambda API execution engine has been rewritten to take advantage of `async/await`, which means we no longer need to depend on Bluebird. We now have **ZERO** dependencies.
 
@@ -88,7 +135,7 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 
 ## Routes and HTTP Methods
 
-Routes are defined by using convenience methods or the `METHOD` method. There are currently six convenience route methods: `get()`, `post()`, `put()`, `patch()`, `delete()` and `options()`. Convenience route methods require two parameters, a *route* and a function that accepts two arguments. A *route* is simply a path such as `/users`. The second parameter must be a function that accepts a `REQUEST` and a `RESPONSE` argument. These arguments can be named whatever you like, but convention dictates `req` and `res`. Examples using convenience route methods:
+Routes are defined by using convenience methods or the `METHOD` method. There are currently eight convenience route methods: `get()`, `post()`, `put()`, `patch()`, `delete()`, `head()`, `options()` and `any()`. Convenience route methods require two parameters, a *route* and a function that accepts two arguments. A *route* is simply a path such as `/users`. The second parameter must be a function that accepts a `REQUEST` and a `RESPONSE` argument. These arguments can be named whatever you like, but convention dictates `req` and `res`. Examples using convenience route methods:
 
 ```javascript
 api.get('/users', (req,res) => {
@@ -103,15 +150,90 @@ api.delete('/users', (req,res) => {
   // do something
 })
 ```
-Additional methods are support by calling the `METHOD` method with three arguments. The first argument is the HTTP method, a *route*, and a function that accepts a `REQUEST` and a `RESPONSE` argument.
+Additional methods are support by calling the `METHOD` method with three arguments. The first argument is the HTTP method (or array of methods), a *route*, and a function that accepts a `REQUEST` and a `RESPONSE` argument.
 
 ```javascript
 api.METHOD('trace','/users', (req,res) => {
-  // do something
+  // do something on TRACE
+})
+
+api.METHOD(['post','put'],'/users', (req,res) => {
+  // do something on POST -or- PUT
 })
 ```
 
-All `GET` methods have a `HEAD` alias that executes the `GET` request but returns a blank `body`. `GET` requests should be idempotent with no side effects.
+All `GET` methods have a `HEAD` alias that executes the `GET` request but returns a blank `body`. `GET` requests should be idempotent with no side effects. The `head()` convenience method can be used to set specific paths for `HEAD` requests or to override default `GET` aliasing.
+
+Routes that use the `any()` method or pass `ANY` to `api.METHOD` will respond to all HTTP methods. Routes that specify a specific method (such as `GET` or `POST`), will override the route for that method. For example:
+
+```javascript
+api.any('/users', (req,res) => { res.send('any') })
+api.get('/users', (req,res) => { res.send('get') })
+```
+
+A `POST` to `/users` will return "any", but a `GET` request would return "get". Please note that routes defined with an `ANY` method will override default `HEAD` aliasing for `GET` routes.
+
+## Returning Responses
+
+Lambda API supports both `callback-style` and `async-await` for returning responses to users. The [RESPONSE](#response) object has several callbacks that will trigger a response (`send()`, `json()`, `html()`, etc.) You can use any of these callbacks from within route functions and middleware to send the response:
+
+```javascript
+api.get('/users', (req,res) => {
+  res.send({ foo: 'bar' })
+})
+```
+
+You can also `return` data from route functions and middleware. The contents will be sent as the body:
+
+```javascript
+api.get('/users', (req,res) => {
+  return { foo: 'bar' }
+})
+```
+
+### Async/Await  
+
+If you prefer to use `async/await`, you can easily apply this to your route functions.
+
+Using `return`:
+```javascript
+api.get('/users', async (req,res) => {
+  let users = await getUsers()
+  return users
+})
+```
+
+Or using callbacks:
+```javascript
+api.get('/users', async (req,res) => {
+  let users = await getUsers()
+  res.send(users)
+})
+```
+
+### Promises
+
+If you like promises, you can either use a callback like `res.send()` at the end of your promise chain, or you can simply `return` the resolved promise:
+
+```javascript
+api.get('/users', (req,res) => {
+  getUsers().then(users => {
+    res.send(users)
+  })
+})
+```
+
+OR
+
+```javascript
+api.get('/users', (req,res) => {
+  return getUsers().then(users => {
+    return users
+  })
+})
+```
+
+**IMPORTANT:** You must either use a callback like `res.send()` **OR** `return` a value. Otherwise the execution will hang and no data will be sent to the user. Also, be sure not to return `undefined`, otherwise it will assume no response.
 
 ## Route Prefixing
 
@@ -158,6 +280,39 @@ module.exports = (api, opts) => {
 
 This would create a `/v1/product` and `/v1/v2/product` route. You can also use `register()` to load routes from an external file without the `prefix`. This will just add routes to your `base` path. **NOTE:** Prefixed routes are built off of your `base` path if one is set. If your `base` was set to `/api`, then the first example above would produce the routes: `/api/v1/product` and `/api/v2/product`.
 
+## Debugging Routes
+
+Lambda API has a `routes()` method that can be called on the main instance that will return an array containing the `METHOD` and full `PATH` of every configured route. This will include base paths and prefixed routes. This is helpful for debugging your routes.
+
+```javascript
+ const api = require('lambda-api')()
+
+ api.get('/', (req,res) => {})
+ api.post('/test', (req,res) => {})
+
+ api.routes() // => [ [ 'GET', '/' ], [ 'POST', '/test' ] ]
+```
+
+You can also log the paths in table form to the console by passing in `true` as the only parameter.
+
+```javascript
+ const api = require('lambda-api')()
+
+ api.get('/', (req,res) => {})
+ api.post('/test', (req,res) => {})
+
+ api.routes(true)
+
+// Outputs to console
+╔═══════════╤═════════════════╗
+║  METHOD   │  ROUTE          ║
+╟───────────┼─────────────────╢
+║  GET      │  /              ║
+╟───────────┼─────────────────╢
+║  POST     │  /test          ║
+╚═══════════╧═════════════════╝
+```
+
 
 ## REQUEST
 
@@ -178,6 +333,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `rawBody`: If the `isBase64Encoded` flag is `true`, this is a copy of the original, base64 encoded body
 - `route`: The matched route of the request
 - `requestContext`: The `requestContext` passed from the API Gateway
+- `auth`: An object containing the `type` and `value` of an authorization header. Currently supports `Bearer`, `Basic`, `OAuth`, and `Digest` schemas. For the `Basic` schema, the object is extended with additional fields for username/password. For the `OAuth` schema, the object is extended with key/value pairs of the supplied OAuth 1.0 values.
 - `namespace` or `ns`: A reference to modules added to the app's namespace (see [namespaces](#namespaces))
 - `cookies`: An object containing cookies sent from the browser (see the [cookie](#cookiename-value-options) `RESPONSE` method)
 
@@ -388,6 +544,9 @@ res.clearCookie('fooArray', { path: '/', httpOnly: true }).send()
 ```
 **NOTE:** The `clearCookie()` method only sets the header. A execution ending method like `send()`, `json()`, etc. must be called to send the response.
 
+### etag([boolean])
+Enables Etag generation for the response if at value of `true` is passed in. Lambda API will generate an Etag based on the body of the response and return the appropriate header. If the request contains an `If-No-Match` header that matches the generated Etag, a `304 Not Modified` response will be returned with a blank body.
+
 ### attachment([filename])
 Sets the HTTP response `Content-Disposition` header field to "attachment". If a `filename` is provided, then the `Content-Type` is set based on the file extension using the `type()` method and the "filename=" parameter is added to the `Content-Disposition` header.
 
@@ -508,6 +667,8 @@ api.use((req,res,next) => {
 
 The `next()` callback tells the system to continue executing. If this is not called then the system will hang and eventually timeout unless another request ending call such as `error` is called. You can define as many middleware functions as you want. They will execute serially and synchronously in the order in which they are defined.
 
+**NOTE:** Middleware can use either callbacks like `res.send()` or `return` to trigger a response to the user. Please note that calling either one of these from within a middleware function will terminate execution and return the response immediately.
+
 ## Clean Up
 The API has a built-in clean up method called 'finally()' that will execute after all middleware and routes have been completed, but before execution is complete. This can be used to close database connections or to perform other clean up functions. A clean up function can be defined using the `finally` method and requires a function with two parameters for the REQUEST and the RESPONSE as its only argument. For example:
 
@@ -529,7 +690,7 @@ api.use((err,req,res,next) => {
 })
 ```
 
-The `next()` callback will cause the script to continue executing and eventually call the standard error handling function. You can short-circuit the default handler by calling a request ending method such as `send`, `html`, or `json`.
+The `next()` callback will cause the script to continue executing and eventually call the standard error handling function. You can short-circuit the default handler by calling a request ending method such as `send`, `html`, or `json` OR by `return`ing data from your handler.
 
 ## Namespaces
 Lambda API allows you to map specific modules to namespaces that can be accessed from the `REQUEST` object. This is helpful when using the pattern in which you create a module that exports middleware, error, or route functions. In the example below, the `data` namespace is added to the API and then accessed by reference within an included module.
