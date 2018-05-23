@@ -3,7 +3,7 @@
 /**
  * Lightweight web framework for your serverless applications
  * @author Jeremy Daly <jeremy@jeremydaly.com>
- * @version 0.6.0
+ * @version 0.7.0
  * @license MIT
  */
 
