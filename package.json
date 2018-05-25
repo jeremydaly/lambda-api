@@ -4,9 +4,9 @@
   "description": "Lightweight web framework for your serverless applications",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
-    "test-nyc": "nyc mocha",
-    "test-travis": "nyc npm test && nyc report --reporter=text-lcov | ./node_modules/coveralls/bin/coveralls.js"
+    "test": "mocha --check-leaks --recursive",
+    "test-cov": "nyc --reporter=lcov mocha --check-leaks --recursive",
+    "test-ci": "nyc npm test && nyc report --reporter=text-lcov | ./node_modules/coveralls/bin/coveralls.js"
   },
   "repository": {
     "type": "git",
@@ -36,12 +36,21 @@
     "bluebird": "^3.5.1",
     "chai": "^4.1.2",
     "coveralls": "^3.0.1",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.12.0",
     "istanbul": "^0.4.5",
     "mocha": "^4.0.1",
     "mocha-lcov-reporter": "^1.3.0",
     "nyc": "^11.8.0",
     "sinon": "^4.5.0"
   },
+  "files": [
+    "LICENSE",
+    "README.md",
+    "index.js",
+    "lib/"
+  ],
   "engines": {
     "node": ">= 8.10.0"
   }
