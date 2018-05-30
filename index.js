@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 /**
  * Lightweight web framework for your serverless applications
@@ -31,7 +31,7 @@ class API {
     this._routes = {}
 
     // Default callback
-    this._cb = function(err,res) { console.log('No callback specified') }
+    this._cb = function() { console.log('No callback specified') }
 
     // Middleware stack
     this._middleware = []
@@ -106,7 +106,7 @@ class API {
                 handler: handler,
                 route: '/'+parsedPath.join('/'),
                 path: '/'+this._prefix.concat(parsedPath).join('/') }
-              } : {}),
+            } : {}),
             route.slice(0,i+1)
           )
         }
@@ -170,7 +170,7 @@ class API {
     // Strip the headers (TODO: find a better way to handle this)
     response._headers = {}
 
-    let message;
+    let message
 
     if (e instanceof Error) {
       response.status(this._errorStatus)
@@ -250,8 +250,8 @@ class API {
 
   // Recursive function to create routes object
   setRoute(obj, value, path) {
-    if (typeof path === "string") {
-        let path = path.split('.')
+    if (typeof path === 'string') {
+      let path = path.split('.')
     }
 
     if (path.length > 1){
