@@ -32,9 +32,7 @@ class API {
 
     // Default callback
     this._cb = function() {
-      /* eslint-disable no-console */
-      console.log('No callback specified')
-      /* eslint-enable no-console */
+      console.log('No callback specified') // eslint-disable-line no-console
     }
 
     // Middleware stack
@@ -176,16 +174,14 @@ class API {
 
     let message
 
-    /* eslint-disable no-console */
     if (e instanceof Error) {
       response.status(this._errorStatus)
       message = e.message
-      !this._test && console.log(e)
+      !this._test && console.log(e) // eslint-disable-line no-console
     } else {
       message = e
-      !this._test && console.log('API Error:',e)
+      !this._test && console.log('API Error:',e) // eslint-disable-line no-console
     }
-    /* eslint-enable no-console */
 
     // If first time through, process error middleware
     if (response._state === 'processing') {
@@ -286,9 +282,7 @@ class API {
         try {
           this._app[namespace] = packages[namespace]
         } catch(e) {
-          /* eslint-disable no-console */
-          console.error(e.message)
-          /* eslint-enable no-console */
+          console.error(e.message) // eslint-disable-line no-console
         }
       }
     } else if (arguments.length === 2 && typeof packages === 'string') {
@@ -325,9 +319,7 @@ class API {
     let routes = UTILS.extractRoutes(this._routes)
 
     if (format) {
-      /* eslint-disable no-console */
-      console.log(prettyPrint(routes))
-      /* eslint-enable no-console */
+      console.log(prettyPrint(routes)) // eslint-disable-line no-console
     } else {
       return routes
     }
