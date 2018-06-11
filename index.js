@@ -142,9 +142,28 @@ class API {
       for (const mw of this._middleware) {
         // Only run middleware if in processing state
         if (response._state !== 'processing') break
+
+        // Init for matching routes
+        let matched = false
+
+        // Test paths if they are supplied
+        for (const path of mw[0]) {
+          if (
+            path === request.path || // If exact path match
+            path === request.route || // If exact route match
+            // If a wildcard match
+            (path.substr(-1) === '*' && new RegExp('^' + path.slice(0, -1) + '.*$').test(request.route))
+          ) {
+            matched = true
+            break
+          }
+        }
+
+        if (mw[0].length > 0 && !matched) continue
+
         // Promisify middleware
         await new Promise(r => {
-          let rtn = mw(request,response,() => { r() })
+          let rtn = mw[1](request,response,() => { r() })
           if (rtn) response.send(rtn)
         })
       } // end for
@@ -224,9 +243,13 @@ class API {
 
 
   // Middleware handler
-  use(fn) {
+  use(path,handler) {
+
+    let fn = typeof path === 'function' ? path : handler
+    let routes = typeof path === 'string' ? Array.of(path) : (Array.isArray(path) ? path : [])
+
     if (fn.length === 3) {
-      this._middleware.push(fn)
+      this._middleware.push([routes,fn])
     } else if (fn.length === 4) {
       this._errors.push(fn)
     } else {
