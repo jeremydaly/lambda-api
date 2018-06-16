@@ -126,7 +126,7 @@ class API {
 
     // Set the event, context and callback
     this._event = event
-    this._context = context
+    this._context = this.context = context
     this._cb = cb
 
     // Initalize request and response objects
