@@ -321,6 +321,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 
 - `app`: A reference to an instance of the app
 - `version`: The version set at initialization
+- `id`: The awsRequestId from the Lambda `context`
 - `params`: Dynamic path parameters parsed from the path (see [path parameters](#path-parameters))
 - `method`: The HTTP method of the request
 - `path`: The path passed in by the request including the `base` and any `prefix` assigned to routes
@@ -337,6 +338,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `auth`: An object containing the `type` and `value` of an authorization header. Currently supports `Bearer`, `Basic`, `OAuth`, and `Digest` schemas. For the `Basic` schema, the object is extended with additional fields for username/password. For the `OAuth` schema, the object is extended with key/value pairs of the supplied OAuth 1.0 values.
 - `namespace` or `ns`: A reference to modules added to the app's namespace (see [namespaces](#namespaces))
 - `cookies`: An object containing cookies sent from the browser (see the [cookie](#cookiename-value-options) `RESPONSE` method)
+- `context`: Reference to the `context` passed into the Lambda handler function
 
 The request object can be used to pass additional information through the processing chain. For example, if you are using a piece of authentication middleware, you can add additional keys to the `REQUEST` object with information about the user. See [middleware](#middleware) for more information.
 
