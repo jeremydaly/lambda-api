@@ -110,7 +110,7 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ## Recent Updates
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
 
-### v0.7: Restrict middleware execution to a certain paths
+### v0.7: Restrict middleware execution to certain paths
 Middleware now supports an optional path parameter that supports multiple paths, wildcards, and parameter matching to better control middleware execution. See [middleware](#middleware) for more information.
 
 ### v0.6: Support for both `callback-style` and `async-await`
@@ -696,7 +696,7 @@ api.use('/users/:userId',(req,res,next) => { next() })
 api.use(['/comments','/users/:userId','/posts/*'],(req,res,next) => { next() })
 ```
 
-Path matching checks both the supplied `path` and the defined `route`. This means that parameterize paths can be matched by either the parameter (e.g. `/users/:param1`) or by an exact matching path (e.g. `/users/123`). 
+Path matching checks both the supplied `path` and the defined `route`. This means that parameterized paths can be matched by either the parameter (e.g. `/users/:param1`) or by an exact matching path (e.g. `/users/123`).
 
 
 ## Clean Up
@@ -844,4 +844,4 @@ Routes must be configured in API Gateway in order to support routing to the Lamb
 Simply create a `{proxy+}` route that uses the `ANY` method and all requests will be routed to your Lambda function and processed by the `lambda-api` module. In order for a "root" path mapping to work, you also need to create an `ANY` route for `/`.
 
 ## Contributions
-Contributions, ideas and bug reports are welcome and greatly appreciated. Please add  [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bug reports.
+Contributions, ideas and bug reports are welcome and greatly appreciated. Please add  [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bug reports or create a pull request.
