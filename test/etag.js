@@ -29,6 +29,10 @@ api.get('/testEtag2', function(req,res) {
   res.etag(true).send({ test: false })
 })
 
+api.get('/testEtagFalse', function(req,res) {
+  res.etag(false).send({ noEtag: true })
+})
+
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
 /******************************************************************************/
@@ -80,7 +84,13 @@ describe('Etag Tests:', function() {
     }, statusCode: 200, body: '{"test":true}', isBase64Encoded: false })
   }) // end it
 
-
+  it('Disable Etag', async function() {
+    let _event = Object.assign({},event,{ path: '/testEtagFalse' })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: {
+      'content-type': 'application/json'
+    }, statusCode: 200, body: '{"noEtag":true}', isBase64Encoded: false })
+  }) // end it
 
 
 }) // end ERROR HANDLING tests

@@ -6,3 +6,7 @@ node_modules
 
 # Local REDIS test data
 dump.rdb
+
+# Coverage reports
+.nyc_output
+coverage

@@ -1,9 +1,9 @@
-'use strict';
+'use strict'
 
 /**
  * Lightweight web framework for your serverless applications
  * @author Jeremy Daly <jeremy@jeremydaly.com>
- * @version 0.6.0
+ * @version 0.7.0
  * @license MIT
  */
 
@@ -31,7 +31,9 @@ class API {
     this._routes = {}
 
     // Default callback
-    this._cb = function(err,res) { console.log('No callback specified') }
+    this._cb = function() {
+      console.log('No callback specified') // eslint-disable-line no-console
+    }
 
     // Middleware stack
     this._middleware = []
@@ -106,7 +108,7 @@ class API {
                 handler: handler,
                 route: '/'+parsedPath.join('/'),
                 path: '/'+this._prefix.concat(parsedPath).join('/') }
-              } : {}),
+            } : {}),
             route.slice(0,i+1)
           )
         }
@@ -124,7 +126,7 @@ class API {
 
     // Set the event, context and callback
     this._event = event
-    this._context = context
+    this._context = this.context = context
     this._cb = cb
 
     // Initalize request and response objects
@@ -140,9 +142,28 @@ class API {
       for (const mw of this._middleware) {
         // Only run middleware if in processing state
         if (response._state !== 'processing') break
+
+        // Init for matching routes
+        let matched = false
+
+        // Test paths if they are supplied
+        for (const path of mw[0]) {
+          if (
+            path === request.path || // If exact path match
+            path === request.route || // If exact route match
+            // If a wildcard match
+            (path.substr(-1) === '*' && new RegExp('^' + path.slice(0, -1) + '.*$').test(request.route))
+          ) {
+            matched = true
+            break
+          }
+        }
+
+        if (mw[0].length > 0 && !matched) continue
+
         // Promisify middleware
         await new Promise(r => {
-          let rtn = mw(request,response,() => { r() })
+          let rtn = mw[1](request,response,() => { r() })
           if (rtn) response.send(rtn)
         })
       } // end for
@@ -170,15 +191,15 @@ class API {
     // Strip the headers (TODO: find a better way to handle this)
     response._headers = {}
 
-    let message;
+    let message
 
     if (e instanceof Error) {
       response.status(this._errorStatus)
       message = e.message
-      !this._test && console.log(e)
+      !this._test && console.log(e) // eslint-disable-line no-console
     } else {
       message = e
-      !this._test && console.log('API Error:',e)
+      !this._test && console.log('API Error:',e) // eslint-disable-line no-console
     }
 
     // If first time through, process error middleware
@@ -222,9 +243,13 @@ class API {
 
 
   // Middleware handler
-  use(fn) {
+  use(path,handler) {
+
+    let fn = typeof path === 'function' ? path : handler
+    let routes = typeof path === 'string' ? Array.of(path) : (Array.isArray(path) ? path : [])
+
     if (fn.length === 3) {
-      this._middleware.push(fn)
+      this._middleware.push([routes,fn])
     } else if (fn.length === 4) {
       this._errors.push(fn)
     } else {
@@ -250,8 +275,8 @@ class API {
 
   // Recursive function to create routes object
   setRoute(obj, value, path) {
-    if (typeof path === "string") {
-        let path = path.split('.')
+    if (typeof path === 'string') {
+      let path = path.split('.')
     }
 
     if (path.length > 1){
@@ -280,7 +305,7 @@ class API {
         try {
           this._app[namespace] = packages[namespace]
         } catch(e) {
-          console.error(e.message)
+          console.error(e.message) // eslint-disable-line no-console
         }
       }
     } else if (arguments.length === 2 && typeof packages === 'string') {
@@ -317,7 +342,7 @@ class API {
     let routes = UTILS.extractRoutes(this._routes)
 
     if (format) {
-      prettyPrint(routes)
+      console.log(prettyPrint(routes)) // eslint-disable-line no-console
     } else {
       return routes
     }

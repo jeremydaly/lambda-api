@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/jeremydaly/lambda-api.svg?branch=master)](https://travis-ci.org/jeremydaly/lambda-api)
 [![npm](https://img.shields.io/npm/v/lambda-api.svg)](https://www.npmjs.com/package/lambda-api)
 [![npm](https://img.shields.io/npm/l/lambda-api.svg)](https://www.npmjs.com/package/lambda-api)
+[![Coverage Status](https://coveralls.io/repos/github/jeremydaly/lambda-api/badge.svg?branch=master)](https://coveralls.io/github/jeremydaly/lambda-api?branch=master)
 
 ### Lightweight web framework for your serverless applications
 
@@ -108,6 +109,9 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 
 ## Recent Updates
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
+
+### v0.7: Restrict middleware execution to certain paths
+Middleware now supports an optional path parameter that supports multiple paths, wildcards, and parameter matching to better control middleware execution. See [middleware](#middleware) for more information.
 
 ### v0.6: Support for both `callback-style` and `async-await`
 In additional to `res.send()`, you can now simply `return` the body from your route and middleware functions. See [Returning Responses](#returning-responses) for more information.
@@ -320,6 +324,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 
 - `app`: A reference to an instance of the app
 - `version`: The version set at initialization
+- `id`: The awsRequestId from the Lambda `context`
 - `params`: Dynamic path parameters parsed from the path (see [path parameters](#path-parameters))
 - `method`: The HTTP method of the request
 - `path`: The path passed in by the request including the `base` and any `prefix` assigned to routes
@@ -336,6 +341,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `auth`: An object containing the `type` and `value` of an authorization header. Currently supports `Bearer`, `Basic`, `OAuth`, and `Digest` schemas. For the `Basic` schema, the object is extended with additional fields for username/password. For the `OAuth` schema, the object is extended with key/value pairs of the supplied OAuth 1.0 values.
 - `namespace` or `ns`: A reference to modules added to the app's namespace (see [namespaces](#namespaces))
 - `cookies`: An object containing cookies sent from the browser (see the [cookie](#cookiename-value-options) `RESPONSE` method)
+- `context`: Reference to the `context` passed into the Lambda handler function
 
 The request object can be used to pass additional information through the processing chain. For example, if you are using a piece of authentication middleware, you can add additional keys to the `REQUEST` object with information about the user. See [middleware](#middleware) for more information.
 
@@ -642,7 +648,7 @@ api.options('/users/*', (req,res) => {
 ```
 
 ## Middleware
-The API supports middleware to preprocess requests before they execute their matching routes. Middleware is defined using the `use` method and require a function with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
+The API supports middleware to preprocess requests before they execute their matching routes. Middleware is defined using the `use` method and requires a function with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
 
 ```javascript
 api.use((req,res,next) => {
@@ -667,7 +673,31 @@ api.use((req,res,next) => {
 
 The `next()` callback tells the system to continue executing. If this is not called then the system will hang and eventually timeout unless another request ending call such as `error` is called. You can define as many middleware functions as you want. They will execute serially and synchronously in the order in which they are defined.
 
-**NOTE:** Middleware can use either callbacks like `res.send()` or `return` to trigger a response to the user. Please note that calling either one of these from within a middleware function will terminate execution and return the response immediately.
+**NOTE:** Middleware can use either callbacks like `res.send()` or `return` to trigger a response to the user. Please note that calling either one of these from within a middleware function will return the response immediately.
+
+### Restricting middleware execution to certain path(s)
+
+By default, middleware will execute on every path. If you only need it to execute for specific paths, pass the path (or array of paths) as the first parameter to the `use` function.
+
+```javascript
+// Single path
+api.use('/users', (req,res,next) => { next() })
+
+// Wildcard path
+api.use('/users/*', (req,res,next) => { next() })
+
+// Multiple path
+api.use(['/users','/posts'], (req,res,next) => { next() })
+
+// Parameterized paths
+api.use('/users/:userId',(req,res,next) => { next() })
+
+// Multiple paths with parameters and wildcards
+api.use(['/comments','/users/:userId','/posts/*'],(req,res,next) => { next() })
+```
+
+Path matching checks both the supplied `path` and the defined `route`. This means that parameterized paths can be matched by either the parameter (e.g. `/users/:param1`) or by an exact matching path (e.g. `/users/123`).
+
 
 ## Clean Up
 The API has a built-in clean up method called 'finally()' that will execute after all middleware and routes have been completed, but before execution is complete. This can be used to close database connections or to perform other clean up functions. A clean up function can be defined using the `finally` method and requires a function with two parameters for the REQUEST and the RESPONSE as its only argument. For example:
@@ -814,4 +844,4 @@ Routes must be configured in API Gateway in order to support routing to the Lamb
 Simply create a `{proxy+}` route that uses the `ANY` method and all requests will be routed to your Lambda function and processed by the `lambda-api` module. In order for a "root" path mapping to work, you also need to create an `ANY` route for `/`.
 
 ## Contributions
-Contributions, ideas and bug reports are welcome and greatly appreciated. Please add  [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bug reports.
+Contributions, ideas and bug reports are welcome and greatly appreciated. Please add  [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bug reports or create a pull request.
