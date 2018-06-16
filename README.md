@@ -110,6 +110,9 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ## Recent Updates
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
 
+### v0.7: Restrict middleware execution to a certain paths
+Middleware now supports an optional path parameter that supports multiple paths, wildcards, and parameter matching to better control middleware execution. See [middleware](#middleware) for more information.
+
 ### v0.6: Support for both `callback-style` and `async-await`
 In additional to `res.send()`, you can now simply `return` the body from your route and middleware functions. See [Returning Responses](#returning-responses) for more information.
 
@@ -645,7 +648,7 @@ api.options('/users/*', (req,res) => {
 ```
 
 ## Middleware
-The API supports middleware to preprocess requests before they execute their matching routes. Middleware is defined using the `use` method and require a function with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
+The API supports middleware to preprocess requests before they execute their matching routes. Middleware is defined using the `use` method and requires a function with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
 
 ```javascript
 api.use((req,res,next) => {
@@ -670,7 +673,31 @@ api.use((req,res,next) => {
 
 The `next()` callback tells the system to continue executing. If this is not called then the system will hang and eventually timeout unless another request ending call such as `error` is called. You can define as many middleware functions as you want. They will execute serially and synchronously in the order in which they are defined.
 
-**NOTE:** Middleware can use either callbacks like `res.send()` or `return` to trigger a response to the user. Please note that calling either one of these from within a middleware function will terminate execution and return the response immediately.
+**NOTE:** Middleware can use either callbacks like `res.send()` or `return` to trigger a response to the user. Please note that calling either one of these from within a middleware function will return the response immediately.
+
+### Restricting middleware execution to certain path(s)
+
+By default, middleware will execute on every path. If you only need it to execute for specific paths, pass the path (or array of paths) as the first parameter to the `use` function.
+
+```javascript
+// Single path
+api.use('/users', (req,res,next) => { next() })
+
+// Wildcard path
+api.use('/users/*', (req,res,next) => { next() })
+
+// Multiple path
+api.use(['/users','/posts'], (req,res,next) => { next() })
+
+// Parameterized paths
+api.use('/users/:userId',(req,res,next) => { next() })
+
+// Multiple paths with parameters and wildcards
+api.use(['/comments','/users/:userId','/posts/*'],(req,res,next) => { next() })
+```
+
+Path matching checks both the supplied `path` and the defined `route`. This means that parameterize paths can be matched by either the parameter (e.g. `/users/:param1`) or by an exact matching path (e.g. `/users/123`). 
+
 
 ## Clean Up
 The API has a built-in clean up method called 'finally()' that will execute after all middleware and routes have been completed, but before execution is complete. This can be used to close database connections or to perform other clean up functions. A clean up function can be defined using the `finally` method and requires a function with two parameters for the REQUEST and the RESPONSE as its only argument. For example:
