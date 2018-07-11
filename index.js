@@ -126,7 +126,7 @@ class API {
 
     // Set the event, context and callback
     this._event = event
-    this._context = this.context = context
+    this._context = this.context = typeof context === 'object' ? context : {}
     this._cb = cb
 
     // Initalize request and response objects
@@ -136,7 +136,7 @@ class API {
     try {
 
       // Parse the request
-      request.parseRequest()
+      await request.parseRequest()
 
       // Loop through the middleware and await response
       for (const mw of this._middleware) {
@@ -175,8 +175,11 @@ class API {
       }
 
     } catch(e) {
-      this.catchErrors(e,response)
+      await this.catchErrors(e,response)
     }
+
+    // Return the final response
+    return response._response
 
   } // end run function
 
@@ -236,7 +239,7 @@ class API {
     await this._finally(response._request,response)
 
     // Execute the primary callback
-    this._cb(err,res)
+    typeof this._cb === 'function' && this._cb(err,res)
 
   } // end _callback
 
