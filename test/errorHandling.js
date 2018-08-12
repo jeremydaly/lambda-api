@@ -5,9 +5,11 @@ const expect = require('chai').expect // Assertion library
 
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
+const api2 = require('../index')({ version: 'v1.0' })
 
 // NOTE: Set test to true
 api._test = true;
+api2._test = true;
 
 let event = {
   httpMethod: 'get',
@@ -58,6 +60,22 @@ api.use(function(err,req,res,next) {
   }
 });
 
+const errorMiddleware1 = (err,req,res,next) => {
+  req.errorMiddleware1 = true
+  next()
+}
+
+const errorMiddleware2 = (err,req,res,next) => {
+  req.errorMiddleware2 = true
+  next()
+}
+
+const sendError = (err,req,res,next) => {
+  res.type('text/plain').send('This is a test error message: ' + req.errorMiddleware1 + '/' + req.errorMiddleware2)
+}
+
+api2.use(errorMiddleware1,errorMiddleware2,sendError)
+
 /******************************************************************************/
 /***  DEFINE TEST ROUTES                                                    ***/
 /******************************************************************************/
@@ -82,6 +100,12 @@ api.get('/testErrorMiddleware', function(req,res) {
 })
 
 api.get('/testErrorPromise', function(req,res) {
+  res.status(500)
+  res.error('This is a test error message')
+})
+
+
+api2.get('/testError', function(req,res) {
   res.status(500)
   res.error('This is a test error message')
 })
@@ -123,5 +147,12 @@ describe('Error Handling Tests:', function() {
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({ headers: { 'content-type': 'text/plain' }, statusCode: 500, body: 'This is a test error message: 123/456', isBase64Encoded: false })
   }) // end it
+
+  it('Multiple error middlewares', async function() {
+    let _event = Object.assign({},event,{ path: '/testError'})
+    let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: { 'content-type': 'text/plain' }, statusCode: 500, body: 'This is a test error message: true/true', isBase64Encoded: false })
+  }) // end it
+
 
 }) // end ERROR HANDLING tests

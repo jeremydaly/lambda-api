@@ -248,16 +248,22 @@ class API {
   // Middleware handler
   use(path,handler) {
 
-    let fn = typeof path === 'function' ? path : handler
+    // Extract routes
     let routes = typeof path === 'string' ? Array.of(path) : (Array.isArray(path) ? path : [])
 
-    if (fn.length === 3) {
-      this._middleware.push([routes,fn])
-    } else if (fn.length === 4) {
-      this._errors.push(fn)
-    } else {
-      throw new Error('Middleware must have 3 or 4 parameters')
+    // Add func args as middleware
+    for (let arg in arguments) {
+      if (typeof arguments[arg] === 'function') {
+        if (arguments[arg].length === 3) {
+          this._middleware.push([routes,arguments[arg]])
+        } else if (arguments[arg].length === 4) {
+          this._errors.push(arguments[arg])
+        } else {
+          throw new Error('Middleware must have 3 or 4 parameters')
+        }
+      }
     }
+    
   } // end use
 
 
