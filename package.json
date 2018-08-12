@@ -17,10 +17,9 @@
     "serverless",
     "nodejs",
     "api",
-    "awslambda",
-    "apigateway",
-    "web",
-    "framework",
+    "AWS Lambda",
+    "API Gateway",
+    "web framework",
     "json",
     "schema",
     "open"
