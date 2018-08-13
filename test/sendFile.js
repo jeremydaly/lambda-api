@@ -41,6 +41,10 @@ api.get('/sendfile', function(req,res) {
   res.sendFile('./test-missing.txt')
 })
 
+api.get('/sendfile/root', function(req,res) {
+  res.sendFile('test.txt', { root: './test/' })
+})
+
 api.get('/sendfile/err', function(req,res) {
   res.sendFile('./test-missing.txt', err => {
     if (err) {
@@ -169,6 +173,10 @@ api.get('/sendfile/s3missing', function(req,res) {
   res.sendFile('s3://my-test-bucket/file-does-not-exist.txt')
 })
 
+api.get('/sendfile/s3-bad-path', function(req,res) {
+  res.sendFile('s3://my-test-bucket')
+})
+
 // Error Middleware
 api.use(function(err,req,res,next) {
   // Set x-error header to test middleware execution
@@ -187,10 +195,6 @@ describe('SendFile Tests:', function() {
   before(function() {
      // Stub getObjectAsync
     stub = sinon.stub(S3,'getObject')
-    //stub.prototype.promise = function() { console.log('test') }
-    //console.log('proto:',);
-    //S3.getObject.promise = () => { }
-    //stub.promise = () => {}
   })
 
   it('Bad path', async function() {
@@ -258,6 +262,19 @@ describe('SendFile Tests:', function() {
         'content-type': 'text/plain',
         'x-test': 'test',
         'x-timestamp': 1,
+        'cache-control': 'max-age=0',
+        'expires': result.headers.expires,
+        'last-modified': result.headers['last-modified']
+      }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
+    })
+  }) // end it
+
+  it('Text file w/ root path', async function() {
+    let _event = Object.assign({},event,{ path: '/sendfile/root' })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({
+      headers: {
+        'content-type': 'text/plain',
         'cache-control': 'max-age=0',
         'expires': result.headers.expires,
         'last-modified': result.headers['last-modified']
@@ -368,6 +385,18 @@ describe('SendFile Tests:', function() {
         'content-type': 'application/json',
         'x-error': 'true'
       }, statusCode: 500, body: '{"error":"NoSuchKey: The specified key does not exist."}', isBase64Encoded: false
+    })
+  }) // end it
+
+
+  it('S3 bad path error',async function() {
+    let _event = Object.assign({},event,{ path: '/sendfile/s3-bad-path' })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({
+      headers: {
+        'content-type': 'application/json',
+        'x-error': 'true'
+      }, statusCode: 500, body: '{"error":"Invalid S3 path"}', isBase64Encoded: false
     })
   }) // end it
 

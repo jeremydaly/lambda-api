@@ -87,6 +87,10 @@ api.get('/download/all', function(req,res) {
   res.download('test/test.txt', 'test-file.txt', { private: true, maxAge: 3600000 }, err => { res.header('x-callback','true') })
 })
 
+api.get('/download/no-options', function(req,res) {
+  res.download('test/test.txt', 'test-file.txt', err => { res.header('x-callback','true') })
+})
+
 // S3 file
 api.get('/download/s3', function(req,res) {
 
@@ -243,6 +247,22 @@ describe('Download Tests:', function() {
         'content-type': 'text/plain',
         'x-callback': 'true',
         'cache-control': 'private, max-age=3600',
+        'expires': result.headers.expires,
+        'last-modified': result.headers['last-modified'],
+        'content-disposition': 'attachment; filename="test-file.txt"'
+      }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
+    })
+  }) // end it
+
+
+  it('Text file w/ filename and callback (no options)', async function() {
+    let _event = Object.assign({},event,{ path: '/download/no-options' })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({
+      headers: {
+        'content-type': 'text/plain',
+        'x-callback': 'true',
+        'cache-control': 'max-age=0',
         'expires': result.headers.expires,
         'last-modified': result.headers['last-modified'],
         'content-disposition': 'attachment; filename="test-file.txt"'
