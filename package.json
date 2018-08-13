@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --check-leaks --recursive",
-    "test-cov": "nyc --reporter=lcov mocha --check-leaks --recursive",
+    "test-cov": "nyc --reporter=html mocha --check-leaks --recursive",
     "test-ci": "nyc npm test && nyc report --reporter=text-lcov | ./node_modules/coveralls/bin/coveralls.js",
     "lint": "eslint ."
   },
