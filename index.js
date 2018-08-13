@@ -71,6 +71,10 @@ class API {
   // METHOD: Adds method and handler to routes
   METHOD(method, path, handler) {
 
+    if (typeof handler !== 'function') {
+      throw new Error(`No route handler specified for ${method} method on ${path} route.`)
+    }
+
     // Ensure method is an array
     let methods = Array.isArray(method) ? method : method.split(',')
 
@@ -263,7 +267,7 @@ class API {
         }
       }
     }
-    
+
   } // end use
 
 

@@ -53,6 +53,10 @@ api.post('/test', function(req,res) {
   res.status(200).json({ method: 'post', status: 'ok' })
 })
 
+api.post('/test/base64', function(req,res) {
+  res.status(200).json({ method: 'post', status: 'ok', body: req.body })
+})
+
 api.put('/test', function(req,res) {
   res.status(200).json({ method: 'put', status: 'ok' })
 })
@@ -245,6 +249,12 @@ describe('Route Tests:', function() {
     it('Simple path: /test', async function() {
       let _event = Object.assign({},event,{})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Simple path, no `context`', async function() {
+      let _event = Object.assign({},event,{})
+      let result = await new Promise(r => api.run(_event,null,(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
@@ -450,6 +460,12 @@ describe('Route Tests:', function() {
       let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'post', body: 'test=123&test2=456', headers: { 'CoNtEnt-TYPe': 'application/x-www-form-urlencoded' } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
+    }) // end it
+
+    it('With base64 encoded body', async function() {
+      let _event = Object.assign({},event,{ path: '/test/base64', httpMethod: 'post', body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":"Test file for sendFile\\n"}', isBase64Encoded: false })
     }) // end it
 
     it('Missing path: /not_found', async function() {
@@ -823,6 +839,22 @@ describe('Route Tests:', function() {
     }) // end it
 
   }) // end method tests
+
+
+  describe('Configuration errors', function() {
+
+    it('Missing handler', async function() {
+      let error_message
+      try {
+        const api_error1 = require('../index')({ version: 'v1.0' })
+        api_error1.get('/test-missing-handler')
+      } catch(e) {
+        error_message = e.message
+      }
+      expect(error_message).to.equal('No route handler specified for GET method on /test-missing-handler route.')
+    }) // end it
+
+  }) // end Configuration errors
 
   describe('routes() (debug method)', function() {
 
