@@ -25,6 +25,11 @@ api.get('/test', function(req,res) {
   res.status(200).json({ method: 'get', status: 'ok' })
 })
 
+api.get('/testEmpty', function(req,res) {
+  res.header('test')
+  res.status(200).json({ method: 'get', status: 'ok' })
+})
+
 api.get('/testOverride', function(req,res) {
   res.header('Content-Type','text/html')
   res.status(200).send('<div>testHTML</div>')
@@ -89,6 +94,12 @@ api.get('/corsOverride', function(req,res) {
   }).json({})
 })
 
+api.get('/corsOverride2', function(req,res) {
+  res.cors().cors({
+    methods: 'GET, PUT, POST'
+  }).json({})
+})
+
 api.get('/auth', function(req,res) {
   res.json({
     auth: req.auth
@@ -107,6 +118,12 @@ describe('Header Tests:', function() {
       let _event = Object.assign({},event,{})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json', 'test': 'testVal' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Empty Header - Default', async function() {
+      let _event = Object.assign({},event,{ path: '/testEmpty' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json', 'test': '' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
     it('Override Header: /testOveride -- Content-Type: text/html', async function() {
@@ -198,7 +215,7 @@ describe('Header Tests:', function() {
       })
     }) // end it
 
-    it('Override CORS Headers', async function() {
+    it('Override CORS Headers #1', async function() {
       let _event = Object.assign({},event,{ path: '/corsOverride'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({
@@ -208,6 +225,21 @@ describe('Header Tests:', function() {
           'access-control-allow-methods': 'GET, PUT, POST, DELETE, OPTIONS',
           'access-control-allow-origin': 'example.com',
           'access-control-allow-credentials': 'true'
+        }, statusCode: 200,
+        body: '{}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Override CORS Headers #2', async function() {
+      let _event = Object.assign({},event,{ path: '/corsOverride2'})
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: {
+          'content-type': 'application/json',
+          'access-control-allow-headers': 'Content-Type, Authorization, Content-Length, X-Requested-With',
+          'access-control-allow-methods': 'GET, PUT, POST',
+          'access-control-allow-origin': '*'
         }, statusCode: 200,
         body: '{}',
         isBase64Encoded: false
