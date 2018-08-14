@@ -52,7 +52,7 @@ Lambda API was written to be extremely lightweight and built specifically for se
 - [REQUEST](#request)
 - [RESPONSE](#response)
   - [attachment()](#attachmentfilename)
-  - [cache()](#cacheage-private)
+  - [cache()](#cacheageprivate)
   - [clearCookie()](#clearcookiename-options)
   - [cookie()](#cookiename-value-options)
   - [cors()](#corsoptions)
@@ -572,11 +572,11 @@ Sets the HTTP response `content-disposition` header field to "attachment". If a 
 
 ```javascript
 res.attachment()
-// Content-Disposition: attachment
+// content-disposition: attachment
 
 res.attachment('path/to/logo.png')
-// Content-Disposition: attachment; filename="logo.png"
-// Content-Type: image/png
+// content-disposition: attachment; filename="logo.png"
+// content-type: image/png
 ```
 
 ### download(file [, filename] [, options] [, callback])
