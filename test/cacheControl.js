@@ -106,7 +106,8 @@ describe('cacheControl Tests:', function() {
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
       headers: {
-        'content-type': 'application/json'
+        'content-type': 'application/json',
+        'cache-control': 'no-cache, no-store, must-revalidate'
       },
       statusCode: 200,
       body: 'cache',
