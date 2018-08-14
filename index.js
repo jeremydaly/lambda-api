@@ -30,10 +30,8 @@ class API {
     // Stores route mappings
     this._routes = {}
 
-    // Default callback
-    this._cb = function() {
-      console.log('No callback specified') // eslint-disable-line no-console
-    }
+    // Init callback
+    this._cb
 
     // Middleware stack
     this._middleware = []
@@ -131,7 +129,7 @@ class API {
     // Set the event, context and callback
     this._event = event
     this._context = this.context = typeof context === 'object' ? context : {}
-    this._cb = cb
+    this._cb = cb ? cb : undefined
 
     // Initalize request and response objects
     let request = new REQUEST(this)
@@ -289,7 +287,7 @@ class API {
   // Recursive function to create routes object
   setRoute(obj, value, path) {
     if (typeof path === 'string') {
-      let path = path.split('.')
+      path = path.split('.')
     }
 
     if (path.length > 1){
