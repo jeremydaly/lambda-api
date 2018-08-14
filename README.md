@@ -52,6 +52,7 @@ Lambda API was written to be extremely lightweight and built specifically for se
 - [REQUEST](#request)
 - [RESPONSE](#response)
   - [attachment()](#attachmentfilename)
+  - [cache()](#cacheage-private)
   - [clearCookie()](#clearcookiename-options)
   - [cookie()](#cookiename-value-options)
   - [cors()](#corsoptions)
@@ -65,6 +66,7 @@ Lambda API was written to be extremely lightweight and built specifically for se
   - [json()](#jsonbody)
   - [jsonp()](#jsonpbody)
   - [location](#locationpath)
+  - [modified()](#modifieddate)
   - [redirect()](#redirectstatus-path)
   - [removeHeader()](#removeheaderkey)
   - [send()](#sendbody)
@@ -332,8 +334,8 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `headers`: An object containing the request headers (properties converted to lowercase for HTTP/2, see [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540))
 - `rawHeaders`: An object containing the original request headers (property case preserved)
 - `body`: The body of the request. If the `isBase64Encoded` flag is `true`, it will be decoded automatically.
-  - If the `Content-Type` header is `application/json`, it will attempt to parse the request using `JSON.parse()`
-  - If the `Content-Type` header is `application/x-www-form-urlencoded`, it will attempt to parse a URL encoded string using `querystring`
+  - If the `content-type` header is `application/json`, it will attempt to parse the request using `JSON.parse()`
+  - If the `content-type` header is `application/x-www-form-urlencoded`, it will attempt to parse a URL encoded string using `querystring`
   - Otherwise it will be plain text.
 - `rawBody`: If the `isBase64Encoded` flag is `true`, this is a copy of the original, base64 encoded body
 - `route`: The matched route of the request
@@ -359,11 +361,11 @@ api.get('/users', (req,res) => {
 ```
 
 ### header(key, value)
-The `header` method allows for you to set additional headers to return to the client. By default, just the `Content-Type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two string arguments. The first is the name of the header and then second is the value.
+The `header` method allows for you to set additional headers to return to the client. By default, just the `content-type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two string arguments. The first is the name of the header and then second is the value.
 
 ```javascript
 api.get('/users', (req,res) => {
-  res.header('Content-Type','text/html').send('<div>This is HTML</div>')
+  res.header('content-type','text/html').send('<div>This is HTML</div>')
 })
 ```
 
@@ -429,7 +431,7 @@ api.get('/users', (req,res) => {
 ```
 
 ### type(type)
-Sets the `Content-Type` header for you based on a single `String` input. There are thousands of MIME types, many of which are likely never to be used by your application. Lambda API stores a list of the most popular file types and will automatically set the correct `Content-Type` based on the input. If the `type` contains the "/" character, then it sets the `Content-Type` to the value of `type`.
+Sets the `content-type` header for you based on a single `String` input. There are thousands of MIME types, many of which are likely never to be used by your application. Lambda API stores a list of the most popular file types and will automatically set the correct `content-type` based on the input. If the `type` contains the "/" character, then it sets the `content-type` to the value of `type`.
 
 ```javascript
 res.type('.html');              // => 'text/html'
@@ -494,7 +496,7 @@ Defaults can be set by calling `res.cors()` with no properties, or with any comb
 res.cors({
   origin: 'example.com',
   methods: 'GET, POST, OPTIONS',
-  headers: 'Content-Type, Authorization',
+  headers: 'content-type, authorization',
   maxAge: 84000000
 })
 ```
@@ -553,8 +555,20 @@ res.clearCookie('fooArray', { path: '/', httpOnly: true }).send()
 ### etag([boolean])
 Enables Etag generation for the response if at value of `true` is passed in. Lambda API will generate an Etag based on the body of the response and return the appropriate header. If the request contains an `If-No-Match` header that matches the generated Etag, a `304 Not Modified` response will be returned with a blank body.
 
+### cache([age][,private])
+Adds `cache-control` header to responses. If the first parameter is an `integer`, it will add a `max-age` to the header. The number should be in milliseconds. If the first parameter is `true`, it will add the cache headers with `max-age` set to `0` and use the current time for the `expires` header. If set to false, it will add a cache header with `no-cache, no-store, must-revalidate` as the value. You can also provide a custom string that will manually set the value of the `cache-control` header. And optional second argument takes a `boolean` and will set the `cache-control` to `private` This method is chainable.
+
+```javascript
+res.cache(false).send() // 'cache-control': 'no-cache, no-store, must-revalidate'
+res.cache(1000).send() // 'cache-control': 'max-age=1'
+res.cache(30000,true).send() // 'cache-control': 'private, max-age=30'
+```
+
+### modified(date)
+Adds a `last-modified` header to responses. A value of `true` will set the value to the current date and time. A JavaScript `Date` object can also be passed in. Note that it will be converted to UTC if not already. A `string` can also be passed in and will be converted to a date if JavaScript's `Date()` function is able to parse it. A value of `false` will prevent the header from being generated, but will not remove any existing `last-modified` headers.
+
 ### attachment([filename])
-Sets the HTTP response `Content-Disposition` header field to "attachment". If a `filename` is provided, then the `Content-Type` is set based on the file extension using the `type()` method and the "filename=" parameter is added to the `Content-Disposition` header.
+Sets the HTTP response `content-disposition` header field to "attachment". If a `filename` is provided, then the `content-type` is set based on the file extension using the `type()` method and the "filename=" parameter is added to the `content-disposition` header.
 
 ```javascript
 res.attachment()
@@ -566,7 +580,7 @@ res.attachment('path/to/logo.png')
 ```
 
 ### download(file [, filename] [, options] [, callback])
-This transfers the `file` (either a local path, S3 file reference, or Javascript `Buffer`) as an "attachment". This is a convenience method that combines `attachment()` and `sendFile()` to prompt the user to download the file. This method optionally takes a `filename` as a second parameter that will overwrite the "filename=" parameter of the `Content-Disposition` header, otherwise it will use the filename from the `file`. An optional `options` object passes through to the [sendFile()](#sendfilefile--options--callback) method and takes the same parameters. Finally, a optional `callback` method can be defined which is passed through to [sendFile()](#sendfilefile--options--callback) as well.
+This transfers the `file` (either a local path, S3 file reference, or Javascript `Buffer`) as an "attachment". This is a convenience method that combines `attachment()` and `sendFile()` to prompt the user to download the file. This method optionally takes a `filename` as a second parameter that will overwrite the "filename=" parameter of the `content-disposition` header, otherwise it will use the filename from the `file`. An optional `options` object passes through to the [sendFile()](#sendfilefile--options--callback) method and takes the same parameters. Finally, a optional `callback` method can be defined which is passed through to [sendFile()](#sendfilefile--options--callback) as well.
 
 ```javascript
 res.download('./files/sales-report.pdf')
@@ -589,10 +603,10 @@ The `sendFile()` method takes up to three arguments. The first is the `file`. Th
 | -------- | ---- | ----------- | ------- |
 | maxAge   | `Number` | Set the expiration time relative to the current time in milliseconds. Automatically sets the `Expires` header | 0 |
 | root   | `String` | Root directory for relative filenames. |  |
-| lastModified | `Boolean` or `String` | Sets the `Last-Modified` header to the last modified date of the file. This can be disabled by setting it to `false`, or overridden by setting it to a valid `Date` object | |
+| lastModified | `Boolean` or `String` | Sets the `last-modified` header to the last modified date of the file. This can be disabled by setting it to `false`, or overridden by setting it to a valid `Date` object | |
 | headers | `Object` |  Key value pairs of additional headers to be sent with the file | |
-| cacheControl | `Boolean` or `String` | Enable or disable setting `Cache-Control` response header. Override value with custom string. | true |
-| private | `Boolean` | Sets the `Cache-Control` to `private`. | false |
+| cacheControl | `Boolean` or `String` | Enable or disable setting `cache-control` response header. Override value with custom string. | true |
+| private | `Boolean` | Sets the `cache-control` to `private`. | false |
 
 ```javascript
 res.sendFile('./img/logo.png')
@@ -662,7 +676,7 @@ Middleware can be used to authenticate requests, log API calls, etc. The `REQUES
 ```javascript
 // Auth User
 api.use((req,res,next) => {
-  if (req.headers.Authorization === 'some value') {
+  if (req.headers.authorization === 'some value') {
     req.authorized = true
     next() // continue execution
   } else {
