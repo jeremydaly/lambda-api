@@ -81,7 +81,7 @@ api.get('/redirectHTML', function(req,res) {
 })
 
 api.get('/s3Path', function(req,res) {
-  stub.callsArgWith(2, null, 'https://s3.amazonaws.com/my-test-bucket/test/test.txt?AWSAccessKeyId=AKXYZ&Expires=1534290845&Signature=XYZ')
+  stub.callsArgWithAsync(2, null, 'https://s3.amazonaws.com/my-test-bucket/test/test.txt?AWSAccessKeyId=AKXYZ&Expires=1534290845&Signature=XYZ')
   res.redirect('s3://my-test-bucket/test/test.txt')
 })
 
