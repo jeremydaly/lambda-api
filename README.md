@@ -16,8 +16,8 @@ Lambda API is a lightweight web framework for use with AWS API Gateway and AWS L
 const api = require('lambda-api')()
 
 // Define a route
-api.get('/status', (req,res) => {
-  res.json({ status: 'ok' })
+api.get('/status', async (req,res) => {
+  return { status: 'ok' }
 })
 
 // Declare your Lambda handler
