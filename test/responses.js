@@ -1,6 +1,9 @@
 'use strict';
 
 const expect = require('chai').expect // Assertion library
+const sinon = require('sinon') // Require Sinon.js library
+const AWS = require('aws-sdk') // AWS SDK (automatically available in Lambda)
+const S3 = require('../lib/s3-service') // Init S3 Service
 
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
@@ -77,11 +80,24 @@ api.get('/redirectHTML', function(req,res) {
   res.redirect('http://www.github.com?foo=bar&bat=baz<script>alert(\'not good\')</script>')
 })
 
+api.get('/s3Path', function(req,res) {
+  stub.callsArgWith(2, null, 'https://s3.amazonaws.com/my-test-bucket/test/test.txt?AWSAccessKeyId=AKXYZ&Expires=1534290845&Signature=XYZ')
+  res.redirect('s3://my-test-bucket/test/test.txt')
+})
+
+
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
 /******************************************************************************/
 
+let stub
+
 describe('Response Tests:', function() {
+
+  before(function() {
+     // Stub getSignedUrl
+    stub = sinon.stub(S3,'getSignedUrl')
+  })
 
   it('Object response: convert to string', async function() {
     let _event = Object.assign({},event,{ path: '/testObjectResponse'})
@@ -172,5 +188,24 @@ describe('Response Tests:', function() {
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({ headers: { 'content-type': 'text/html', 'location': 'http://www.github.com?foo=bar&bat=baz%3Cscript%3Ealert(\'not%20good\')%3C/script%3E' }, statusCode: 302, body: '<p>302 Redirecting to <a href=\"http://www.github.com?foo=bar&amp;bat=baz&lt;script&gt;alert(&#39;not good&#39;)&lt;/script&gt;\">http://www.github.com?foo=bar&amp;bat=baz&lt;script&gt;alert(&#39;not good&#39;)&lt;/script&gt;</a></p>', isBase64Encoded: false })
   }) // end it
+
+  it('S3 Path', async function() {
+    let _event = Object.assign({},event,{ path: '/s3Path' })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({
+      headers: {
+        'content-type': 'text/html',
+        'location': 'https://s3.amazonaws.com/my-test-bucket/test/test.txt?AWSAccessKeyId=AKXYZ&Expires=1534290845&Signature=XYZ'
+      },
+      statusCode: 302,
+      body: '<p>302 Redirecting to <a href="https://s3.amazonaws.com/my-test-bucket/test/test.txt?AWSAccessKeyId=AKXYZ&amp;Expires=1534290845&amp;Signature=XYZ">https://s3.amazonaws.com/my-test-bucket/test/test.txt?AWSAccessKeyId=AKXYZ&amp;Expires=1534290845&amp;Signature=XYZ</a></p>',
+      isBase64Encoded: false
+    })
+    expect(stub.lastCall.args[1]).to.deep.equal({ Bucket: 'my-test-bucket', Key: 'test/test.txt', Expires: 900 })
+  }) // end it
+
+  after(function() {
+    stub.restore()
+  })
 
 }) // end ERROR HANDLING tests

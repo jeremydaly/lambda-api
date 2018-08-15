@@ -480,7 +480,7 @@ api.get('/redirectToGithub', (req,res) => {
 ```
 
 ### redirect([status,] path)
-The `redirect` convenience method triggers a redirection and ends the current API execution. This method is similar to the `location()` method, but it automatically sets the status code and calls `send()`. The redirection URL (relative/absolute path OR a FQDN) can be specified as the only parameter or as a second parameter when a valid `3xx` status code is supplied as the first parameter. The status code is set to `302` by default, but can be changed to `300`, `301`, `302`, `303`, `307`, or `308` by adding it as the first parameter.
+The `redirect` convenience method triggers a redirection and ends the current API execution. This method is similar to the `location()` method, but it automatically sets the status code and calls `send()`. The redirection URL (relative/absolute path, a FQDN, or an S3 path reference) can be specified as the only parameter or as a second parameter when a valid `3xx` status code is supplied as the first parameter. The status code is set to `302` by default, but can be changed to `300`, `301`, `302`, `303`, `307`, or `308` by adding it as the first parameter.
 
 ```javascript
 api.get('/redirectToHome', (req,res) => {
@@ -489,6 +489,11 @@ api.get('/redirectToHome', (req,res) => {
 
 api.get('/redirectToGithub', (req,res) => {
   res.redirect(301,'https://github.com')
+})
+
+// This will redirect a signed URL using the getLink method
+api.get('/redirectToS3File', (req,res) => {
+  res.redirect('s3://my-bucket/someFile.pdf')
 })
 ```
 
