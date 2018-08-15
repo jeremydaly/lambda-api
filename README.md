@@ -52,7 +52,7 @@ Lambda API was written to be extremely lightweight and built specifically for se
 - [REQUEST](#request)
 - [RESPONSE](#response)
   - [attachment()](#attachmentfilename)
-  - [cache()](#cacheageprivate)
+  - [cache()](#cacheage--private)
   - [clearCookie()](#clearcookiename-options)
   - [cookie()](#cookiename-value-options)
   - [cors()](#corsoptions)
@@ -381,7 +381,7 @@ Returns a boolean indicating the existence of `key` in the response headers. `ke
 ### removeHeader(key)
 Removes header matching `key` from the response headers. `key` is case insensitive. This method is chainable.
 
-### getLink(s3Path[,expires][,callback])
+### getLink(s3Path [,expires] [,callback])
 This returns a signed URL to the referenced file in S3 (using the `s3://{my-bucket}/{path-to-file}` format). You can optionally pass in an integer as the second parameter that will changed the default expiration time of the link. The expiration time is in seconds and defaults to `900`. In order to ensure proper URL signing, the `getLink()` must be asynchronous, and therefore returns a promise. You must either `await` the result or use a `.then` to retrieve the value.
 
 There is an optional third parameter that takes an error handler callback. If the underlying `getSignedUrl()` call fails, the error will be returned using the standard `res.error()` method. You can override this by providing your own callback.
@@ -576,7 +576,7 @@ res.clearCookie('fooArray', { path: '/', httpOnly: true }).send()
 ### etag([boolean])
 Enables Etag generation for the response if at value of `true` is passed in. Lambda API will generate an Etag based on the body of the response and return the appropriate header. If the request contains an `If-No-Match` header that matches the generated Etag, a `304 Not Modified` response will be returned with a blank body.
 
-### cache([age][,private])
+### cache([age] [,private])
 Adds `cache-control` header to responses. If the first parameter is an `integer`, it will add a `max-age` to the header. The number should be in milliseconds. If the first parameter is `true`, it will add the cache headers with `max-age` set to `0` and use the current time for the `expires` header. If set to false, it will add a cache header with `no-cache, no-store, must-revalidate` as the value. You can also provide a custom string that will manually set the value of the `cache-control` header. And optional second argument takes a `boolean` and will set the `cache-control` to `private` This method is chainable.
 
 ```javascript
