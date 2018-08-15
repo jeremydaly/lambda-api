@@ -60,6 +60,7 @@ Lambda API was written to be extremely lightweight and built specifically for se
   - [error()](#errormessage)
   - [etag()](#etagboolean)
   - [getHeader()](#getheaderkey)
+  - [getLink()](#getlinks3path--expires--callback])
   - [hasHeader()](#hasheaderkey)
   - [header()](#headerkey-value)
   - [html()](#htmlbody)
@@ -379,6 +380,26 @@ Returns a boolean indicating the existence of `key` in the response headers. `ke
 
 ### removeHeader(key)
 Removes header matching `key` from the response headers. `key` is case insensitive. This method is chainable.
+
+### getLink(s3Path[,expires][,callback])
+This returns a signed URL to the referenced file in S3 (using the `s3://{my-bucket}/{path-to-file}` format). You can optionally pass in an integer as the second parameter that will changed the default expiration time of the link. The expiration time is in seconds and defaults to `900`. In order to ensure proper URL signing, the `getLink()` must be asynchronous, and therefore returns a promise. You must either `await` the result or use a `.then` to retrieve the value.
+
+There is an optional third parameter that takes an error handler callback. If the underlying `getSignedUrl()` call fails, the error will be returned using the standard `res.error()` method. You can override this by providing your own callback.
+
+```javascript
+// async/await
+api.get('/getLink', async (req,res) => {
+  let url = await res.getLink('s3://my-bucket/my-file.pdf')
+  return { link: url }
+})
+
+// promises
+api.get('/getLink', (req,res) => {
+  res.getLink('s3://my-bucket/my-file.pdf').then(url => {
+    res.json({ link: url })
+  })
+})
+```
 
 ### send(body)
 The `send` methods triggers the API to return data to the API Gateway. The `send` method accepts one parameter and sends the contents through as is, e.g. as an object, string, integer, etc. AWS Gateway expects a string, so the data should be converted accordingly.
