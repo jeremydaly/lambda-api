@@ -8,7 +8,7 @@ const api = require('../index')({ version: 'v1.0' })
 const api2 = require('../index')({ version: 'v1.0' })
 const api3 = require('../index')({ version: 'v1.0' })
 const api4 = require('../index')({ version: 'v1.0' })
-const api5 = require('../index')({ version: 'v1.0', logger: true})
+const api5 = require('../index')({ version: 'v1.0', logger: { access: 'never' }})
 
 let event = {
   httpMethod: 'get',
