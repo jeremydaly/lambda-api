@@ -32,7 +32,7 @@ api.get('/test', function(req,res) {
 })
 
 api.get('/testError', function(req,res) {
-  res.status(404).error('some error')
+  res.error(404,'some error')
 })
 
 api_error.get('/testErrorThrown', function(req,res) {

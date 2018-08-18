@@ -10,6 +10,7 @@
 const REQUEST = require('./lib/request.js') // Resquest object
 const RESPONSE = require('./lib/response.js') // Response object
 const UTILS = require('./lib/utils.js') // Require utils library
+const LOGGER = require('./lib/logger.js') // Require logger library
 const prettyPrint = require('./lib/prettyPrint') // Pretty print for debugging
 
 // Create the API class
@@ -23,6 +24,28 @@ class API {
     this._base = props && props.base && typeof props.base === 'string' ? props.base.trim() : ''
     this._callbackName = props && props.callback ? props.callback.trim() : 'callback'
     this._mimeTypes = props && props.mimeTypes && typeof props.mimeTypes === 'object' ? props.mimeTypes : {}
+
+    // Set sampling info
+    this._sampleCounts = {}
+
+    // Init request counter
+    this._requestCount = 0
+
+    // Track init date/time
+    this._initTime = Date.now()
+
+    // Logging levels
+    this._logLevels = {
+      trace: 10,
+      debug: 20,
+      info: 30,
+      warn: 40,
+      error: 50,
+      fatal: 60
+    }
+
+    // Configure logger
+    this._logger = LOGGER.config(props && props.logger,this._logLevels)
 
     // Prefix stack w/ base
     this._prefix = this.parseRoute(this._base)
@@ -45,11 +68,8 @@ class API {
     // Executed after the callback
     this._finally = () => {}
 
-    // Global error status
+    // Global error status (used for response parsing errors)
     this._errorStatus = 500
-
-    // Testing flag (disables logging)
-    this._test = false
 
   } // end constructor
 
@@ -188,7 +208,7 @@ class API {
 
 
   // Catch all async/sync errors
-  async catchErrors(e,response) {
+  async catchErrors(e,response,code,detail) {
 
     // Error messages should never be base64 encoded
     response._isBase64 = false
@@ -198,13 +218,21 @@ class API {
 
     let message
 
+    let info = {
+      detail,
+      statusCode: response._statusCode,
+      coldStart: response._request.coldStart,
+      stack: this._logger.stack && e.stack || undefined
+    }
+
     if (e instanceof Error) {
-      response.status(this._errorStatus)
+      response.status(code ? code : this._errorStatus)
       message = e.message
-      !this._test && console.log(e) // eslint-disable-line no-console
+      this.log.fatal(message, info)
     } else {
+      response.status(code)
       message = e
-      !this._test && console.log('API Error:',e) // eslint-disable-line no-console
+      this.log.error(message, info)
     }
 
     // If first time through, process error middleware
@@ -232,13 +260,31 @@ class API {
 
 
   // Custom callback
-  async _callback(err, res, response) {
+  async _callback(err,res,response) {
 
     // Set done status
     response._state = 'done'
 
     // Execute finally
     await this._finally(response._request,response)
+
+    // Output logs
+    response._request._logs.forEach(log => {
+      console.log(JSON.stringify(this._logger.detail ? // eslint-disable-line no-console
+        this._logger.format(log,response._request,response) : log))
+    })
+
+    // Generate access log
+    if ((this._logger.access || response._request._logs.length > 0) && this._logger.access !== 'never') {
+      let access = this._logger.log(
+        'access',
+        undefined,
+        response._request,
+        response._request.context,
+        { statusCode: res.statusCode, coldStart: response._request.coldStart }
+      )
+      console.log(JSON.stringify(this._logger.format(access,response._request,response))) // eslint-disable-line no-console
+    }
 
     // Execute the primary callback
     typeof this._cb === 'function' && this._cb(err,res)
@@ -248,7 +294,7 @@ class API {
 
 
   // Middleware handler
-  use(path,handler) {
+  use(path) {
 
     // Extract routes
     let routes = typeof path === 'string' ? Array.of(path) : (Array.isArray(path) ? path : [])

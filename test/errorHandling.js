@@ -8,12 +8,7 @@ const api = require('../index')({ version: 'v1.0' })
 const api2 = require('../index')({ version: 'v1.0' })
 const api3 = require('../index')({ version: 'v1.0' })
 const api4 = require('../index')({ version: 'v1.0' })
-
-// NOTE: Set test to true
-api._test = true;
-api2._test = true;
-api3._test = true;
-api4._test = true;
+const api5 = require('../index')({ version: 'v1.0', logger: true})
 
 let event = {
   httpMethod: 'get',
@@ -52,10 +47,7 @@ api.use(function(err,req,res,next) {
 api.use(function(err,req,res,next) {
   if (req.route === '/testErrorPromise') {
     let start = Date.now()
-    Promise.try(() => {
-      for(let i = 0; i<40000000; i++) {}
-      return true
-    }).then((x) => {
+    Promise.delay(100).then((x) => {
       res.header('Content-Type','text/plain')
       res.send('This is a test error message: ' + req.testError1 + '/' + req.testError2)
     })
@@ -87,8 +79,7 @@ const returnError = (err,req,res,next) => {
 api3.use(returnError,errorMiddleware1)
 
 const callError = (err,req,res,next) => {
-  res.send('this is an error: ' + (req.errorMiddleware1 ? true : false))
-
+  res.status(500).send('this is an error: ' + (req.errorMiddleware1 ? true : false))
   next()
 }
 
@@ -99,7 +90,6 @@ api4.use(callError,errorMiddleware1)
 /******************************************************************************/
 
 api.get('/testError', function(req,res) {
-  res.status(500)
   res.error('This is a test error message')
 })
 
@@ -113,12 +103,10 @@ api.get('/testErrorSimulated', function(req,res) {
 })
 
 api.get('/testErrorMiddleware', function(req,res) {
-  res.status(500)
   res.error('This test error message should be overridden')
 })
 
 api.get('/testErrorPromise', function(req,res) {
-  res.status(500)
   res.error('This is a test error message')
 })
 
@@ -128,14 +116,22 @@ api2.get('/testError', function(req,res) {
 })
 
 api3.get('/testError', function(req,res) {
-  res.status(500)
   res.error('This is a test error message')
 })
 
 api4.get('/testError', function(req,res) {
-  res.status(500)
+  res.error(403,'This is a test error message')
+})
+
+api5.get('/testError', function(req,res) {
   res.error('This is a test error message')
 })
+
+api5.get('/testErrorThrow', function(req,res) {
+  throw new Error('This is a test thrown error')
+})
+
+
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
@@ -207,12 +203,13 @@ describe('Error Handling Tests:', function() {
       let _event = Object.assign({},event,{ path: '/testErrorThrow'})
       let logger = console.log
       api._test = false
-      console.log = log => _log = log
-      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      console.log = log => { try { _log = JSON.parse(log) } catch(e) { _log = log } }
+      let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
       api._test = true
       console.log = logger
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test thrown error"}', isBase64Encoded: false })
-      expect(_log.message).to.equal('This is a test thrown error')
+      expect(_log.level).to.equal('fatal')
+      expect(_log.msg).to.equal('This is a test thrown error')
     }) // end it
 
 
@@ -221,12 +218,13 @@ describe('Error Handling Tests:', function() {
       let _event = Object.assign({},event,{ path: '/testError'})
       let logger = console.log
       api._test = false
-      console.log = (...args) => _log = args.join(' ')
-      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      console.log = log => { try { _log = JSON.parse(log) } catch(e) { _log = log } }
+      let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
       api._test = true
       console.log = logger
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test error message"}', isBase64Encoded: false })
-      expect(_log).to.equal('API Error: This is a test error message')
+      expect(_log.level).to.equal('error')
+      expect(_log.msg).to.equal('This is a test error message')
     }) // end it
 
   })

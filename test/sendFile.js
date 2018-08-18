@@ -48,7 +48,7 @@ api.get('/sendfile/root', function(req,res) {
 api.get('/sendfile/err', function(req,res) {
   res.sendFile('./test-missing.txt', err => {
     if (err) {
-      res.status(404).error('There was an error accessing the requested file')
+      res.error(404,'There was an error accessing the requested file')
     }
   })
 })
@@ -62,7 +62,7 @@ api.get('/sendfile/test', function(req,res) {
     }).then((x) => {
       if (err) {
         // set custom error code and message on error
-        res.status(501).error('Custom File Error')
+        res.error(501,'Custom File Error')
       } else {
         // else set custom response code
         res.status(201)

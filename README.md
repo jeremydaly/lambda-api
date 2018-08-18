@@ -535,12 +535,24 @@ res.cors({
 })
 ```
 
-### error(message)
-An error can be triggered by calling the `error` method. This will cause the API to stop execution and return the message to the client. Custom error handling can be accomplished using the [Error Handling](#error-handling) feature.
+### error([code], message [,detail])
+An error can be triggered by calling the `error` method. This will cause the API to stop execution and return the message to the client. The status code can be set by optionally passing in an integer as the first parameter. Additional detail can be added as an optional third parameter (or second parameter if no status code is passed). This will add an additional `detail` property to error logs. Details accepts any value that can be serialized by `JSON.stringify` including objects, strings and arrays. Custom error handling can be accomplished using the [Error Handling](#error-handling) feature.
 
 ```javascript
 api.get('/users', (req,res) => {
   res.error('This is an error')
+})
+
+api.get('/users', (req,res) => {
+  res.error(403,'Not authorized')
+})
+
+api.get('/users', (req,res) => {
+  res.error('Error', { foo: 'bar' })
+})
+
+api.get('/users', (req,res) => {
+  res.error(404, 'Page not found', 'foo bar')
 })
 ```
 

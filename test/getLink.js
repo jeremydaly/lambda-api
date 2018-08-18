@@ -163,7 +163,7 @@ describe('getLink Tests:', function() {
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
       headers: { 'content-type': 'application/json' },
-      statusCode: 200,
+      statusCode: 500,
       body: '{"error":"getSignedUrl error"}',
       isBase64Encoded: false
     })
@@ -175,7 +175,7 @@ describe('getLink Tests:', function() {
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
       headers: { 'content-type': 'application/json' },
-      statusCode: 200,
+      statusCode: 500,
       body: '{"error":"Custom error"}',
       isBase64Encoded: false
     })
@@ -187,7 +187,7 @@ describe('getLink Tests:', function() {
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
       headers: { 'content-type': 'application/json' },
-      statusCode: 200,
+      statusCode: 500,
       body: '{"error":"getSignedUrl error"}',
       isBase64Encoded: false
     })

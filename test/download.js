@@ -41,7 +41,7 @@ api.get('/download', function(req,res) {
 api.get('/download/err', function(req,res) {
   res.download('./test-missing.txt', err => {
     if (err) {
-      res.status(404).error('There was an error accessing the requested file')
+      res.error(404,'There was an error accessing the requested file')
     }
   })
 })
@@ -50,13 +50,10 @@ api.get('/download/test', function(req,res) {
   res.download('test/test.txt' + (req.query.test ? req.query.test : ''), err => {
 
     // Return a promise
-    return Promise.try(() => {
-      for(let i = 0; i<40000000; i++) {}
-      return true
-    }).then((x) => {
+    return Promise.delay(100).then((x) => {
       if (err) {
         // set custom error code and message on error
-        res.status(501).error('Custom File Error')
+        res.error(501,'Custom File Error')
       } else {
         // else set custom response code
         res.status(201)
