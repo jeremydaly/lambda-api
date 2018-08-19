@@ -106,6 +106,10 @@ api.get('/auth', function(req,res) {
   })
 })
 
+api.get('/cloudfront', (req,res) => {
+  res.send({ clientType: req.clientType, clientCountry: req.clientCountry })
+})
+
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
@@ -294,5 +298,122 @@ describe('Header Tests:', function() {
     }) // end it
 
   }) // end Auth tests
+
+  describe('CloudFront:', function() {
+
+    it('clientType (desktop)', async function() {
+      let _event = Object.assign({},event,{ path: '/cloudfront', headers: {
+        'CloudFront-Is-Desktop-Viewer': 'true',
+        'CloudFront-Is-Mobile-Viewer': 'false',
+        'CloudFront-Is-SmartTV-Viewer': 'false',
+        'CloudFront-Is-Tablet-Viewer': 'false',
+        'CloudFront-Viewer-Country': 'US'
+      } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"clientType":"desktop","clientCountry":"US"}',
+        isBase64Encoded: false })
+    }) // end it
+
+    it('clientType (mobile)', async function() {
+      let _event = Object.assign({},event,{ path: '/cloudfront', headers: {
+        'CloudFront-Is-Desktop-Viewer': 'false',
+        'CloudFront-Is-Mobile-Viewer': 'true',
+        'CloudFront-Is-SmartTV-Viewer': 'false',
+        'CloudFront-Is-Tablet-Viewer': 'false',
+        'CloudFront-Viewer-Country': 'US'
+      } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"clientType":"mobile","clientCountry":"US"}',
+        isBase64Encoded: false })
+    }) // end it
+
+    it('clientType (tv)', async function() {
+      let _event = Object.assign({},event,{ path: '/cloudfront', headers: {
+        'CloudFront-Is-Desktop-Viewer': 'false',
+        'CloudFront-Is-Mobile-Viewer': 'false',
+        'CloudFront-Is-SmartTV-Viewer': 'true',
+        'CloudFront-Is-Tablet-Viewer': 'false',
+        'CloudFront-Viewer-Country': 'US'
+      } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"clientType":"tv","clientCountry":"US"}',
+        isBase64Encoded: false })
+    }) // end it
+
+    it('clientType (tablet)', async function() {
+      let _event = Object.assign({},event,{ path: '/cloudfront', headers: {
+        'CloudFront-Is-Desktop-Viewer': 'false',
+        'CloudFront-Is-Mobile-Viewer': 'false',
+        'CloudFront-Is-SmartTV-Viewer': 'false',
+        'CloudFront-Is-Tablet-Viewer': 'true',
+        'CloudFront-Viewer-Country': 'US'
+      } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"clientType":"tablet","clientCountry":"US"}',
+        isBase64Encoded: false })
+    }) // end it
+
+    it('clientType (unknown)', async function() {
+      let _event = Object.assign({},event,{ path: '/cloudfront', headers: {
+        'CloudFront-Is-Desktop-Viewer': 'false',
+        'CloudFront-Is-Mobile-Viewer': 'false',
+        'CloudFront-Is-SmartTV-Viewer': 'false',
+        'CloudFront-Is-Tablet-Viewer': 'false',
+        'CloudFront-Viewer-Country': 'US'
+      } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"clientType":"unknown","clientCountry":"US"}',
+        isBase64Encoded: false })
+    }) // end it
+
+    it('clientType (unknown - missing headers)', async function() {
+      let _event = Object.assign({},event,{ path: '/cloudfront', headers: {} })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"clientType":"unknown","clientCountry":"unknown"}',
+        isBase64Encoded: false })
+    }) // end it
+
+    it('clientCountry (UK)', async function() {
+      let _event = Object.assign({},event,{ path: '/cloudfront', headers: {
+        'CloudFront-Is-Desktop-Viewer': 'false',
+        'CloudFront-Is-Mobile-Viewer': 'false',
+        'CloudFront-Is-SmartTV-Viewer': 'false',
+        'CloudFront-Is-Tablet-Viewer': 'false',
+        'CloudFront-Viewer-Country': 'uk'
+      } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"clientType":"unknown","clientCountry":"UK"}',
+        isBase64Encoded: false })
+    }) // end it
+
+  })
 
 }) // end HEADER tests

@@ -278,7 +278,7 @@ class API {
     if ((this._logger.access || response._request._logs.length > 0) && this._logger.access !== 'never') {
       let access = Object.assign(
         this._logger.log('access',undefined,response._request,response._request.context),
-        { statusCode: res.statusCode, coldStart: response._request.coldStart }
+        { statusCode: res.statusCode, coldStart: response._request.coldStart, count: response._request.requestCount }
       )
       console.log(JSON.stringify(this._logger.format(access,response._request,response))) // eslint-disable-line no-console
     }
