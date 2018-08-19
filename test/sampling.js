@@ -287,8 +287,12 @@ describe('Sampling Tests:', function() {
     // Create a temporary logger to capture the console.log
     let consoleLog = console.log
     let _log = []
-    const logger = log => { try { _log.push(JSON.parse(log)) } catch(e) { _log.push(log) } }
-
+    // const logger = log => { try { _log.push(JSON.parse(log)) } catch(e) { _log.push(log) } }
+    const logger = (...logs) => {
+      let log
+      try { log = JSON.parse(logs[0]) } catch(e) { }
+      if (log && log.level) { _log.push(log) } else { console.info(...logs) }
+    }
 
     it('Default route', async function() {
       this.timeout(10000);

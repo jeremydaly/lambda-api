@@ -185,7 +185,11 @@ describe('Logging Tests:', function() {
   // Create a temporary logger to capture the console.log
   let _log = []
   let consoleLog = console.log
-  const logger = log => { try { _log.push(JSON.parse(log)) } catch(e) { _log.push(log) } }
+  const logger = (...logs) => {
+    let log
+    try { log = JSON.parse(logs[0]) } catch(e) { }
+    if (log && log.level) { _log.push(log) } else { console.info(...logs) }
+  }
 
   // Clear the log before each test
   beforeEach(function() { _log = [] })
