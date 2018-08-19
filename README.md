@@ -90,7 +90,7 @@ npm i lambda-api --save
 
 ## Requirements
 - AWS Lambda running **Node 8.10+**
-- AWS Gateway using [Proxy Integration](#lambda-proxy-integration)
+- AWS API Gateway using [Proxy Integration](#lambda-proxy-integration)
 
 ## Configuration
 Require the `lambda-api` module into your Lambda handler script and instantiate it. You can initialize the API with the following options:
