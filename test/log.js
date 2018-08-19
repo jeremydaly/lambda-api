@@ -56,43 +56,7 @@ const api_customSerializers = require('../index')({ version: 'v1.0', logger: {
 } })
 
 
-
-
-
-// const api3 = require('../index')({
-//   logger: {
-//     sampling: {
-//       target: 2,
-//       rate: 0.3,
-//       period: 300, // seconds
-//       level: 'debug'
-//     }
-//   }
-// })
-
-
-
-
-// const api6 = require('../index')({
-//   logger: {
-//     sampling: {
-//       rules: [
-//         { route: '/testError',  target: 0, rate:0, method: 'POST, GET, DeLete' },
-//         { route: '/testlog', target: 10, rate:0, period:10 },
-//         { route: '/testlog/:param',  target: 2, rate:0, period:10 },
-//         { route: '/testlog/:param2',  level: 'xyz', method: ['HEAD','PATCH'] },
-//         { route: '/testlog/:param2/test',  level: 'xyz', method: ['GET','OPTIONS'] },
-//         { route: '/testlog/:param2/XYZ',  level: 'xyz', method: ['PUT','DELETE'] },
-//         { route: '/',  level: 'xyz' }
-//       ],
-//       period: 30
-//     }
-//   }
-// })
-
-
-
-
+// Define default event
 let event = {
   httpMethod: 'get',
   path: '/test',
@@ -104,12 +68,18 @@ let event = {
   }
 }
 
+// Default context
 let context = {
   awsRequestId: 'AWSREQID',
   functionName: 'testFunc',
   memoryLimitInMB: '2048',
   getRemainingTimeInMillis: () => 5000
 }
+
+
+/******************************************************************************/
+/***  DEFINE TEST ROUTES                                                    ***/
+/******************************************************************************/
 
 api_default.get('/', (req,res) => {
   req.log.trace('trace message')
@@ -204,57 +174,6 @@ api_showStackTrace.get('/', (req,res) => {
   undefinedVar // this should throw an error
   res.send('done')
 })
-
-//
-//
-// api.get('/testlog', (req,res) => {
-//   res.send('test')
-// })
-//
-// api.get('/testlog/:param', (req,res) => {
-//   res.send('test param')
-// })
-//
-// api6.get('/testlog/:param', (req,res) => {
-//   res.send('test param')
-// })
-//
-//
-// api2.get('/test', (req,res) => {
-//   req.log.trace('log message')
-//   req.log.debug('log message')
-//   req.log.info('log message')
-//   req.log.warn('log message')
-//   req.log.error('log message',{ foo: 'bar', bar: 'foo' })
-//   req.log.fatal('log message','custom string')
-//   res.send('done')
-// })
-//
-// api3.get('/test', (req,res) => {
-//   // req.log('message')
-//   req.log.trace('log message')
-//   req.log.debug('log message')
-//   req.log.info('log message')
-//   req.log.warn('log message')
-//   req.log.error('log message',{ foo: 'bar', bar: 'foo' })
-//   req.log.fatal('log message','custom string')
-//   res.send('done')
-// })
-//
-// api4.get('/test', (req,res) => {
-//   // req.log('message')
-//   req.log.x('some message')
-//   req.log.test('some message')
-//   req.log.trace('log message')
-//   req.log.debug('log message')
-//   req.log.info('log messageX')
-//   req.log.warn('log message')
-//   req.log.error('log message',{ foo: 'bar', bar: 'foo' })
-//   req.log.fatal('log message','custom string')
-//   // res.error('error message',{ foo: 'barerror' })
-//   //res.error('error message','string')
-//   res.error('error message')
-// })
 
 
 /******************************************************************************/
