@@ -72,7 +72,7 @@ let event = {
 let context = {
   awsRequestId: 'AWSREQID',
   functionName: 'testFunc',
-  memoryLimitInMB: '2048',
+  memoryLimitInMB: 2048,
   getRemainingTimeInMillis: () => 5000
 }
 
@@ -186,6 +186,7 @@ describe('Logging Tests:', function() {
   let _log = []
   let consoleLog = console.log
   const logger = (...logs) => {
+    // console.info(...logs);
     let log
     try { log = JSON.parse(logs[0]) } catch(e) { }
     if (log && log.level) { _log.push(log) } else { console.info(...logs) }
