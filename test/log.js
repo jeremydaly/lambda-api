@@ -64,7 +64,12 @@ let event = {
   headers: {
     'content-type': 'application/json',
     'x-forwarded-for': '12.34.56.78, 23.45.67.89',
-    'User-Agent': 'user-agent-string'
+    'User-Agent': 'user-agent-string',
+    'CloudFront-Is-Desktop-Viewer': 'false',
+    'CloudFront-Is-Mobile-Viewer': 'true',
+    'CloudFront-Is-SmartTV-Viewer': 'false',
+    'CloudFront-Is-Tablet-Viewer': 'false',
+    'CloudFront-Viewer-Country': 'US'
   }
 }
 
@@ -228,6 +233,8 @@ describe('Logging Tests:', function() {
     expect(_log[4]).to.have.property('ua')
     expect(_log[4]).to.have.property('version')
     expect(_log[4]).to.have.property('qs')
+    expect(_log[4]).to.have.property('device')
+    expect(_log[4]).to.have.property('country')
   }) // end it
 
 
@@ -249,7 +256,7 @@ describe('Logging Tests:', function() {
 
   it('Custom level (debug)', async function() {
     console.log = logger
-    let _event = Object.assign({},event,{ path: '/' })
+    let _event = Object.assign({},event,{ path: '/',  })
     let result = await new Promise(r => api_customLevel.run(_event,context,(e,res) => { r(res) }))
     console.log = consoleLog
 
@@ -278,6 +285,8 @@ describe('Logging Tests:', function() {
     expect(_log[5]).to.have.property('ip')
     expect(_log[5]).to.have.property('ua')
     expect(_log[5]).to.have.property('version')
+    expect(_log[5]).to.have.property('device')
+    expect(_log[5]).to.have.property('country')
   }) // end it
 
 
@@ -329,6 +338,8 @@ describe('Logging Tests:', function() {
     expect(_log[1]).to.have.property('ip')
     expect(_log[1]).to.have.property('ua')
     expect(_log[1]).to.have.property('version')
+    expect(_log[1]).to.have.property('device')
+    expect(_log[1]).to.have.property('country')
   }) // end it
 
 
@@ -365,6 +376,8 @@ describe('Logging Tests:', function() {
     expect(_log[1]).to.have.property('ip')
     expect(_log[1]).to.have.property('ua')
     expect(_log[1]).to.have.property('version')
+    expect(_log[1]).to.have.property('device')
+    expect(_log[1]).to.have.property('country')
   }) // end it
 
 
@@ -399,6 +412,8 @@ describe('Logging Tests:', function() {
     expect(_log[1]).to.have.property('ip')
     expect(_log[1]).to.have.property('ua')
     expect(_log[1]).to.have.property('version')
+    expect(_log[1]).to.have.property('device')
+    expect(_log[1]).to.have.property('country')
   }) // end it
 
 
@@ -434,6 +449,8 @@ describe('Logging Tests:', function() {
     expect(_log[1]).to.have.property('ip')
     expect(_log[1]).to.have.property('ua')
     expect(_log[1]).to.have.property('version')
+    expect(_log[1]).to.have.property('device')
+    expect(_log[1]).to.have.property('country')
   }) // end it
 
 
@@ -470,6 +487,8 @@ describe('Logging Tests:', function() {
     expect(_log[1]).to.have.property('ip')
     expect(_log[1]).to.have.property('ua')
     expect(_log[1]).to.have.property('version')
+    expect(_log[1]).to.have.property('device')
+    expect(_log[1]).to.have.property('country')
   }) // end it
 
 
@@ -510,6 +529,8 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('ip')
     expect(_log[0]).to.have.property('ua')
     expect(_log[0]).to.have.property('version')
+    expect(_log[0]).to.have.property('device')
+    expect(_log[0]).to.have.property('country')
     // access log 2
     expect(_log[1]).to.have.property('time')
     expect(_log[1]).to.have.property('id')
@@ -524,6 +545,8 @@ describe('Logging Tests:', function() {
     expect(_log[1]).to.have.property('ip')
     expect(_log[1]).to.have.property('ua')
     expect(_log[1]).to.have.property('version')
+    expect(_log[1]).to.have.property('device')
+    expect(_log[1]).to.have.property('country')
   }) // end it
 
 
@@ -558,6 +581,8 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.not.have.property('ip')
     expect(_log[0]).to.not.have.property('ua')
     expect(_log[0]).to.not.have.property('version')
+    expect(_log[0]).to.not.have.property('device')
+    expect(_log[0]).to.not.have.property('country')
   }) // end it
 
 
@@ -628,6 +653,8 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('ip')
     expect(_log[0]).to.have.property('ua')
     expect(_log[0]).to.have.property('version')
+    expect(_log[0]).to.have.property('device')
+    expect(_log[0]).to.have.property('country')
 
     expect(_log[1]).to.have.property('time')
     expect(_log[1]).to.have.property('id')
@@ -641,6 +668,8 @@ describe('Logging Tests:', function() {
     expect(_log[1]).to.have.property('ip')
     expect(_log[1]).to.have.property('ua')
     expect(_log[1]).to.have.property('version')
+    expect(_log[1]).to.have.property('device')
+    expect(_log[1]).to.have.property('country')
   }) // end it
 
 
@@ -683,6 +712,8 @@ describe('Logging Tests:', function() {
     expect(_log[3]).to.have.property('ip')
     expect(_log[3]).to.have.property('ua')
     expect(_log[3]).to.have.property('version')
+    expect(_log[3]).to.have.property('device')
+    expect(_log[3]).to.have.property('country')
   }) // end it
 
 
@@ -728,6 +759,8 @@ describe('Logging Tests:', function() {
     expect(_log[1]).to.have.property('version')
     expect(_log[1]).to.have.property('TESTPATH')
     expect(_log[1]).to.have.property('STATUS')
+    expect(_log[1]).to.have.property('device')
+    expect(_log[1]).to.have.property('country')
   }) // end it
 
 
@@ -782,6 +815,8 @@ describe('Logging Tests:', function() {
     expect(_log[1]).to.have.property('ip')
     expect(_log[1]).to.have.property('ua')
     expect(_log[1]).to.have.property('version')
+    expect(_log[1]).to.have.property('device')
+    expect(_log[1]).to.have.property('country')
   }) // end it
 
 
