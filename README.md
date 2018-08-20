@@ -93,7 +93,7 @@ npm i lambda-api --save
 
 ## Requirements
 - AWS Lambda running **Node 8.10+**
-- AWS Gateway using [Proxy Integration](#lambda-proxy-integration)
+- AWS API Gateway using [Proxy Integration](#lambda-proxy-integration)
 
 ## Configuration
 Require the `lambda-api` module into your Lambda handler script and instantiate it. You can initialize the API with the following options:
@@ -345,6 +345,12 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `namespace` or `ns`: A reference to modules added to the app's namespace (see [namespaces](#namespaces))
 - `cookies`: An object containing cookies sent from the browser (see the [cookie](#cookiename-value-options) `RESPONSE` method)
 - `context`: Reference to the `context` passed into the Lambda handler function
+- `coldStart`: Boolean that indicates whether or not the current invocation was a cold start
+- `requestCount`: Integer representing the total number of invocations of the current function container (how many times it has been reused)
+- `ip`: The IP address of the client making the request
+- `userAgent`: The `User-Agent` header sent by the client making the request
+- `clientType`: Either `desktop`, `mobile`, `tv`, `tablet` or `unknown` based on CloudFront's analysis of the `User-Agent` header
+- `clientCountry`: Two letter country code representing the origin of the requests as determined by CloudFront
 
 The request object can be used to pass additional information through the processing chain. For example, if you are using a piece of authentication middleware, you can add additional keys to the `REQUEST` object with information about the user. See [middleware](#middleware) for more information.
 
@@ -699,6 +705,257 @@ api.options('/users/*', (req,res) => {
 })
 ```
 
+## Logging
+Lambda API includes a robust logging engine specifically designed for integration with AWS CloudWatch Logs' native JSON support. Not only is it ridiculously fast, but it's also highly configurable. Logging is disabled by default, but can be enabled by passing `{ logger: true }` when you create the Lambda API instance (or by passing a [Logging Configuration](#logging-configuration) definition).
+
+The logger is attached to the `REQUEST` object and can be used anywhere the object is available (e.g. routes, middleware, and error handlers).
+
+```javascript
+const api = require('lambda-api')({ logger: true })
+
+api.get('/status', (req,res) => {
+  req.log.info('Some info about this route')
+  res.send({ status: 'ok' })
+})
+```
+
+In addition to manual logging, Lambda API can also generate "access" logs for your API requests. API Gateway can also provide access logs, but they are limited to contextual information about your request (see [here](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html)). Lambda API allows you to capture the same data **PLUS** additional information directly from within your application.
+
+### Logging Configuration
+Logging can be enabled setting the `logger` option to `true` when creating the Lambda API instance. Logging can be configured by setting `logger` to an object that contains configuration information. The following table contains available logging configuration properties.
+
+| Property | Type | Description | Default |
+| -------- | ---- | ----------- | ------- |
+| access | `boolean` or `string` | Enables/disables automatic access log generation for each request. See [Access Logs](#access-logs)) | `false` |
+| customKey | `string` | Sets the JSON property name for custom data passed to logs. | `custom` |
+| detail | `boolean` | Enables/disables adding `REQUEST` and `RESPONSE` data to all log entries. | `false` |
+| level | `string` | Minimum logging level to send logs for. See [Logging Levels](#logging-levels). | `info` |
+| levels | `object` | Key/value pairs of custom log levels and their priority. See [Custom Logging Levels](#custom-logging-levels). | |
+| messageKey | `string` | Sets the JSON property name of the log "message". | `msg` |
+| nested | `boolean` | Enables/disables nesting of JSON logs for serializer data. See [Serializers](#serializers). | `false` |
+| timestamp | `boolean` or `function` | By default, timestamps will return the epoch time in milliseconds. A value of `false` disables log timestamps. A function that returns a value can be used to override the default format. | `true` |
+| sampling | `object` | Enables log sampling for periodic request tracing. See [Sampling](#sampling). | |
+| serializers | `object` | Serializers to manipulate the log format. See [Serializers](#serializers). | |
+| stack | `boolean` | Enables/disables the inclusion of stack traces in caught errors. | `false` |
+
+```javascript
+const api = require('lambda-api')({
+  logger: {
+    level: 'debug',
+    access: true,
+    customKey: 'detail',
+    messageKey: 'message',
+    timestamp: () => new Date().toUTCString(), // custom timestamp
+    stack: true
+  }
+})
+```
+
+### Log Format
+Logs are generated using Lambda API's standard JSON format. The log format can be customized using [Serializers](#serializers).
+
+**Standard log format (manual logging):**
+```javascript
+  {
+    "level": "info", // log level
+    "time": 1534724904910, // request timestamp
+    "id": "41b45ea3-70b5-11e6-b7bd-69b5aaebc7d9", // awsRequestId
+    "route": "/user/:userId", // route accessed
+    "method": "GET", // request method
+    "msg": "Some info about this route", // log message
+    "timer": 2, // execution time up until log was generated
+    "custom": "additional data", // addditional custom log detail
+    "remaining": 2000, // remaining milliseconds until function timeout
+    "function": "my-function-v1", // function name
+    "memory": 2048, // allocated function memory
+    "sample": true // generated during sampling request
+  }
+```
+
+### Access Logs
+Access logs generate detailed information about the API request. Access logs are disabled by default, but can be enabled by setting the `access` property to `true` in the logging configuration object. If set to `false`, access logs will *only* be generated when other log entries (`info`, `error`, etc.) are created. If set to the string `'never'`, access logs will never be generated.
+
+Access logs use the same format as the standard logs above, but include additional information about the request. The access log format can be customized using [Serializers](#serializers).
+
+**Access log format (automatic logging):**
+```javascript
+  {
+    ... Standard Log Data ...,
+    "path": "/user/123",
+    "ip": "12.34.56.78",
+    "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6)...",
+    "version": "v1",
+    "qs": {
+      "foo": "bar"
+    }
+  }
+```
+
+### Logging Levels
+Logging "levels" allow you to add detailed logging to your functions based on severity. There are six standard log levels as specified in the table below along with their default priority.
+
+| Level | Priority |
+| -------- | ------- |
+| `trace` | 10 |
+| `debug` | 20 |
+| `info` | 30 |
+| `warn` | 40 |
+| `error` | 50 |
+| `fatal` | 60 |
+
+Logs are written to CloudWatch Logs *ONLY* if they are the same or higher severity than specified in the `level` log configuration.
+
+```javascript
+// Logging level set to "warn"
+const api = require('lambda-api')({ logger: { level: 'warn' } })
+
+api.get('/', (req,res) => {
+  req.log.trace('trace log message') // ignored
+  req.log.debug('debug log message') // ignored
+  req.log.info('info log message') // ignored
+  req.log.warn('warn log message') // write to CloudWatch
+  req.log.error('error log message') // write to CloudWatch
+  req.log.fatal('fatal log message') // write to CloudWatch
+  res.send({ hello: 'world' })
+})
+```
+
+### Custom Logging Levels
+Custom logging "levels" can be added by specifying an object containing "level names" as keys and their priorities as values. You can also adjust the priority of standard levels by adding it to the object.
+
+```javascript
+const api = require('lambda-api')({
+  logger: {
+    levels: {
+      'test': 5, // low priority 'test' level
+      'customLevel': 35, // between info and warn
+      'trace': 70 // set trace to the highest priority
+    }
+  }
+})
+```
+
+In the example above, the `test` level would only generate logs if the priority was set to `test`. `customLevel` would generate logs if `level` was set to anything with the same or lower priority (e.g. `info`). `trace` now has the highest priority and would generate a log entry no matter what the level was set to.
+
+### Adding Additional Detail
+Manual logging also allows you to specify additional detail with each log entry. Details can be added by suppling *any variable type* as a second parameter to the logger function.
+
+```javascript
+req.log.info('This is the main log message','some other detail') // string
+req.log.info('This is the main log message',{ foo: 'bar', isAuthorized: someVar }) // object
+req.log.info('This is the main log message',25) // number
+req.log.info('This is the main log message',['val1','val2','val3']) // array
+req.log.info('This is the main log message',true) // boolean
+```
+
+If an object is provided, the keys will be merged into the main log entry's JSON. If an other value is provided, the value will be assigned to a key using the the `customKey` setting as its name. If `nested` is set to `true`, objects will be nested under the value of `customKey` as well.
+
+### Serializers
+Serializers allow you to customize log formats as well as add additional data from your application. Serializers can be defined by adding a `serializers` property to the `logger` configuration object. A property named for an available serializer (`main`, `req`, `res`, `context` or `custom`) needs to return an anonymous function that takes one argument and returns an object. The returned object will be merged into the main JSON log entry. Existing properties can be removed by returning `undefined` as their values.
+
+```javascript
+const api = require('lambda-api')({
+  logger: {
+    serializers: {
+      req: (req) => {
+        return {
+          apiId: req.requestContext.apiId, // add the apiId
+          stage: req.requestContext.stage, // add the stage
+          qs: undefined // remove the query string
+        }
+      }
+    }
+  }
+})
+```
+
+Serializers are passed one argument that contains their corresponding object. `req` *and* `main` receive the `REQUEST` object, `res` receives the `RESPONSE` object, `context` receives the `context` object passed into the main `run` function, and `custom` receives custom data passed in to the logging methods. Note that only custom `objects` will trigger the `custom` serializer.
+
+If the `nested` option is set to true in the `logger` configuration, then JSON log entries will be generated with properties for `req`, `res`, `context` and `custom` with their serialized data as nested objects.
+
+### Sampling
+Sampling allows you to periodically generate log entries for all possible severities within a single request execution. All of the log entries will be written to CloudWatch Logs and can be used to trace an entire request. This can be used for debugging, metric samples, resource response time sampling, etc.
+
+Sampling can be enabled by adding a `sampling` property to the `logger` configuration object. A value of `true` will enable the default sampling rule. The default can be changed by passing in a configuration object with the following available *optional* properties:
+
+| Property | Type | Description | Default |
+| -------- | ---- | ----------- | ------- |
+| target | `number` | The minimum number of samples per `period`. | 1 |
+| rate | `number` | The percentage of samples to be taken during the `period`. | 0.1 |
+| period | `number` | Number of **seconds** representing the duration of each sampling period. | 60 |
+
+The example below would sample at least `2` requests every `30` seconds as well as an additional `0.1` (10%) of all other requests during that period. Lambda API tracks the velocity of requests and attempts to distribute the samples as evenly as possible across the specified `period`.
+
+```javascript
+const api = require('lambda-api')({
+  logger: {
+    sampling: {
+      target: 2,
+      rate: 0.1,
+      period: 30
+    }
+  }
+})
+```
+
+Additional rules can be added by specify a `rules` parameter in the `sampling` configuration object. The `rules` should contain an `array` of "rule" objects with the following properties:
+
+| Property | Type | Description | Default | Required |
+| -------- | ---- | ----------- | ------- | -------- |
+| route | `string` | The route (as defined in a route handler) to apply this rule to. | | **Yes** |
+| target | `number` | The minimum number of samples per `period`. | 1 | No |
+| rate | `number` | The percentage of samples to be taken during the `period`. | 0.1 | No |
+| period | `number` | Number of **seconds** representing the duration of each sampling period. | 60 | No |
+| method | `string` or `array` | A comma separated list or `array` of HTTP methods to apply this rule to. | | No |
+
+The `route` property is the only value required and must match a route's path definition (e.g. `/user/:userId`, not `/user/123`) to be activated. Routes can also use wildcards at the end of the route to match multiple routes (e.g. `/user/*` would match `/user/:userId` *AND* `/user/:userId/tags`). A list of `method`s can also be supplied that would limit the rule to just those HTTP methods. A comma separated `string` or an `array` will be properly parsed.
+
+Sampling rules can be used to disable sampling on certain routes by setting the `target` and `rate` to `0`. For example, if you had a `/status` route that you didn't want to be sampled, you would use the following configuration:
+
+```javascript
+const api = require('lambda-api')({
+  logger: {
+    sampling: {
+      rules: [
+        { route: '/status', target: 0, rate: 0 }
+      ]
+    }
+  }
+})
+```
+
+You could also use sampling rules to enable sampling on certain routes:
+
+```javascript
+const api = require('lambda-api')({
+  logger: {
+    sampling: {
+      rules: [
+        { route: '/user', target: 1, rate: 0.1 }, // enable for /user route
+        { route: '/posts/*', target: 1, rate: 0.1 } // enable for all routes that start with /posts
+      ],
+      target: 0, // disable sampling default target
+      rate: 0 // disable sampling default rate
+    }
+  }
+})
+```
+
+If you'd like to disable sampling for `GET` and `POST` requests to user:
+```javascript
+const api = require('lambda-api')({
+  logger: {
+    sampling: {
+      rules: [
+        // disable GET and POST on /user route
+        { route: '/user', target: 0, rate: 0, method: ['GET','POST'] }
+      ]
+    }
+  }
+})
+```
+
+
 ## Middleware
 The API supports middleware to preprocess requests before they execute their matching routes. Middleware is defined using the `use` method and requires a function with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
 
@@ -709,7 +966,7 @@ api.use((req,res,next) => {
 })
 ```
 
-Middleware can be used to authenticate requests, log API calls, etc. The `REQUEST` and `RESPONSE` objects behave as they do within routes, allowing you to manipulate either object. In the case of authentication, for example, you could verify a request and update the `REQUEST` with an `authorized` flag and continue execution. Or if the request couldn't be authorized, you could respond with an error directly from the middleware. For example:
+Middleware can be used to authenticate requests, create database connections, etc. The `REQUEST` and `RESPONSE` objects behave as they do within routes, allowing you to manipulate either object. In the case of authentication, for example, you could verify a request and update the `REQUEST` with an `authorized` flag and continue execution. Or if the request couldn't be authorized, you could respond with an error directly from the middleware. For example:
 
 ```javascript
 // Auth User
@@ -723,13 +980,13 @@ api.use((req,res,next) => {
 })
 ```
 
-The `next()` callback tells the system to continue executing. If this is not called then the system will hang and eventually timeout unless another request ending call such as `error` is called. You can define as many middleware functions as you want. They will execute serially and synchronously in the order in which they are defined.
+The `next()` callback tells the system to continue executing. If this is not called then the system will hang (and eventually timeout) unless another request ending call such as `error` is called. You can define as many middleware functions as you want. They will execute serially and synchronously in the order in which they are defined.
 
-**NOTE:** Middleware can use either callbacks like `res.send()` or `return` to trigger a response to the user. Please note that calling either one of these from within a middleware function will return the response immediately.
+**NOTE:** Middleware can use either callbacks like `res.send()` or `return` to trigger a response to the user. Please note that calling either one of these from within a middleware function will return the response immediately and terminate API execution.
 
 ### Restricting middleware execution to certain path(s)
 
-By default, middleware will execute on every path. If you only need it to execute for specific paths, pass the path (or array of paths) as the first parameter to the `use` function.
+By default, middleware will execute on every path. If you only need it to execute for specific paths, pass the path (or array of paths) as the first parameter to the `use` method.
 
 ```javascript
 // Single path
@@ -750,6 +1007,26 @@ api.use(['/comments','/users/:userId','/posts/*'],(req,res,next) => { next() })
 
 Path matching checks both the supplied `path` and the defined `route`. This means that parameterized paths can be matched by either the parameter (e.g. `/users/:param1`) or by an exact matching path (e.g. `/users/123`).
 
+### Specifying multiple middleware
+
+In addition to restricting middleware to certain paths, you can also add multiple middleware using a single `use` method. This is a convenient way to assign several pieces of middleware to the same path or minimize your code.
+
+```javascript
+const middleware1 = (req,res,next) => {
+  // middleware code
+}
+
+const middleware2 = (req,res,next) => {
+  // some other middleware code
+}
+
+// Restrict middleware1 and middleware2 to /users route
+api.use('/users', middleware1, middleware2)
+
+// Add middleware1 and middleware2 to all routes
+api.use(middleware1, middleware2)
+```
+
 
 ## Clean Up
 The API has a built-in clean up method called 'finally()' that will execute after all middleware and routes have been completed, but before execution is complete. This can be used to close database connections or to perform other clean up functions. A clean up function can be defined using the `finally` method and requires a function with two parameters for the REQUEST and the RESPONSE as its only argument. For example:
@@ -763,7 +1040,7 @@ api.finally((req,res) => {
 The `RESPONSE` **CANNOT** be manipulated since it has already been generated. Only one `finally()` method can be defined and will execute after properly handled errors as well.
 
 ## Error Handling
-The API has simple built-in error handling that will log the error using `console.log`. These will be available via CloudWatch Logs. By default, errors will trigger a JSON response with the error message. If you would like to define additional error handling, you can define them using the `use` method similar to middleware. Error handling middleware must be defined as a function with **four** arguments instead of three like normal middleware. An additional `error` parameter must be added as the first parameter. This will contain the error object generated.
+The API has sophisticated error handling that will automatically catch and log errors using the [Logging](#logging) system. By default, errors will trigger a JSON response with the error message. If you would like to define additional error handling, you can define them using the `use` method similar to middleware. Error handling middleware must be defined as a function with **four** arguments instead of three like normal middleware. An additional `error` parameter must be added as the first parameter. This will contain the error object generated.
 
 ```javascript
 api.use((err,req,res,next) => {
@@ -773,6 +1050,24 @@ api.use((err,req,res,next) => {
 ```
 
 The `next()` callback will cause the script to continue executing and eventually call the standard error handling function. You can short-circuit the default handler by calling a request ending method such as `send`, `html`, or `json` OR by `return`ing data from your handler.
+
+Error handling middleware, like regular middleware, also supports specifying multiple handlers in a single `use` method call.
+
+```javascript
+const errorHandler1 = (err,req,res,next) => {
+  // do something with the error
+  next()
+})
+
+const errorHandler2 = (err,req,res,next) => {
+  // do something else with the error
+  next()
+})
+
+api.use(errorHandler1,errorHandler2)
+```
+
+**NOTE:** Error handling middleware runs on *ALL* paths. If paths are passed in as the first parameter, they will be ignored by the error handling middleware.
 
 ## Namespaces
 Lambda API allows you to map specific modules to namespaces that can be accessed from the `REQUEST` object. This is helpful when using the pattern in which you create a module that exports middleware, error, or route functions. In the example below, the `data` namespace is added to the API and then accessed by reference within an included module.
