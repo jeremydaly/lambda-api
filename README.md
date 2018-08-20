@@ -77,6 +77,15 @@ Lambda API was written to be extremely lightweight and built specifically for se
 - [Enabling Binary Support](#enabling-binary-support)
 - [Path Parameters](#path-parameters)
 - [Wildcard Routes](#wildcard-routes)
+- [Logging](#logging)
+  - [Logging Configuration](#logging-configuration)
+  - [Log Format](#log-format)
+  - [Access Logs](#access-logs)
+  - [Logging Levels](#logging-levels)
+  - [Custom Logging Levels](#custom-logging-levels)
+  - [Adding Additional Detail](#adding-additional-detail)
+  - [Serializers](#serializers)
+  - [Sampling](#sampling)
 - [Middleware](#middleware)
 - [Clean Up](#clean-up)
 - [Error Handling](#error-handling)
@@ -112,6 +121,9 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 
 ## Recent Updates
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
+
+### v0.8: Logging Support and Sampling
+Lambda API has added a powerful (and customizable) logging engine that utilizes native JSON support for CloudWatch Logs. Log entries can be manually added using standard severities like `info` and `warn`. In addition, "access logs" can be automatically generated with detailed information about each requests. See [Logging](#logging) for more information about logging and auto sampling for request tracing.
 
 ### v0.7: Restrict middleware execution to certain paths
 Middleware now supports an optional path parameter that supports multiple paths, wildcards, and parameter matching to better control middleware execution. See [middleware](#middleware) for more information.
@@ -706,7 +718,7 @@ api.options('/users/*', (req,res) => {
 ```
 
 ## Logging
-Lambda API includes a robust logging engine specifically designed for integration with AWS CloudWatch Logs' native JSON support. Not only is it ridiculously fast, but it's also highly configurable. Logging is disabled by default, but can be enabled by passing `{ logger: true }` when you create the Lambda API instance (or by passing a [Logging Configuration](#logging-configuration) definition).
+Lambda API includes a robust logging engine specifically designed to utilize native JSON support for CloudWatch Logs. Not only is it ridiculously fast, but it's also highly configurable. Logging is disabled by default, but can be enabled by passing `{ logger: true }` when you create the Lambda API instance (or by passing a [Logging Configuration](#logging-configuration) definition).
 
 The logger is attached to the `REQUEST` object and can be used anywhere the object is available (e.g. routes, middleware, and error handlers).
 
@@ -722,11 +734,11 @@ api.get('/status', (req,res) => {
 In addition to manual logging, Lambda API can also generate "access" logs for your API requests. API Gateway can also provide access logs, but they are limited to contextual information about your request (see [here](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html)). Lambda API allows you to capture the same data **PLUS** additional information directly from within your application.
 
 ### Logging Configuration
-Logging can be enabled setting the `logger` option to `true` when creating the Lambda API instance. Logging can be configured by setting `logger` to an object that contains configuration information. The following table contains available logging configuration properties.
+Logging can be enabled by setting the `logger` option to `true` when creating the Lambda API instance. Logging can be configured by setting `logger` to an object that contains configuration information. The following table contains available logging configuration properties.
 
 | Property | Type | Description | Default |
 | -------- | ---- | ----------- | ------- |
-| access | `boolean` or `string` | Enables/disables automatic access log generation for each request. See [Access Logs](#access-logs)) | `false` |
+| access | `boolean` or `string` | Enables/disables automatic access log generation for each request. See [Access Logs](#access-logs). | `false` |
 | customKey | `string` | Sets the JSON property name for custom data passed to logs. | `custom` |
 | detail | `boolean` | Enables/disables adding `REQUEST` and `RESPONSE` data to all log entries. | `false` |
 | level | `string` | Minimum logging level to send logs for. See [Logging Levels](#logging-levels). | `info` |
@@ -735,9 +747,10 @@ Logging can be enabled setting the `logger` option to `true` when creating the L
 | nested | `boolean` | Enables/disables nesting of JSON logs for serializer data. See [Serializers](#serializers). | `false` |
 | timestamp | `boolean` or `function` | By default, timestamps will return the epoch time in milliseconds. A value of `false` disables log timestamps. A function that returns a value can be used to override the default format. | `true` |
 | sampling | `object` | Enables log sampling for periodic request tracing. See [Sampling](#sampling). | |
-| serializers | `object` | Serializers to manipulate the log format. See [Serializers](#serializers). | |
+| serializers | `object` | Adds serializers that manipulate the log format. See [Serializers](#serializers). | |
 | stack | `boolean` | Enables/disables the inclusion of stack traces in caught errors. | `false` |
 
+Example:
 ```javascript
 const api = require('lambda-api')({
   logger: {
@@ -768,7 +781,7 @@ Logs are generated using Lambda API's standard JSON format. The log format can b
     "remaining": 2000, // remaining milliseconds until function timeout
     "function": "my-function-v1", // function name
     "memory": 2048, // allocated function memory
-    "sample": true // generated during sampling request
+    "sample": true // is generated during sampling request?
   }
 ```
 
@@ -781,11 +794,13 @@ Access logs use the same format as the standard logs above, but include addition
 ```javascript
   {
     ... Standard Log Data ...,
-    "path": "/user/123",
-    "ip": "12.34.56.78",
-    "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6)...",
-    "version": "v1",
-    "qs": {
+    "path": "/user/123", // path accessed
+    "ip": "12.34.56.78", // client ip address
+    "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6)...", // User-Agent
+    "version": "v1", // specified API version
+    "device": "mobile", // client device (as determined by CloudFront)
+    "country": "US", // client country (as determined by CloudFront)
+    "qs": { // query string parameters
       "foo": "bar"
     }
   }
@@ -848,7 +863,7 @@ req.log.info('This is the main log message',['val1','val2','val3']) // array
 req.log.info('This is the main log message',true) // boolean
 ```
 
-If an object is provided, the keys will be merged into the main log entry's JSON. If an other value is provided, the value will be assigned to a key using the the `customKey` setting as its name. If `nested` is set to `true`, objects will be nested under the value of `customKey` as well.
+If an `object` is provided, the keys will be merged into the main log entry's JSON. If any other `type` is provided, the value will be assigned to a key using the the `customKey` setting as its property name. If `nested` is set to `true`, objects will be nested under the value of `customKey` as well.
 
 ### Serializers
 Serializers allow you to customize log formats as well as add additional data from your application. Serializers can be defined by adding a `serializers` property to the `logger` configuration object. A property named for an available serializer (`main`, `req`, `res`, `context` or `custom`) needs to return an anonymous function that takes one argument and returns an object. The returned object will be merged into the main JSON log entry. Existing properties can be removed by returning `undefined` as their values.
@@ -955,6 +970,7 @@ const api = require('lambda-api')({
 })
 ```
 
+Any combination of rules can be provided to customize sampling behavior. Note that each rule tracks requests and velocity separately, which could limit the number of samples for infrequently accessed routes.
 
 ## Middleware
 The API supports middleware to preprocess requests before they execute their matching routes. Middleware is defined using the `use` method and requires a function with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
