@@ -41,7 +41,7 @@ Lambda API was written to be *extremely lightweight* and built specifically for 
 ### Single Purpose Functions
 You may have heard that a serverless "best practice" is to keep your functions small and limit them to a single purpose. I generally agree since building monolith applications is not what serverless was designed for. However, what exactly is a "single purpose" when it comes to building serverless APIs and web services? Should we create a separate function for our "create user" `POST` endpoint and then another one for our "update user" `PUT` endpoint? Should we create yet another function for our "delete user" `DELETE` endpoint? You certainly could, but that seems like a lot of repeated boilerplate code. On the other hand, you could create just one function that handled all your user management features. It may even make sense (in certain circumstances) to create one big serverless function handling several related components that can share your VPC database connections.
 
-Whatever you decide is best for your use case, **Lambda API** is there to support you. Whether your function has over a hundred routes, or just one, Lambda API's small size and lightning fast load time has virtually no impact on your function's performance. Yet despite its small footprint, it gives you the power of a full-featured web framework. 
+Whatever you decide is best for your use case, **Lambda API** is there to support you. Whether your function has over a hundred routes, or just one, Lambda API's small size and lightning fast load time has virtually no impact on your function's performance. Yet despite its small footprint, it gives you the power of a full-featured web framework.
 
 ## Table of Contents
 - [Installation](#installation)
@@ -1061,7 +1061,7 @@ api.finally((req,res) => {
 The `RESPONSE` **CANNOT** be manipulated since it has already been generated. Only one `finally()` method can be defined and will execute after properly handled errors as well.
 
 ## Error Handling
-The API has sophisticated error handling that will automatically catch and log errors using the [Logging](#logging) system. By default, errors will trigger a JSON response with the error message. If you would like to define additional error handling, you can define them using the `use` method similar to middleware. Error handling middleware must be defined as a function with **four** arguments instead of three like normal middleware. An additional `error` parameter must be added as the first parameter. This will contain the error object generated.
+Lambda API has sophisticated error handling that will automatically catch and log errors using the [Logging](#logging) system. By default, errors will trigger a JSON response with the error message. If you would like to define additional error handling, you can define them using the `use` method similar to middleware. Error handling middleware must be defined as a function with **four** arguments instead of three like normal middleware. An additional `error` parameter must be added as the first parameter. This will contain the error object generated.
 
 ```javascript
 api.use((err,req,res,next) => {
@@ -1089,6 +1089,31 @@ api.use(errorHandler1,errorHandler2)
 ```
 
 **NOTE:** Error handling middleware runs on *ALL* paths. If paths are passed in as the first parameter, they will be ignored by the error handling middleware.
+
+### Error Types
+Error logs are generate using either the `error` or `fatal` logging level. Errors can be triggered from within routes and middleware by calling the `error()` method on the `RESPONSE` object. If provided a `string` as an error message, this will generate an `error` level log entry. If you supply a JavaScript `Error` object, or you `throw` an error, a `fatal` log entry will be generated.
+
+```javascript
+api.get('/somePath', (res,req) => {
+  res.error('This is an error message') // creates 'error' log
+})
+
+api.get('/someOtherPath', (res,req) => {
+  res.error(new Error('This is a fatal error')) // creates 'fatal' log
+})
+
+api.get('/anotherPath', (res,req) => {
+  throw new Error('Another fatal error') // creates 'fatal' log
+})
+
+api.get('/finalPath', (res,req) => {
+  try {
+    // do something
+  } catch(e) {
+    res.error(e) // creates 'fatal' log
+  }
+})
+```
 
 ## Namespaces
 Lambda API allows you to map specific modules to namespaces that can be accessed from the `REQUEST` object. This is helpful when using the pattern in which you create a module that exports middleware, error, or route functions. In the example below, the `data` namespace is added to the API and then accessed by reference within an included module.
