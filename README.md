@@ -114,10 +114,12 @@ Require the `lambda-api` module into your Lambda handler script and instantiate 
 
 | Property | Type | Description |
 | -------- | ---- | ----------- |
-| version  | `String` | Version number accessible via the `REQUEST` object |
 | base  | `String` | Base path for all routes, e.g. `base: 'v1'` would prefix all routes with `/v1` |
 | callbackName | `String` | Override the default callback query parameter name for JSONP calls |
+| logger | `boolean` or `object` | Enables default [logging](#logging) or allows for configuration through a [Logging Configuration](#logging-configuration) object. |
 | mimeTypes | `Object` | Name/value pairs of additional MIME types to be supported by the `type()`. The key should be the file extension (without the `.`) and the value should be the expected MIME type, e.g. `application/json` |
+| version  | `String` | Version number accessible via the `REQUEST` object |
+
 
 ```javascript
 // Require the framework and instantiate it with optional version and base parameters
