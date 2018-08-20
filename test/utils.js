@@ -290,4 +290,61 @@ describe('Utility Function Tests:', function() {
   }) // end generateEtag tests
 
 
+  describe('isS3:', function() {
+    it('Empty path', function() {
+      expect(utils.isS3('')).to.be.false
+    })
+
+    it('Valid S3 path', function() {
+      expect(utils.isS3('s3://test-bucket/key')).to.be.true
+    })
+
+    it('Valid S3 path (uppercase)', function() {
+      expect(utils.isS3('S3://test-bucket/key')).to.be.true
+    })
+
+    it('Invalid S3 path', function() {
+      expect(utils.isS3('s3://test-bucket')).to.be.false
+    })
+
+    it('Empty S3 path', function() {
+      expect(utils.isS3('s3:///')).to.be.false
+    })
+
+    it('URL', function() {
+      expect(utils.isS3('https://somedomain.com/test')).to.be.false
+    })
+
+    it('Relative path', function() {
+      expect(utils.isS3('../test/file.txt')).to.be.false
+    })
+  }) // end isS3 tests
+
+
+  describe('parseS3:', function() {
+    it('Valid S3 path', function() {
+      expect(utils.parseS3('s3://test-bucket/key')).to.deep.equal({ Bucket: 'test-bucket', Key: 'key' })
+    })
+
+    it('Valid S3 path (nested key)', function() {
+      expect(utils.parseS3('s3://test-bucket/key/path/file.txt')).to.deep.equal({ Bucket: 'test-bucket', Key: 'key/path/file.txt' })
+    })
+
+    it('Invalid S3 path (no key)', function() {
+      let func = () => utils.parseS3('s3://test-bucket')
+      expect(func).to.throw('Invalid S3 path')
+    })
+
+    it('Invalid S3 path (no bucket or key)', function() {
+      let func = () => utils.parseS3('s3://')
+      expect(func).to.throw('Invalid S3 path')
+    })
+
+    it('Invalid S3 path (empty)', function() {
+      let func = () => utils.parseS3('')
+      expect(func).to.throw('Invalid S3 path')
+    })
+
+  }) // end parseS3 tests
+
 }) // end UTILITY tests

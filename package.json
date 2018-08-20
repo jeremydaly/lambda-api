@@ -1,11 +1,11 @@
 {
   "name": "lambda-api",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Lightweight web framework for your serverless applications",
   "main": "index.js",
   "scripts": {
     "test": "mocha --check-leaks --recursive",
-    "test-cov": "nyc --reporter=lcov mocha --check-leaks --recursive",
+    "test-cov": "nyc --reporter=html mocha --check-leaks --recursive",
     "test-ci": "nyc npm test && nyc report --reporter=text-lcov | ./node_modules/coveralls/bin/coveralls.js",
     "lint": "eslint ."
   },
@@ -17,10 +17,9 @@
     "serverless",
     "nodejs",
     "api",
-    "awslambda",
-    "apigateway",
-    "web",
-    "framework",
+    "AWS Lambda",
+    "API Gateway",
+    "web framework",
     "json",
     "schema",
     "open"

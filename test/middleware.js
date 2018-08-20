@@ -7,11 +7,19 @@ const expect = require('chai').expect // Assertion library
 const api = require('../index')({ version: 'v1.0' })
 const api2 = require('../index')({ version: 'v1.0' })
 const api3 = require('../index')({ version: 'v1.0' })
+const api4 = require('../index')({ version: 'v1.0' })
+const api5 = require('../index')({ version: 'v1.0' })
+const api6 = require('../index')({ version: 'v1.0' })
+const api7 = require('../index')({ version: 'v1.0' })
 
 // NOTE: Set test to true
 api._test = true;
 api2._test = true;
 api3._test = true;
+api4._test = true;
+api5._test = true;
+api6._test = true;
+api7._test = true;
 
 let event = {
   httpMethod: 'get',
@@ -84,6 +92,47 @@ api3.use(['/test','/test/:param1','/test2/*'],function(req,res,next) {
   next()
 })
 
+const middleware1 = (req,res,next) => {
+  req.middleware1 = true
+  next()
+}
+
+const middleware2 = (req,res,next) => {
+  req.middleware2 = true
+  next()
+}
+
+api4.use(middleware1,middleware2);
+api5.use('/test/x',middleware1,middleware2);
+api5.use('/test/y',middleware1);
+
+
+
+api6.use((req,res,next) => {
+  res.header('middleware1',true)
+  return 'return from middleware'
+})
+
+// This shouldn't run
+api6.use((req,res,next) => {
+  res.header('middleware2',true)
+  next()
+})
+
+
+
+api7.use((req,res,next) => {
+  res.header('middleware1',true)
+  res.send('return from middleware')
+  next()
+})
+
+// This shouldn't run
+api7.use((req,res,next) => {
+  res.header('middleware2',true)
+  next()
+})
+
 /******************************************************************************/
 /***  DEFINE TEST ROUTES                                                    ***/
 /******************************************************************************/
@@ -132,6 +181,48 @@ api3.get('/test2/test', function(req,res) {
 
 api3.get('/test3', function(req,res) {
   res.status(200).json({ method: 'get', middleware: req.testMiddlewareAll ? true : false })
+})
+
+api4.get('/test', (req,res) => {
+  res.status(200).json({
+    method: 'get',
+    middleware1: req.middleware1 ? true : false,
+    middleware2: req.middleware2 ? true : false
+  })
+})
+
+api5.get('/test', (req,res) => {
+  res.status(200).json({
+    method: 'get',
+    middleware1: req.middleware1 ? true : false,
+    middleware2: req.middleware2 ? true : false
+  })
+})
+
+api5.get('/test/x', (req,res) => {
+  res.status(200).json({
+    method: 'get',
+    middleware1: req.middleware1 ? true : false,
+    middleware2: req.middleware2 ? true : false
+  })
+})
+
+api5.get('/test/y', (req,res) => {
+  res.status(200).json({
+    method: 'get',
+    middleware1: req.middleware1 ? true : false,
+    middleware2: req.middleware2 ? true : false
+  })
+})
+
+api6.get('/test', (req,res) => {
+  // This should not run because of the middleware return
+  res.status(200).send('route response')
+})
+
+api7.get('/test', (req,res) => {
+  // This should not run because of the middleware return
+  res.status(200).send('route response')
 })
 
 /******************************************************************************/
@@ -210,6 +301,52 @@ describe('Middleware Tests:', function() {
     let _event = Object.assign({},event,{ path: '/test3' })
     let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware":false}', isBase64Encoded: false })
+  }) // end it
+
+
+  it('Multiple middlewares (no path)', async function() {
+    let _event = Object.assign({},event,{ path: '/test' })
+    let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware1":true,"middleware2":true}', isBase64Encoded: false })
+  }) // end it
+
+
+  it('Multiple middlewares (w/o matching path)', async function() {
+    let _event = Object.assign({},event,{ path: '/test' })
+    let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware1":false,"middleware2":false}', isBase64Encoded: false })
+  }) // end it
+
+
+  it('Multiple middlewares (w/ matching path)', async function() {
+    let _event = Object.assign({},event,{ path: '/test/x' })
+    let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware1":true,"middleware2":true}', isBase64Encoded: false })
+  }) // end it
+
+
+  it('Single middleware (w/ matching path)', async function() {
+    let _event = Object.assign({},event,{ path: '/test/y' })
+    let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware1":true,"middleware2":false}', isBase64Encoded: false })
+  }) // end it
+
+
+  it('Short-circuit route with middleware (async return)', async function() {
+    let _event = Object.assign({},event,{ path: '/test' })
+    let result = await new Promise(r => api6.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({
+      headers: { 'content-type': 'application/json', middleware1: true },
+      statusCode: 200, body: 'return from middleware', isBase64Encoded: false })
+  }) // end it
+
+
+  it('Short-circuit route with middleware (callback)', async function() {
+    let _event = Object.assign({},event,{ path: '/test' })
+    let result = await new Promise(r => api7.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({
+      headers: { 'content-type': 'application/json', middleware1: true },
+      statusCode: 200, body: 'return from middleware', isBase64Encoded: false })
   }) // end it
 
 

@@ -41,7 +41,7 @@ api.get('/download', function(req,res) {
 api.get('/download/err', function(req,res) {
   res.download('./test-missing.txt', err => {
     if (err) {
-      res.status(404).error('There was an error accessing the requested file')
+      res.error(404,'There was an error accessing the requested file')
     }
   })
 })
@@ -50,13 +50,10 @@ api.get('/download/test', function(req,res) {
   res.download('test/test.txt' + (req.query.test ? req.query.test : ''), err => {
 
     // Return a promise
-    return Promise.try(() => {
-      for(let i = 0; i<40000000; i++) {}
-      return true
-    }).then((x) => {
+    return Promise.delay(100).then((x) => {
       if (err) {
         // set custom error code and message on error
-        res.status(501).error('Custom File Error')
+        res.error(501,'Custom File Error')
       } else {
         // else set custom response code
         res.status(201)
@@ -85,6 +82,10 @@ api.get('/download/headers-private', function(req,res) {
 
 api.get('/download/all', function(req,res) {
   res.download('test/test.txt', 'test-file.txt', { private: true, maxAge: 3600000 }, err => { res.header('x-callback','true') })
+})
+
+api.get('/download/no-options', function(req,res) {
+  res.download('test/test.txt', 'test-file.txt', err => { res.header('x-callback','true') })
 })
 
 // S3 file
@@ -243,6 +244,22 @@ describe('Download Tests:', function() {
         'content-type': 'text/plain',
         'x-callback': 'true',
         'cache-control': 'private, max-age=3600',
+        'expires': result.headers.expires,
+        'last-modified': result.headers['last-modified'],
+        'content-disposition': 'attachment; filename="test-file.txt"'
+      }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
+    })
+  }) // end it
+
+
+  it('Text file w/ filename and callback (no options)', async function() {
+    let _event = Object.assign({},event,{ path: '/download/no-options' })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({
+      headers: {
+        'content-type': 'text/plain',
+        'x-callback': 'true',
+        'cache-control': 'max-age=0',
         'expires': result.headers.expires,
         'last-modified': result.headers['last-modified'],
         'content-disposition': 'attachment; filename="test-file.txt"'

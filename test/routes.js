@@ -3,14 +3,9 @@
 const expect = require('chai').expect // Assertion library
 
 // Init API instance
-const api = require('../index')({ version: 'v1.0' })
-const api2 = require('../index')({ version: 'v1.0' })
-const api3 = require('../index')({ version: 'v1.0' })
-
-// NOTE: Set test to true
-api._test = true;
-api2._test = true;
-api3._test = true;
+const api = require('../index')({ version: 'v1.0', logger: false })
+const api2 = require('../index')({ version: 'v1.0', logger: false })
+const api3 = require('../index')({ version: 'v1.0', logger: false })
 
 let event = {
   httpMethod: 'get',
@@ -27,6 +22,10 @@ let event = {
 
 api.get('/', function(req,res) {
   res.status(200).json({ method: 'get', status: 'ok' })
+})
+
+api.get('/return', async function(req,res) {
+  return { method: 'get', status: 'ok' }
 })
 
 api2.get('/', function(req,res) {
@@ -51,6 +50,10 @@ api.get('/test_options2/:test', function(req,res) {
 
 api.post('/test', function(req,res) {
   res.status(200).json({ method: 'post', status: 'ok' })
+})
+
+api.post('/test/base64', function(req,res) {
+  res.status(200).json({ method: 'post', status: 'ok', body: req.body })
 })
 
 api.put('/test', function(req,res) {
@@ -245,6 +248,25 @@ describe('Route Tests:', function() {
     it('Simple path: /test', async function() {
       let _event = Object.assign({},event,{})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+    }) // end it
+
+
+    it('Simple path w/ async return', async function() {
+      let _event = Object.assign({},event,{ path: '/return' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"method":"get","status":"ok"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+
+    it('Simple path, no `context`', async function() {
+      let _event = Object.assign({},event,{})
+      let result = await new Promise(r => api.run(_event,null,(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
@@ -450,6 +472,12 @@ describe('Route Tests:', function() {
       let _event = Object.assign({},event,{ path: '/test/form', httpMethod: 'post', body: 'test=123&test2=456', headers: { 'CoNtEnt-TYPe': 'application/x-www-form-urlencoded' } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":{"test":"123","test2":"456"}}', isBase64Encoded: false })
+    }) // end it
+
+    it('With base64 encoded body', async function() {
+      let _event = Object.assign({},event,{ path: '/test/base64', httpMethod: 'post', body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","body":"Test file for sendFile\\n"}', isBase64Encoded: false })
     }) // end it
 
     it('Missing path: /not_found', async function() {
@@ -823,6 +851,46 @@ describe('Route Tests:', function() {
     }) // end it
 
   }) // end method tests
+
+
+  describe('Configuration errors', function() {
+
+    it('Missing handler', async function() {
+      let error_message
+      try {
+        const api_error1 = require('../index')({ version: 'v1.0' })
+        api_error1.get('/test-missing-handler')
+      } catch(e) {
+        error_message = e.message
+      }
+      expect(error_message).to.equal('No route handler specified for GET method on /test-missing-handler route.')
+    }) // end it
+
+    it('Missing callback', async function() {
+      let _event = Object.assign({},event,{ path: '/test', httpMethod: 'get' })
+      let result = await api.run(_event,{}).then(res => { return res })
+
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json' },
+        statusCode: 200,
+        body: '{"method":"get","status":"ok"}',
+        isBase64Encoded: false
+      })
+
+    }) // end it
+
+    it('Invalid middleware', async function() {
+      let error_message
+      try {
+        const api_error2 = require('../index')({ version: 'v1.0' })
+        api_error2.use((err,req) => {})
+      } catch(e) {
+        error_message = e.message
+      }
+      expect(error_message).to.equal('Middleware must have 3 or 4 parameters')
+    }) // end it
+
+  }) // end Configuration errors
 
   describe('routes() (debug method)', function() {
 

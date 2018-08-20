@@ -3,13 +3,14 @@
 /**
  * Lightweight web framework for your serverless applications
  * @author Jeremy Daly <jeremy@jeremydaly.com>
- * @version 0.7.0
+ * @version 0.8.0
  * @license MIT
  */
 
 const REQUEST = require('./lib/request.js') // Resquest object
 const RESPONSE = require('./lib/response.js') // Response object
 const UTILS = require('./lib/utils.js') // Require utils library
+const LOGGER = require('./lib/logger.js') // Require logger library
 const prettyPrint = require('./lib/prettyPrint') // Pretty print for debugging
 
 // Create the API class
@@ -24,16 +25,36 @@ class API {
     this._callbackName = props && props.callback ? props.callback.trim() : 'callback'
     this._mimeTypes = props && props.mimeTypes && typeof props.mimeTypes === 'object' ? props.mimeTypes : {}
 
+    // Set sampling info
+    this._sampleCounts = {}
+
+    // Init request counter
+    this._requestCount = 0
+
+    // Track init date/time
+    this._initTime = Date.now()
+
+    // Logging levels
+    this._logLevels = {
+      trace: 10,
+      debug: 20,
+      info: 30,
+      warn: 40,
+      error: 50,
+      fatal: 60
+    }
+
+    // Configure logger
+    this._logger = LOGGER.config(props && props.logger,this._logLevels)
+
     // Prefix stack w/ base
     this._prefix = this.parseRoute(this._base)
 
     // Stores route mappings
     this._routes = {}
 
-    // Default callback
-    this._cb = function() {
-      console.log('No callback specified') // eslint-disable-line no-console
-    }
+    // Init callback
+    this._cb
 
     // Middleware stack
     this._middleware = []
@@ -47,11 +68,8 @@ class API {
     // Executed after the callback
     this._finally = () => {}
 
-    // Global error status
+    // Global error status (used for response parsing errors)
     this._errorStatus = 500
-
-    // Testing flag (disables logging)
-    this._test = false
 
   } // end constructor
 
@@ -70,6 +88,10 @@ class API {
 
   // METHOD: Adds method and handler to routes
   METHOD(method, path, handler) {
+
+    if (typeof handler !== 'function') {
+      throw new Error(`No route handler specified for ${method} method on ${path} route.`)
+    }
 
     // Ensure method is an array
     let methods = Array.isArray(method) ? method : method.split(',')
@@ -126,8 +148,8 @@ class API {
 
     // Set the event, context and callback
     this._event = event
-    this._context = this.context = context
-    this._cb = cb
+    this._context = this.context = typeof context === 'object' ? context : {}
+    this._cb = cb ? cb : undefined
 
     // Initalize request and response objects
     let request = new REQUEST(this)
@@ -136,7 +158,7 @@ class API {
     try {
 
       // Parse the request
-      request.parseRequest()
+      await request.parseRequest()
 
       // Loop through the middleware and await response
       for (const mw of this._middleware) {
@@ -175,15 +197,18 @@ class API {
       }
 
     } catch(e) {
-      this.catchErrors(e,response)
+      await this.catchErrors(e,response)
     }
+
+    // Return the final response
+    return response._response
 
   } // end run function
 
 
 
   // Catch all async/sync errors
-  async catchErrors(e,response) {
+  async catchErrors(e,response,code,detail) {
 
     // Error messages should never be base64 encoded
     response._isBase64 = false
@@ -193,13 +218,21 @@ class API {
 
     let message
 
+    let info = {
+      detail,
+      statusCode: response._statusCode,
+      coldStart: response._request.coldStart,
+      stack: this._logger.stack && e.stack || undefined
+    }
+
     if (e instanceof Error) {
-      response.status(this._errorStatus)
+      response.status(code ? code : this._errorStatus)
       message = e.message
-      !this._test && console.log(e) // eslint-disable-line no-console
+      this.log.fatal(message, info)
     } else {
+      response.status(code)
       message = e
-      !this._test && console.log('API Error:',e) // eslint-disable-line no-console
+      this.log.error(message, info)
     }
 
     // If first time through, process error middleware
@@ -227,7 +260,7 @@ class API {
 
 
   // Custom callback
-  async _callback(err, res, response) {
+  async _callback(err,res,response) {
 
     // Set done status
     response._state = 'done'
@@ -235,26 +268,47 @@ class API {
     // Execute finally
     await this._finally(response._request,response)
 
+    // Output logs
+    response._request._logs.forEach(log => {
+      console.log(JSON.stringify(this._logger.detail ? // eslint-disable-line no-console
+        this._logger.format(log,response._request,response) : log))
+    })
+
+    // Generate access log
+    if ((this._logger.access || response._request._logs.length > 0) && this._logger.access !== 'never') {
+      let access = Object.assign(
+        this._logger.log('access',undefined,response._request,response._request.context),
+        { statusCode: res.statusCode, coldStart: response._request.coldStart, count: response._request.requestCount }
+      )
+      console.log(JSON.stringify(this._logger.format(access,response._request,response))) // eslint-disable-line no-console
+    }
+
     // Execute the primary callback
-    this._cb(err,res)
+    typeof this._cb === 'function' && this._cb(err,res)
 
   } // end _callback
 
 
 
   // Middleware handler
-  use(path,handler) {
+  use(path) {
 
-    let fn = typeof path === 'function' ? path : handler
+    // Extract routes
     let routes = typeof path === 'string' ? Array.of(path) : (Array.isArray(path) ? path : [])
 
-    if (fn.length === 3) {
-      this._middleware.push([routes,fn])
-    } else if (fn.length === 4) {
-      this._errors.push(fn)
-    } else {
-      throw new Error('Middleware must have 3 or 4 parameters')
+    // Add func args as middleware
+    for (let arg in arguments) {
+      if (typeof arguments[arg] === 'function') {
+        if (arguments[arg].length === 3) {
+          this._middleware.push([routes,arguments[arg]])
+        } else if (arguments[arg].length === 4) {
+          this._errors.push(arguments[arg])
+        } else {
+          throw new Error('Middleware must have 3 or 4 parameters')
+        }
+      }
     }
+
   } // end use
 
 
@@ -276,7 +330,7 @@ class API {
   // Recursive function to create routes object
   setRoute(obj, value, path) {
     if (typeof path === 'string') {
-      let path = path.split('.')
+      path = path.split('.')
     }
 
     if (path.length > 1){
