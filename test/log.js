@@ -175,6 +175,11 @@ api_customSerializers.get('/', (req,res) => {
   res.send('done')
 })
 
+api_default.get('/array', (req,res) => {
+  req.log.info('info message',['val1','val2','val3'])
+  res.send('done')
+})
+
 api_showStackTrace.get('/', (req,res) => {
   undefinedVar // this should throw an error
   res.send('done')
@@ -759,6 +764,48 @@ describe('Logging Tests:', function() {
     expect(_log[1]).to.have.property('version')
     expect(_log[1]).to.have.property('TESTPATH')
     expect(_log[1]).to.have.property('STATUS')
+    expect(_log[1]).to.have.property('device')
+    expect(_log[1]).to.have.property('country')
+  }) // end it
+
+
+  it('Custom data (array)', async function() {
+    console.log = logger
+    let _event = Object.assign({},event,{ path: '/array' })
+    let result = await new Promise(r => api_default.run(_event,context,(e,res) => { r(res) }))
+    console.log = consoleLog
+
+    expect(result).to.deep.equal({
+      headers: { 'content-type': 'application/json' },
+      statusCode: 200,
+      body: 'done',
+      isBase64Encoded: false
+    })
+    expect(_log).to.have.length(2)
+    expect(_log[0].level).to.equal('info')
+    expect(_log[1].level).to.equal('access')
+    // standard log
+    expect(_log[0]).to.have.property('time')
+    expect(_log[0]).to.have.property('id')
+    expect(_log[0]).to.have.property('route')
+    expect(_log[0]).to.have.property('msg')
+    expect(_log[0]).to.have.property('timer')
+    expect(_log[0]).to.have.property('remaining')
+    expect(_log[0]).to.have.property('function')
+    expect(_log[0]).to.have.property('custom')
+    // access log
+    expect(_log[1]).to.have.property('time')
+    expect(_log[1]).to.have.property('id')
+    expect(_log[1]).to.have.property('route')
+    expect(_log[1]).to.have.property('timer')
+    expect(_log[1]).to.have.property('remaining')
+    expect(_log[1]).to.have.property('function')
+    expect(_log[1]).to.have.property('memory')
+    expect(_log[1]).to.have.property('coldStart')
+    expect(_log[1]).to.have.property('path')
+    expect(_log[1]).to.have.property('ip')
+    expect(_log[1]).to.have.property('ua')
+    expect(_log[1]).to.have.property('version')
     expect(_log[1]).to.have.property('device')
     expect(_log[1]).to.have.property('country')
   }) // end it
