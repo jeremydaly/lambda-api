@@ -312,7 +312,7 @@ describe('Sampling Tests:', function() {
 
       for(let x = 0; x<requests;x++) {
         result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
-        await Promise.delay(Math.random()*25)
+        await Promise.delay(20)
       } // end for loop
 
       // End the timer and restore console.log
@@ -350,7 +350,7 @@ describe('Sampling Tests:', function() {
 
       for(let x = 0; x<requests;x++) {
         result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
-        await Promise.delay(Math.random()*25)
+        await Promise.delay(20)
       } // end for loop
 
       // End the timer and restore console.log
@@ -389,7 +389,7 @@ describe('Sampling Tests:', function() {
 
       for(let x = 0; x<requests;x++) {
         result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
-        await Promise.delay(Math.random()*25)
+        await Promise.delay(20)
         // await Promise.delay(20)
       } // end for loop
 
