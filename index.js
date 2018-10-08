@@ -372,7 +372,9 @@ class API {
 
 
   // Register routes with options
-  register(fn,options) {
+  register(fn,opts) {
+
+    let options = typeof opts === 'object' ? opts : {}
 
     // Extract Prefix
     let prefix = options.prefix && options.prefix.toString().trim() !== '' ?
