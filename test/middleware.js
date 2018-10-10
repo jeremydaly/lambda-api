@@ -86,6 +86,10 @@ api2.use('/test/testing',function(req,res,next) {
   next()
 })
 
+api2.use('/test/error',function(req,res,next) {
+  res.error(401,'Not Authorized')
+})
+
 
 api3.use(['/test','/test/:param1','/test2/*'],function(req,res,next) {
   req.testMiddlewareAll = true
@@ -164,6 +168,10 @@ api2.get('/test/xyz', function(req,res) {
 
 api2.get('/test/:param1', function(req,res) {
   res.status(200).json({ method: 'get', middleware: req.testMiddleware ? true : false, middlewareWildcard: req.testMiddlewareWildcard ? true : false, middlewareParam: req.testMiddlewareParam ? true : false, middlewarePath: req.testMiddlewarePath ? true : false })
+})
+
+api2.get('/test/error', function(req,res) {
+  res.status(200).json({ message: 'should not get here' })
 })
 
 
@@ -347,6 +355,15 @@ describe('Middleware Tests:', function() {
     expect(result).to.deep.equal({
       headers: { 'content-type': 'application/json', middleware1: true },
       statusCode: 200, body: 'return from middleware', isBase64Encoded: false })
+  }) // end it
+
+
+  it('Trigger error in middleware', async function() {
+    let _event = Object.assign({},event,{ path: '/test/error' })
+    let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({
+      headers: { 'content-type': 'application/json' },
+      statusCode: 401, body: '{"error":"Not Authorized"}', isBase64Encoded: false })
   }) // end it
 
 
