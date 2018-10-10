@@ -4,9 +4,7 @@ const expect = require('chai').expect // Assertion library
 
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
-
-// NOTE: Set test to true
-api._test = true;
+const api2 = require('../index')({ version: 'v2.0' })
 
 let event = {
   httpMethod: 'get',
@@ -25,6 +23,9 @@ api.register(require('./_testRoutes-v1'), { prefix: '/v1' })
 api.register(require('./_testRoutes-v1'), { prefix: '/vX/vY' })
 api.register(require('./_testRoutes-v1'), { prefix: '' })
 api.register(require('./_testRoutes-v2'), { prefix: '/v2' })
+api.register(require('./_testRoutes-v3')) // no options
+api2.register(require('./_testRoutes-v3'), ['array']) // w/ array options
+api2.register(require('./_testRoutes-v3'), 'string') // w/ string
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
@@ -127,6 +128,12 @@ describe('Register Tests:', function() {
     let _event = Object.assign({},event,{ path: '/v2/test-register/TEST/test' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/v2/test-register/TEST/test","route":"/test-register/:param1/test","method":"GET","params":{"param1":"TEST"}}', isBase64Encoded: false })
+  }) // end it
+
+  it('No options/no prefix', async function() {
+    let _event = Object.assign({},event,{ path: '/test-register-no-options' })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/test-register-no-options","route":"/test-register-no-options","method":"GET"}', isBase64Encoded: false })
   }) // end it
 
 }) // end ROUTE tests
