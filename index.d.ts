@@ -1,6 +1,6 @@
 import {
+  APIGatewayEvent,
   APIGatewayEventRequestContext,
-  APIGatewayProxyHandler,
   Context,
 } from 'aws-lambda';
 
@@ -181,7 +181,7 @@ declare class API {
   use(req: Request, res: Response, next: NextFunction): void;
   finally(callback: FinallyFunction): void;
 
-  run: APIGatewayProxyHandler;
+  run(event: APIGatewayEvent, context: APIGatewayEventRequestContext): {};
 }
 
 declare function createAPI(options?: Options): API;
