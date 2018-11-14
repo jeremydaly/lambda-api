@@ -24,6 +24,7 @@ class API {
     this._base = props && props.base && typeof props.base === 'string' ? props.base.trim() : ''
     this._callbackName = props && props.callback ? props.callback.trim() : 'callback'
     this._mimeTypes = props && props.mimeTypes && typeof props.mimeTypes === 'object' ? props.mimeTypes : {}
+    this._serializer = props && props.serializer && typeof props.serializer === 'function' ? props.serializer : JSON.stringify
 
     // Set sampling info
     this._sampleCounts = {}
