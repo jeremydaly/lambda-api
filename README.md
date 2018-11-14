@@ -98,6 +98,7 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
 - [CORS Support](#cors-support)
 - [Lambda Proxy Integration](#lambda-proxy-integration)
 - [Configuring Routes in API Gateway](#configuring-routes-in-api-gateway)
+- [TypeScript Support](#typescript-support)
 - [Contributions](#contributions)
 
 ## Installation
@@ -1270,6 +1271,9 @@ Simply create a `{proxy+}` route that uses the `ANY` method and all requests wil
 
 ## Reusing Persistent Connections
 If you are using persistent connections in your function routes (such as AWS RDS or Elasticache), be sure to set `context.callbackWaitsForEmptyEventLoop = false;` in your main handler. This will allow the freezing of connections and will prevent Lambda from hanging on open connections. See [here](https://www.jeremydaly.com/reuse-database-connections-aws-lambda/) for more information.
+
+## TypeScript Support
+An index.d.ts declaration file has been included for use with your TypeScript projects (thanks @hassankhan). Please feel free to make suggestions and contributions to keep this up-to-date with future releases.
 
 ## Contributions
 Contributions, ideas and bug reports are welcome and greatly appreciated. Please add  [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bug reports or create a pull request.
