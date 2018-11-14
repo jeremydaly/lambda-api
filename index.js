@@ -147,7 +147,7 @@ class API {
   async run(event,context,cb) {
 
     // Set the event, context and callback
-    this._event = event
+    this._event = event || {}
     this._context = this.context = typeof context === 'object' ? context : {}
     this._cb = cb ? cb : undefined
 

@@ -24,6 +24,14 @@ let event = {
 /******************************************************************************/
 /***  DEFINE TEST ROUTE                                                     ***/
 /******************************************************************************/
+
+api.get('/', function(req,res) {
+  res.status(200).json({
+    method: 'get',
+    status: 'ok'
+  })
+})
+
 api.get('/test', function(req,res) {
   res.status(200).json({
     method: 'get',
@@ -80,6 +88,24 @@ describe('Main handler Async/Await:', function() {
     let _event = Object.assign({},event,{ path: '/testRoute' })
     let result = await api_error_path.run(_event,{})
     expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
+  }) // end it
+
+  it('Without event', async function() {
+    let _event = {}
+    let result = await api.run(_event,{})
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 405, body: '{"error":"Method not allowed"}', isBase64Encoded: false })
+  }) // end it
+
+  it('With undefined event', async function() {
+    let _event = undefined
+    let result = await api.run(_event,{})
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 405, body: '{"error":"Method not allowed"}', isBase64Encoded: false })
+  }) // end it
+
+  it('With null event', async function() {
+    let _event = null
+    let result = await api.run(_event,{})
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 405, body: '{"error":"Method not allowed"}', isBase64Encoded: false })
   }) // end it
 
 
