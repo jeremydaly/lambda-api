@@ -62,7 +62,7 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
   - [cookie()](#cookiename-value-options)
   - [cors()](#corsoptions)
   - [download()](#downloadfile--filename--options--callback)
-  - [error()](#errormessage)
+  - [error()](#errorcode-message-detail)
   - [etag()](#etagboolean)
   - [getHeader()](#getheaderkey)
   - [getLink()](#getlinks3path-expires-callback)
@@ -261,6 +261,36 @@ api.get('/users', (req,res) => {
 
 **IMPORTANT:** You must either use a callback like `res.send()` **OR** `return` a value. Otherwise the execution will hang and no data will be sent to the user. Also, be sure not to return `undefined`, otherwise it will assume no response.
 
+### A Note About Flow Control
+
+While callbacks like `res.send()` and `res.error()` will trigger a response, they will not necessarily terminate execution of the current route function. Take a look at the following example:
+
+```javascript
+api.get('/users', (req,res) => {
+
+  if (req.headers.test === 'test') {
+    res.error('Throw an error')
+  }
+
+  return { foo: 'bar' }
+})
+```
+
+The example above would not have the intended result of displaying an error. `res.error()` would signal Lambda API to execute the error handling, but the function would continue to run. This would cause the function to `return` a response that would override the intended error. In this situation, you could either wrap the return in an `else` clause, or a cleaner approach would be to `return` the call to the `error()` method, like so:
+
+```javascript
+api.get('/users', (req,res) => {
+
+  if (req.headers.test === 'test') {
+    return res.error('Throw an error')
+  }
+
+  return { foo: 'bar' }
+})
+```
+
+`res.error()` does not have a return value (meaning it is `undefined`). However, the `return` tells the function to stop executing, and the call to `res.error()` handles and formats the appropriate response. This will allow Lambda API to properly return the expected results.
+
 ## Route Prefixing
 
 Lambda API makes it easy to create multiple versions of the same api without changing routes by hand. The `register()` method allows you to load routes from an external file and prefix all of those routes using the `prefix` option. For example:
@@ -382,7 +412,7 @@ The `status` method allows you to set the status code that is returned to API Ga
 
 ```javascript
 api.get('/users', (req,res) => {
-  res.status(401).error('Not Authorized')
+  res.status(304).send('Not Modified')
 })
 ```
 
@@ -998,7 +1028,7 @@ api.use((req,res,next) => {
     req.authorized = true
     next() // continue execution
   } else {
-    res.status(401).error('Not Authorized')
+    res.error(401,'Not Authorized')
   }
 })
 ```

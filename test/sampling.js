@@ -366,7 +366,7 @@ describe('Sampling Tests:', function() {
       let deviation = Math.abs(((totalFixed+totalRate)/_log.length-1).toFixed(2))
 
       // console.log(_log.length,totalFixed,totalRate,deviation)
-      expect(deviation).to.be.below(0.12)
+      expect(deviation).to.be.below(0.15)
     }) // end it
 
 

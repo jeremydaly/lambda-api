@@ -184,10 +184,12 @@ class API {
         if (mw[0].length > 0 && !matched) continue
 
         // Promisify middleware
-        await new Promise(r => {
-          let rtn = mw[1](request,response,() => { r() })
+        await new Promise(async r => {
+          let rtn = await mw[1](request,response,() => { r() })
           if (rtn) response.send(rtn)
+          if (response._state === 'done') r() // if state is done, resolve promise
         })
+
       } // end for
 
       // Execute the primary handler if in processing state
@@ -239,7 +241,7 @@ class API {
     if (response._state === 'processing') {
 
       // Flag error state (this will avoid infinite error loops)
-      response._state === 'error'
+      response._state = 'error'
 
       // Execute error middleware
       for (const err of this._errors) {
@@ -372,7 +374,9 @@ class API {
 
 
   // Register routes with options
-  register(fn,options) {
+  register(fn,opts) {
+
+    let options = typeof opts === 'object' ? opts : {}
 
     // Extract Prefix
     let prefix = options.prefix && options.prefix.toString().trim() !== '' ?
