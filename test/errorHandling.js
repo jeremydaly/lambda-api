@@ -9,6 +9,7 @@ const api2 = require('../index')({ version: 'v1.0' })
 const api3 = require('../index')({ version: 'v1.0' })
 const api4 = require('../index')({ version: 'v1.0' })
 const api5 = require('../index')({ version: 'v1.0', logger: { access: 'never' }})
+const api_errors = require('../index')({ version: 'v1.0' })
 
 let event = {
   httpMethod: 'get',
@@ -132,6 +133,22 @@ api5.get('/testErrorThrow', function(req,res) {
 })
 
 
+api_errors.use(function(err,req,res,next) {
+  res.send({ errorType: err.name })
+});
+
+api_errors.get('/fileError', (req,res) => {
+  res.sendFile('s3://test')
+})
+
+api_errors.get('/fileErrorLocal', (req,res) => {
+  res.sendFile('./missing.txt')
+})
+
+api_errors.get('/responseError', (req,res) => {
+  res.redirect(310,'http://www.google.com')
+})
+
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
@@ -195,6 +212,37 @@ describe('Error Handling Tests:', function() {
     }) // end it
   })
 
+  describe('Error Types', function() {
+    it('RouteError', async function() {
+      let _event = Object.assign({},event,{ path: '/testx'})
+      let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { }, statusCode: 404, body: '{"errorType":"RouteError"}', isBase64Encoded: false })
+    }) // end it
+
+    it('MethodError', async function() {
+      let _event = Object.assign({},event,{ path: '/fileError', httpMethod: 'put' })
+      let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { }, statusCode: 405, body: '{"errorType":"MethodError"}', isBase64Encoded: false })
+    }) // end it
+
+    it('FileError (s3)', async function() {
+      let _event = Object.assign({},event,{ path: '/fileError' })
+      let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { }, statusCode: 500, body: '{"errorType":"FileError"}', isBase64Encoded: false })
+    }) // end it
+
+    it('FileError (local)', async function() {
+      let _event = Object.assign({},event,{ path: '/fileErrorLocal' })
+      let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { }, statusCode: 500, body: '{"errorType":"FileError"}', isBase64Encoded: false })
+    }) // end it
+
+    it('ResponseError', async function() {
+      let _event = Object.assign({},event,{ path: '/responseError' })
+      let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { }, statusCode: 500, body: '{"errorType":"ResponseError"}', isBase64Encoded: false })
+    }) // end it
+  })
 
   describe('Logging', function() {
 

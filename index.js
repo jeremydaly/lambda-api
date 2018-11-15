@@ -7,11 +7,12 @@
  * @license MIT
  */
 
-const REQUEST = require('./lib/request.js') // Resquest object
-const RESPONSE = require('./lib/response.js') // Response object
-const UTILS = require('./lib/utils.js') // Require utils library
-const LOGGER = require('./lib/logger.js') // Require logger library
+const REQUEST = require('./lib/request') // Resquest object
+const RESPONSE = require('./lib/response') // Response object
+const UTILS = require('./lib/utils') // Require utils library
+const LOGGER = require('./lib/logger') // Require logger library
 const prettyPrint = require('./lib/prettyPrint') // Pretty print for debugging
+const { ConfigurationError } = require('./lib/errors') // Require custom errors
 
 // Create the API class
 class API {
@@ -91,7 +92,7 @@ class API {
   METHOD(method, path, handler) {
 
     if (typeof handler !== 'function') {
-      throw new Error(`No route handler specified for ${method} method on ${path} route.`)
+      throw new ConfigurationError(`No route handler specified for ${method} method on ${path} route.`)
     }
 
     // Ensure method is an array
@@ -213,6 +214,8 @@ class API {
   // Catch all async/sync errors
   async catchErrors(e,response,code,detail) {
 
+    // console.log('\n\n------------------------\n',e,'\n------------------------\n\n');
+
     // Error messages should never be base64 encoded
     response._isBase64 = false
 
@@ -307,7 +310,7 @@ class API {
         } else if (arguments[arg].length === 4) {
           this._errors.push(arguments[arg])
         } else {
-          throw new Error('Middleware must have 3 or 4 parameters')
+          throw new ConfigurationError('Middleware must have 3 or 4 parameters')
         }
       }
     }
