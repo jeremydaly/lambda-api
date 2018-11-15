@@ -94,6 +94,8 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
 - [Middleware](#middleware)
 - [Clean Up](#clean-up)
 - [Error Handling](#error-handling)
+  - [Error Types](#error-types)
+  - [Error Logging](#error-logging)
 - [Namespaces](#namespaces)
 - [CORS Support](#cors-support)
 - [Lambda Proxy Integration](#lambda-proxy-integration)
@@ -952,7 +954,7 @@ const api = require('lambda-api')({
 })
 ```
 
-Additional rules can be added by specify a `rules` parameter in the `sampling` configuration object. The `rules` should contain an `array` of "rule" objects with the following properties:
+Additional rules can be added by specifying a `rules` parameter in the `sampling` configuration object. The `rules` should contain an `array` of "rule" objects with the following properties:
 
 | Property | Type | Description | Default | Required |
 | -------- | ---- | ----------- | ------- | -------- |
@@ -1125,7 +1127,23 @@ api.use(errorHandler1,errorHandler2)
 **NOTE:** Error handling middleware runs on *ALL* paths. If paths are passed in as the first parameter, they will be ignored by the error handling middleware.
 
 ### Error Types
-Error logs are generate using either the `error` or `fatal` logging level. Errors can be triggered from within routes and middleware by calling the `error()` method on the `RESPONSE` object. If provided a `string` as an error message, this will generate an `error` level log entry. If you supply a JavaScript `Error` object, or you `throw` an error, a `fatal` log entry will be generated.
+Lambda API provides several different types of errors that can be used by your application. `RouteError`, `MethodError`, `ResponseError`, and `FileError` will all be passed to your error middleware. `ConfigurationError`s will throw an exception when you attempt to `.run()` your route and can be caught in a `try/catch` block. Most error types contain additional properties that further detail the issue.
+
+```javascript
+const errorHandler = (err,req,res,next) => {
+
+  if (err.name === 'RouteError') {
+    // do something with route error
+  } else if (err.name === 'FileError') {
+    // do something with file error
+  }
+  // continue
+  next()
+})
+```
+
+### Error Logging
+Error logs are generated using either the `error` or `fatal` logging level. Errors can be triggered from within routes and middleware by calling the `error()` method on the `RESPONSE` object. If provided a `string` as an error message, this will generate an `error` level log entry. If you supply a JavaScript `Error` object, or you `throw` an error, a `fatal` log entry will be generated.
 
 ```javascript
 api.get('/somePath', (res,req) => {
