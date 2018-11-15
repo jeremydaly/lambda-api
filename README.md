@@ -133,6 +133,9 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ## Recent Updates
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
 
+### v0.9: New error types, custom serializers, and TypeScript support
+Lambda API now generates typed errors for easier parsing in middleware. You can also supply your own custom serializer for formatting output rather than using the default `JSON.stringify`. And thanks to @hassankhan, a TypeScript declaration file is now available.
+
 ### v0.8: Logging Support with Sampling
 Lambda API has added a powerful (and customizable) logging engine that utilizes native JSON support for CloudWatch Logs. Log entries can be manually added using standard severities like `info` and `warn`. In addition, "access logs" can be automatically generated with detailed information about each requests. See [Logging](#logging) for more information about logging and auto sampling for request tracing.
 
