@@ -856,16 +856,19 @@ describe('Route Tests:', function() {
   describe('Configuration errors', function() {
 
     it('Missing handler', async function() {
-      let error_message
+      let error
       try {
         const api_error1 = require('../index')({ version: 'v1.0' })
         api_error1.get('/test-missing-handler')
       } catch(e) {
-        error_message = e.message
+        // console.log(e);
+        error = e
       }
-      expect(error_message).to.equal('No route handler specified for GET method on /test-missing-handler route.')
+      expect(error.name).to.equal('ConfigurationError')
+      expect(error.message).to.equal('No route handler specified for GET method on /test-missing-handler route.')
     }) // end it
 
+    // TODO: ???
     it('Missing callback', async function() {
       let _event = Object.assign({},event,{ path: '/test', httpMethod: 'get' })
       let result = await api.run(_event,{}).then(res => { return res })
@@ -880,14 +883,16 @@ describe('Route Tests:', function() {
     }) // end it
 
     it('Invalid middleware', async function() {
-      let error_message
+      let error
       try {
         const api_error2 = require('../index')({ version: 'v1.0' })
         api_error2.use((err,req) => {})
       } catch(e) {
-        error_message = e.message
+        // console.log(e);
+        error = e
       }
-      expect(error_message).to.equal('Middleware must have 3 or 4 parameters')
+      expect(error.name).to.equal('ConfigurationError')
+      expect(error.message).to.equal('Middleware must have 3 or 4 parameters')
     }) // end it
 
   }) // end Configuration errors

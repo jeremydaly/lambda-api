@@ -812,15 +812,51 @@ describe('Logging Tests:', function() {
 
 
   it('Invalid custom levels configuration', async function() {
-    let error_message
+    let error
     try {
       const api_error = require('../index')({ version: 'v1.0', logger: {
         levels: { '123': 'test '}
       } })
     } catch(e) {
-      error_message = e.message
+      // console.log(e);
+      error = e
     }
-    expect(error_message).to.equal('Invalid level configuration')
+    expect(error.name).to.equal('ConfigurationError')
+    expect(error.message).to.equal('Invalid level configuration')
+  }) // end it
+
+
+  it('Invalid sampler configuration', async function() {
+    let error
+    try {
+      const api_error = require('../index')({ version: 'v1.0', logger: {
+        sampling: 'test'
+      } })
+    } catch(e) {
+      // console.log(e);
+      error = e
+    }
+    expect(error.name).to.equal('ConfigurationError')
+    expect(error.message).to.equal('Invalid sampler configuration')
+  }) // end it
+
+
+  it('Invalid sampler rule route', async function() {
+    let error
+    try {
+      const api_error = require('../index')({ version: 'v1.0', logger: {
+        sampling: {
+          rules: [
+            { target: 0, rate: 0 }
+          ]
+        }
+      } })
+    } catch(e) {
+      // console.log(e);
+      error = e
+    }
+    expect(error.name).to.equal('ConfigurationError')
+    expect(error.message).to.equal('Invalid route specified in rule')
   }) // end it
 
 

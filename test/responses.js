@@ -9,10 +9,11 @@ const S3 = require('../lib/s3-service') // Init S3 Service
 const api = require('../index')({ version: 'v1.0' })
 // Init secondary API for JSONP callback testing
 const api2 = require('../index')({ version: 'v1.0', callback: 'cb' })
-
-// NOTE: Set test to true
-api._test = true;
-api2._test = true;
+// Init API with custom serializer
+const api3 = require('../index')({
+  version: 'v1.0',
+  serializer: body => JSON.stringify(Object.assign(body,{ _custom: true }))
+})
 
 let event = {
   httpMethod: 'get',
@@ -85,6 +86,17 @@ api.get('/s3Path', function(req,res) {
   res.redirect('s3://my-test-bucket/test/test.txt')
 })
 
+api3.get('/test', function(req,res) {
+  res.send({ object: true })
+})
+
+api3.get('/testJSON', function(req,res) {
+  res.json({ object: true })
+})
+
+api3.get('/testJSONP', function(req,res) {
+  res.jsonp({ object: true })
+})
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
@@ -202,6 +214,25 @@ describe('Response Tests:', function() {
       isBase64Encoded: false
     })
     expect(stub.lastCall.args[1]).to.deep.equal({ Bucket: 'my-test-bucket', Key: 'test/test.txt', Expires: 900 })
+  }) // end it
+
+
+  it('Custom serializer', async function() {
+    let _event = Object.assign({},event,{ path: '/test'})
+    let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"object":true,"_custom":true}', isBase64Encoded: false })
+  }) // end it
+
+  it('Custom serializer (JSON)', async function() {
+    let _event = Object.assign({},event,{ path: '/testJSON'})
+    let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"object":true,"_custom":true}', isBase64Encoded: false })
+  }) // end it
+
+  it('Custom serializer (JSONP)', async function() {
+    let _event = Object.assign({},event,{ path: '/testJSONP'})
+    let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: 'callback({"object":true,"_custom":true})', isBase64Encoded: false })
   }) // end it
 
   after(function() {

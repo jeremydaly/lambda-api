@@ -94,10 +94,13 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
 - [Middleware](#middleware)
 - [Clean Up](#clean-up)
 - [Error Handling](#error-handling)
+  - [Error Types](#error-types)
+  - [Error Logging](#error-logging)
 - [Namespaces](#namespaces)
 - [CORS Support](#cors-support)
 - [Lambda Proxy Integration](#lambda-proxy-integration)
 - [Configuring Routes in API Gateway](#configuring-routes-in-api-gateway)
+- [TypeScript Support](#typescript-support)
 - [Contributions](#contributions)
 
 ## Installation
@@ -118,6 +121,7 @@ Require the `lambda-api` module into your Lambda handler script and instantiate 
 | callbackName | `String` | Override the default callback query parameter name for JSONP calls |
 | logger | `boolean` or `object` | Enables default [logging](#logging) or allows for configuration through a [Logging Configuration](#logging-configuration) object. |
 | mimeTypes | `Object` | Name/value pairs of additional MIME types to be supported by the `type()`. The key should be the file extension (without the `.`) and the value should be the expected MIME type, e.g. `application/json` |
+| serializer  | `Function` | Optional object serializer function. This function receives the `body` of a response and must return a string. Defaults to `JSON.stringify` |
 | version  | `String` | Version number accessible via the `REQUEST` object |
 
 
@@ -128,6 +132,9 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 
 ## Recent Updates
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
+
+### v0.9: New error types, custom serializers, and TypeScript support
+Lambda API now generates typed errors for easier parsing in middleware. You can also supply your own custom serializer for formatting output rather than using the default `JSON.stringify`. And thanks to @hassankhan, a TypeScript declaration file is now available.
 
 ### v0.8: Logging Support with Sampling
 Lambda API has added a powerful (and customizable) logging engine that utilizes native JSON support for CloudWatch Logs. Log entries can be manually added using standard severities like `info` and `warn`. In addition, "access logs" can be automatically generated with detailed information about each requests. See [Logging](#logging) for more information about logging and auto sampling for request tracing.
@@ -390,6 +397,9 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `rawBody`: If the `isBase64Encoded` flag is `true`, this is a copy of the original, base64 encoded body
 - `route`: The matched route of the request
 - `requestContext`: The `requestContext` passed from the API Gateway
+- `pathParameters`: The `pathParameters` passed from the API Gateway
+- `stageVariables`: The `stageVariables` passed from the API Gateway
+- `isBase64Encoded`: The `isBase64Encoded` boolean passed from the API Gateway
 - `auth`: An object containing the `type` and `value` of an authorization header. Currently supports `Bearer`, `Basic`, `OAuth`, and `Digest` schemas. For the `Basic` schema, the object is extended with additional fields for username/password. For the `OAuth` schema, the object is extended with key/value pairs of the supplied OAuth 1.0 values.
 - `namespace` or `ns`: A reference to modules added to the app's namespace (see [namespaces](#namespaces))
 - `cookies`: An object containing cookies sent from the browser (see the [cookie](#cookiename-value-options) `RESPONSE` method)
@@ -950,7 +960,7 @@ const api = require('lambda-api')({
 })
 ```
 
-Additional rules can be added by specify a `rules` parameter in the `sampling` configuration object. The `rules` should contain an `array` of "rule" objects with the following properties:
+Additional rules can be added by specifying a `rules` parameter in the `sampling` configuration object. The `rules` should contain an `array` of "rule" objects with the following properties:
 
 | Property | Type | Description | Default | Required |
 | -------- | ---- | ----------- | ------- | -------- |
@@ -1123,7 +1133,23 @@ api.use(errorHandler1,errorHandler2)
 **NOTE:** Error handling middleware runs on *ALL* paths. If paths are passed in as the first parameter, they will be ignored by the error handling middleware.
 
 ### Error Types
-Error logs are generate using either the `error` or `fatal` logging level. Errors can be triggered from within routes and middleware by calling the `error()` method on the `RESPONSE` object. If provided a `string` as an error message, this will generate an `error` level log entry. If you supply a JavaScript `Error` object, or you `throw` an error, a `fatal` log entry will be generated.
+Lambda API provides several different types of errors that can be used by your application. `RouteError`, `MethodError`, `ResponseError`, and `FileError` will all be passed to your error middleware. `ConfigurationError`s will throw an exception when you attempt to `.run()` your route and can be caught in a `try/catch` block. Most error types contain additional properties that further detail the issue.
+
+```javascript
+const errorHandler = (err,req,res,next) => {
+
+  if (err.name === 'RouteError') {
+    // do something with route error
+  } else if (err.name === 'FileError') {
+    // do something with file error
+  }
+  // continue
+  next()
+})
+```
+
+### Error Logging
+Error logs are generated using either the `error` or `fatal` logging level. Errors can be triggered from within routes and middleware by calling the `error()` method on the `RESPONSE` object. If provided a `string` as an error message, this will generate an `error` level log entry. If you supply a JavaScript `Error` object, or you `throw` an error, a `fatal` log entry will be generated.
 
 ```javascript
 api.get('/somePath', (res,req) => {
@@ -1270,6 +1296,14 @@ Simply create a `{proxy+}` route that uses the `ANY` method and all requests wil
 
 ## Reusing Persistent Connections
 If you are using persistent connections in your function routes (such as AWS RDS or Elasticache), be sure to set `context.callbackWaitsForEmptyEventLoop = false;` in your main handler. This will allow the freezing of connections and will prevent Lambda from hanging on open connections. See [here](https://www.jeremydaly.com/reuse-database-connections-aws-lambda/) for more information.
+
+## TypeScript Support
+An `index.d.ts` declaration file has been included for use with your TypeScript projects (thanks @hassankhan). Please feel free to make suggestions and contributions to keep this up-to-date with future releases.
+
+```javascript
+// import Lambda API and TypeScript declarations
+import API from 'lambda-api'
+```
 
 ## Contributions
 Contributions, ideas and bug reports are welcome and greatly appreciated. Please add  [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bug reports or create a pull request.
