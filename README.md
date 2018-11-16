@@ -1300,6 +1300,11 @@ If you are using persistent connections in your function routes (such as AWS RDS
 ## TypeScript Support
 An `index.d.ts` declaration file has been included for use with your TypeScript projects (thanks @hassankhan). Please feel free to make suggestions and contributions to keep this up-to-date with future releases.
 
+```javascript
+// import Lambda API and TypeScript definitions
+import API from 'lambda-api'
+```
+
 ## Contributions
 Contributions, ideas and bug reports are welcome and greatly appreciated. Please add  [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bug reports or create a pull request.
 
