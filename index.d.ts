@@ -5,41 +5,42 @@ import {
 } from 'aws-lambda';
 
 declare interface CookieOptions {
-  domain: string;
-  expires: Date;
-  httpOnly: boolean;
-  maxAge: number;
-  path: string;
-  secure: boolean;
-  sameSite: boolean | 'Strict' | 'Lax';
+  domain?: string;
+  expires?: Date;
+  httpOnly?: boolean;
+  maxAge?: number;
+  path?: string;
+  secure?: boolean;
+  sameSite?: boolean | 'Strict' | 'Lax';
 }
 
 declare interface CorsOptions {
-  credentials: boolean;
-  exposeHeaders: string;
-  headers: string;
-  maxAge: number;
-  methods: string;
-  origin: string;
+  credentials?: boolean;
+  exposeHeaders?: string;
+  headers?: string;
+  maxAge?: number;
+  methods?: string;
+  origin?: string;
 }
 
 declare interface FileOptions {
-  maxAge: number;
-  root: string;
-  lastModified: boolean | string;
-  headers: {};
-  cacheControl: boolean | string;
-  private: boolean;
+  maxAge?: number;
+  root?: string;
+  lastModified?: boolean | string;
+  headers?: {};
+  cacheControl?: boolean | string;
+  private?: boolean;
 }
 
 declare interface App {
   [namespace: string]: HandlerFunction;
 }
 declare type ErrorCallback = (error?: Error) => void;
-declare type HandlerFunction = (req: Request, res) => void | {} | Promise<{}>;
+declare type HandlerFunction = (req: Request, res: Response) => void | {} | Promise<{}>;
 declare type LoggerFunction = (message: string) => void;
 declare type NextFunction = () => void;
 declare type TimestampFunction = () => string;
+declare type SerializerFunction = (body: object) => string;
 declare type FinallyFunction = (req: Request, res: Response) => void;
 
 declare type METHODS = 'GET'
@@ -52,44 +53,45 @@ declare type METHODS = 'GET'
   | 'ANY';
 
 declare interface SamplingOptions {
-  route: string;
-  target: number;
-  rate: number
-  period: number;
-  method: string | string[];
+  route?: string;
+  target?: number;
+  rate?: number
+  period?: number;
+  method?: string | string[];
 }
 
 declare interface LoggerOptions {
-  access: boolean | string;
-  customKey: string;
-  detail: boolean;
-  level: string;
-  levels: {
+  access?: boolean | string;
+  customKey?: string;
+  detail?: boolean;
+  level?: string;
+  levels?: {
     [key: string]: string;
   };
-  messageKey: string;
-  nested: boolean;
-  timestamp: boolean | TimestampFunction;
-  sampling: {
-    target: number;
-    rate: number;
-    period: number;
-    rules: SamplingOptions[];
+  messageKey?: string;
+  nested?: boolean;
+  timestamp?: boolean | TimestampFunction;
+  sampling?: {
+    target?: number;
+    rate?: number;
+    period?: number;
+    rules?: SamplingOptions[];
   };
-  serializers: {
+  serializers?: {
     [name: string]: (req: Request) => {};
   };
-  stack: boolean;
+  stack?: boolean;
 }
 
 declare interface Options {
-  base: string;
-  callbackName: string;
-  logger: boolean | LoggerOptions;
-  mimeTypes: {
+  base?: string;
+  callbackName?: string;
+  logger?: boolean | LoggerOptions;
+  mimeTypes?: {
     [key: string]: string;
   };
-  version: string;
+  serializer?: SerializerFunction;
+  version?: string;
 }
 
 declare class Request {
@@ -110,6 +112,9 @@ declare class Request {
   rawBody: string;
   route: '';
   requestContext: APIGatewayEventRequestContext;
+  isBase64Encoded: boolean;
+  pathParameters: { [name: string]: string } | null;
+  stageVariables: { [name: string]: string } | null;
   auth: {
     [key: string]: any;
     type: 'Bearer' | 'Basic' | 'OAuth' | 'Digest';
