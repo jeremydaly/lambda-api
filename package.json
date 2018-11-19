@@ -52,6 +52,7 @@
     "LICENSE",
     "README.md",
     "index.js",
+    "index.d.ts",
     "lib/"
   ],
   "engines": {
