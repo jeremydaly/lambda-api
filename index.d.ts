@@ -1,7 +1,7 @@
 import {
   APIGatewayEvent,
   APIGatewayEventRequestContext,
-  Context,
+  Context
 } from 'aws-lambda';
 
 export declare interface CookieOptions {
@@ -193,6 +193,26 @@ export declare class API {
   finally(callback: FinallyFunction): void;
 
   run(event: APIGatewayEvent, context: Context): {};
+}
+
+export declare class RouteError extends Error {
+  constructor(message: string, path: string);
+}
+
+export declare class MethodError extends Error {
+  constructor(message: string, method: METHODS, path: string);
+}
+
+export declare class ConfigurationError extends Error {
+  constructor(message: string);
+}
+
+export declare class ResponseError extends Error {
+  constructor(message: string, code: number);
+}
+
+export declare class FileError extends Error {
+  constructor(message: string, err: object);
 }
 
 declare function createAPI(options?: Options): API;
