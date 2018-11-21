@@ -1,10 +1,10 @@
 import {
   APIGatewayEvent,
   APIGatewayEventRequestContext,
-  Context,
+  Context
 } from 'aws-lambda';
 
-declare interface CookieOptions {
+export declare interface CookieOptions {
   domain?: string;
   expires?: Date;
   httpOnly?: boolean;
@@ -14,7 +14,7 @@ declare interface CookieOptions {
   sameSite?: boolean | 'Strict' | 'Lax';
 }
 
-declare interface CorsOptions {
+export declare interface CorsOptions {
   credentials?: boolean;
   exposeHeaders?: string;
   headers?: string;
@@ -23,7 +23,7 @@ declare interface CorsOptions {
   origin?: string;
 }
 
-declare interface FileOptions {
+export declare interface FileOptions {
   maxAge?: number;
   root?: string;
   lastModified?: boolean | string;
@@ -32,27 +32,29 @@ declare interface FileOptions {
   private?: boolean;
 }
 
-declare interface App {
+export declare interface App {
   [namespace: string]: HandlerFunction;
 }
-declare type ErrorCallback = (error?: Error) => void;
-declare type HandlerFunction = (req: Request, res: Response) => void | {} | Promise<{}>;
-declare type LoggerFunction = (message: string) => void;
-declare type NextFunction = () => void;
-declare type TimestampFunction = () => string;
-declare type SerializerFunction = (body: object) => string;
-declare type FinallyFunction = (req: Request, res: Response) => void;
 
-declare type METHODS = 'GET'
-  | 'POST'
-  | 'PUT'
-  | 'PATCH'
-  | 'DELETE'
-  | 'OPTIONS'
-  | 'HEAD'
-  | 'ANY';
+export declare type Middleware = (req: Request, res: Response, next: Middleware) => void;
+export declare type ErrorHandlingMiddleware = (error: Error, req: Request, res: Response, next: ErrorHandlingMiddleware) => void;
+export declare type ErrorCallback = (error?: Error) => void;
+export declare type HandlerFunction = (req: Request, res: Response) => void | {} | Promise<{}>;
+export declare type LoggerFunction = (message: string) => void;
+export declare type NextFunction = () => void;
+export declare type TimestampFunction = () => string;
+export declare type SerializerFunction = (body: object) => string;
+export declare type FinallyFunction = (req: Request, res: Response) => void;
+export declare type METHODS = 'GET'
+    | 'POST'
+    | 'PUT'
+    | 'PATCH'
+    | 'DELETE'
+    | 'OPTIONS'
+    | 'HEAD'
+    | 'ANY';
 
-declare interface SamplingOptions {
+export declare interface SamplingOptions {
   route?: string;
   target?: number;
   rate?: number
@@ -60,7 +62,7 @@ declare interface SamplingOptions {
   method?: string | string[];
 }
 
-declare interface LoggerOptions {
+export declare interface LoggerOptions {
   access?: boolean | string;
   customKey?: string;
   detail?: boolean;
@@ -83,7 +85,7 @@ declare interface LoggerOptions {
   stack?: boolean;
 }
 
-declare interface Options {
+export declare interface Options {
   base?: string;
   callbackName?: string;
   logger?: boolean | LoggerOptions;
@@ -94,7 +96,7 @@ declare interface Options {
   version?: string;
 }
 
-declare class Request {
+export declare class Request {
   app: API;
   version: string;
   id: string;
@@ -141,7 +143,7 @@ declare class Request {
   };
 }
 
-declare class Response {
+export declare class Response {
   status(code: number): this;
   header(key: string, value: string): this;
   getHeader(key: string): string;
@@ -169,7 +171,7 @@ declare class Response {
   sendFile(file: string | Buffer, options?: FileOptions, callback?: ErrorCallback);
 }
 
-declare class API {
+export declare class API {
   app(namespace: string, handler: HandlerFunction): App;
   app(options: App): App;
 
@@ -183,10 +185,34 @@ declare class API {
   any(path: string, handler: HandlerFunction): void;
   METHOD(method: METHODS, path: string, handler: HandlerFunction): void;
 
-  use(req: Request, res: Response, next: NextFunction): void;
+
+  use(paths: string[], middleware: Middleware);
+  use (middleware: Middleware);
+  use (errorHandlingMiddleware: ErrorHandlingMiddleware);
+
   finally(callback: FinallyFunction): void;
 
-  run(event: APIGatewayEvent, context: APIGatewayEventRequestContext): {};
+  run(event: APIGatewayEvent, context: Context): {};
+}
+
+export declare class RouteError extends Error {
+  constructor(message: string, path: string);
+}
+
+export declare class MethodError extends Error {
+  constructor(message: string, method: METHODS, path: string);
+}
+
+export declare class ConfigurationError extends Error {
+  constructor(message: string);
+}
+
+export declare class ResponseError extends Error {
+  constructor(message: string, code: number);
+}
+
+export declare class FileError extends Error {
+  constructor(message: string, err: object);
 }
 
 declare function createAPI(options?: Options): API;
