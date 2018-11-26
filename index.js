@@ -304,7 +304,7 @@ class API {
 
     // Add func args as middleware
     for (let arg in arguments) {
-      if (typeof arguments[arg] === 'function') {
+      if (typeof arguments[arg] === 'function' && !this._middleware.map(e => e.toString()).includes([routes, arguments[arg]].toString())) {
         if (arguments[arg].length === 3) {
           this._middleware.push([routes,arguments[arg]])
         } else if (arguments[arg].length === 4) {
