@@ -1,6 +1,6 @@
 {
   "name": "lambda-api",
-  "version": "0.9.2",
+  "version": "0.10.0",
   "description": "Lightweight web framework for your serverless applications",
   "main": "index.js",
   "types": "index.d.ts",
@@ -34,8 +34,8 @@
   "dependencies": {},
   "devDependencies": {
     "@types/aws-lambda": "^8.10.15",
-    "@types/node": "^10.12.9",
-    "aws-sdk": "^2.357.0",
+    "@types/node": "^10.12.12",
+    "aws-sdk": "^2.370.0",
     "bluebird": "^3.5.3",
     "chai": "^4.2.0",
     "coveralls": "^3.0.2",
