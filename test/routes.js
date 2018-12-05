@@ -288,6 +288,12 @@ describe('Route Tests:', function() {
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
     }) // end it
 
+    it('Path with parameter and multiple querystring: /test/123/query/?test=123&test=321', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123/query', queryStringParameters: { test: ['123', '321'] } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","query":["123","321"]}', isBase64Encoded: false })
+    }) // end it
+
     it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/query/456', queryStringParameters: { test: '321' } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
@@ -364,6 +370,12 @@ describe('Route Tests:', function() {
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '', isBase64Encoded: false })
     }) // end it
 
+    it('Path with parameter and multiple querystring: /test/123/query/?test=123&test=321', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123/query', httpMethod: 'head', queryStringParameters: { test: ['123', '321'] } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '', isBase64Encoded: false })
+    }) // end it
+
     it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', async function() {
       let _event = Object.assign({},event,{ path: '/test/123/query/456', httpMethod: 'head', queryStringParameters: { test: '321' } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
@@ -430,6 +442,12 @@ describe('Route Tests:', function() {
       let _event = Object.assign({},event,{ path: '/test/123/query', httpMethod: 'post', queryStringParameters: { test: '321' } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Path with parameter and multiple querystring: /test/123/query/?test=123&test=321', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123/query', httpMethod: 'post', queryStringParameters: { test: ['123', '321'] } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"post","status":"ok","param":"123","query":["123","321"]}', isBase64Encoded: false })
     }) // end it
 
     it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', async function() {
@@ -517,6 +535,12 @@ describe('Route Tests:', function() {
       let _event = Object.assign({},event,{ path: '/test/123/query', httpMethod: 'put', queryStringParameters: { test: '321' } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Path with parameter and multiple querystring: /test/123/query/?test=123&test=321', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123/query', httpMethod: 'put', queryStringParameters: { test: ['123', '321'] } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"put","status":"ok","param":"123","query":["123","321"]}', isBase64Encoded: false })
     }) // end it
 
     it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', async function() {
@@ -658,6 +682,12 @@ describe('Route Tests:', function() {
       let _event = Object.assign({},event,{ path: '/test/123/query', httpMethod: 'options', queryStringParameters: { test: '321' } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","param":"123","query":"321"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Path with parameter and multiple querystring: /test/123/query/?test=123&test=321', async function() {
+      let _event = Object.assign({},event,{ path: '/test/123/query', httpMethod: 'options', queryStringParameters: { test: ['123', '321'] } })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"options","status":"ok","param":"123","query":["123","321"]}', isBase64Encoded: false })
     }) // end it
 
     it('Path with multiple parameters and querystring: /test/123/query/456/?test=321', async function() {
