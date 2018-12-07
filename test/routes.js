@@ -36,6 +36,13 @@ api.get('/test', function(req,res) {
   res.status(200).json({ method: 'get', status: 'ok' })
 })
 
+api.get('/test_headers', function(req,res) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Set-Cookie', ['language=en-US', 'theme=blue moon'])
+  res.header('MyCustomHeader', 'ValueA', 'ValueB', 'ValueC')
+  res.status(200).json({ method: 'get', status: 'ok' })
+})
+
 api.patch('/test', function(req,res) {
   res.status(200).json({ method: 'patch', status: 'ok' })
 })
@@ -249,6 +256,21 @@ describe('Route Tests:', function() {
       let _event = Object.assign({},event,{})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Simple path headers: /test_headers', async function() {
+      let _event = Object.assign({},event,{ path: '/test_headers' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 
+          'content-type': 'application/json',
+          'access-control-allow-origin': '*'
+        },
+        multiValueHeaders: {
+          'set-cookie': ['language=en-US', 'theme=blue moon'],
+          'mycustomheader': ['ValueA', 'ValueB', 'ValueC']
+        },
+        statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
 
