@@ -427,11 +427,23 @@ api.get('/users', (req,res) => {
 ```
 
 ### header(key, value)
-The `header` method allows for you to set additional headers to return to the client. By default, just the `content-type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two string arguments. The first is the name of the header and then second is the value.
+The `header` method allows for you to set additional headers to return to the client. By default, just the `content-type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two or more arguments. The first is the name of the header and then second is the value (string or array of string). If more than two arguments are provided they are treated as array of values)
 
 ```javascript
 api.get('/users', (req,res) => {
   res.header('content-type','text/html').send('<div>This is HTML</div>')
+})
+```
+
+```javascript
+api.get('/users', (req,res) => {
+  res.header('set-cookie',['theme=beige', 'language=en-US']).send('<div>This is HTML</div>')
+})
+```
+
+```javascript
+api.get('/users', (req,res) => {
+  res.header('set-cookie','theme=beige', 'language=en-US').send('<div>This is HTML</div>')
 })
 ```
 
