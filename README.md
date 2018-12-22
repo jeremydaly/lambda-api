@@ -388,6 +388,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `method`: The HTTP method of the request
 - `path`: The path passed in by the request including the `base` and any `prefix` assigned to routes
 - `query`: Querystring parameters parsed into an object
+- `multiValueQuery`: Querystring parameters with multiple values parsed into an object with array values
 - `headers`: An object containing the request headers (properties converted to lowercase for HTTP/2, see [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540))
 - `rawHeaders`: An object containing the original request headers (property case preserved)
 - `body`: The body of the request. If the `isBase64Encoded` flag is `true`, it will be decoded automatically.
