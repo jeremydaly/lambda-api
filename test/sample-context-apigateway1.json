@@ -1,0 +1,11 @@
+{
+  "callbackWaitsForEmptyEventLoop": false,
+  "logGroupName": "/aws/lambda/test-apigateway",
+  "logStreamName": "2018/12/22/[$LATEST]21a094d27de15adeaceaf073140d5aca",
+  "functionName": "test-alb",
+  "memoryLimitInMB": "1024",
+  "functionVersion": "$LATEST",
+  "invokeid": "59327015-07f1-11e9-a63e-9f9eb869059e",
+  "awsRequestId": "59327015-07f1-11e9-a63e-9f9eb869059e",
+  "invokedFunctionArn": "arn:aws:lambda:us-east-1:XXXXXXXXXX:function:test-apigateway"
+}
