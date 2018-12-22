@@ -38,6 +38,9 @@ describe('Request Tests:', function() {
       expect(body.request.clientType).to.equal('desktop')
       expect(body.request.clientCountry).to.equal('US')
       expect(body.request.route).to.equal('/test/hello')
+      expect(body.request.query.qs1).to.equal('foo')
+      expect(body.request.query.qs2).to.deep.equal(['foo','bar'])
+      expect(body.request.query.qs3).to.deep.equal(['bat','baz'])
       // console.log(body);
     })
 
@@ -57,6 +60,9 @@ describe('Request Tests:', function() {
       expect(body.request.clientType).to.equal('desktop')
       expect(body.request.clientCountry).to.equal('US')
       expect(body.request.route).to.equal('/test/hello')
+      expect(body.request.query.qs1).to.equal('foo')
+      expect(body.request.query.qs2).to.deep.equal(['foo','bar'])
+      expect(body.request.query.qs3).to.deep.equal(['bat','baz'])
       // console.log(body);
     })
   })

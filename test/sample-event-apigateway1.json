@@ -47,7 +47,12 @@
   "resource": "/{proxy+}",
   "httpMethod": "GET",
   "queryStringParameters": {
-    "name": "me"
+    "qs1": "foo",
+    "qs2": "bar"
+  },
+  "multiValueQueryStringParameters": {
+    "qs2": [ "foo", "bar" ],
+    "qs3": [ "bat", "baz" ] 
   },
   "stageVariables": {
     "stageVarName": "stageVarValue"
