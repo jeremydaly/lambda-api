@@ -384,6 +384,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `app`: A reference to an instance of the app
 - `version`: The version set at initialization
 - `id`: The awsRequestId from the Lambda `context`
+- `interface`: The interface being used to access Lambda (either `apigateway` or `alb`)
 - `params`: Dynamic path parameters parsed from the path (see [path parameters](#path-parameters))
 - `method`: The HTTP method of the request
 - `path`: The path passed in by the request including the `base` and any `prefix` assigned to routes
