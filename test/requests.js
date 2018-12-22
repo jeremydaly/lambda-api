@@ -32,6 +32,7 @@ describe('Request Tests:', function() {
       expect(result.headers).to.deep.equal({ 'content-type': 'application/json' })
       expect(body).to.have.property('request')
       expect(body.request.id).is.not.null
+      expect(body.request.interface).to.equal('apigateway')
       expect(body.request.userAgent).to.equal('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36 OPR/39.0.2256.48')
       expect(body.request).to.have.property('requestContext')
       expect(body.request.ip).to.equal('192.168.100.1')
@@ -56,6 +57,7 @@ describe('Request Tests:', function() {
       expect(result.headers).to.deep.equal({ 'content-type': 'application/json' })
       expect(body).to.have.property('request')
       expect(body.request.id).is.not.null
+      expect(body.request.interface).to.equal('apigateway')
       expect(body.request.userAgent).to.equal('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36 OPR/39.0.2256.48')
       expect(body.request).to.have.property('requestContext')
       expect(body.request.ip).to.equal('192.168.100.12')
@@ -83,6 +85,7 @@ describe('Request Tests:', function() {
       expect(result.headers).to.deep.equal({ 'content-type': 'application/json' })
       expect(body).to.have.property('request')
       expect(body.request.id).is.not.null
+      expect(body.request.interface).to.equal('alb')
       expect(body.request.userAgent).to.equal('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36 OPR/39.0.2256.48')
       expect(body.request).to.have.property('requestContext')
       expect(body.request.ip).to.equal('192.168.100.1')
