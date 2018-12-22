@@ -39,9 +39,10 @@ describe('Request Tests:', function() {
       expect(body.request.clientCountry).to.equal('US')
       expect(body.request.route).to.equal('/test/hello')
       expect(body.request.query.qs1).to.equal('foo')
-      expect(body.request.query.qs2).to.deep.equal(['foo','bar'])
-      expect(body.request.query.qs3).to.deep.equal(['bat','baz'])
-      // console.log(body);
+      expect(body.request.query.qs2).to.equal('bar')
+      expect(body.request.multiValueQuery.qs2).to.deep.equal(['foo','bar'])
+      expect(body.request.multiValueQuery.qs3).to.deep.equal(['bat','baz'])
+
     })
 
     it('Missing X-Forwarded-For (sourceIp fallback)', async function() {
@@ -61,8 +62,9 @@ describe('Request Tests:', function() {
       expect(body.request.clientCountry).to.equal('US')
       expect(body.request.route).to.equal('/test/hello')
       expect(body.request.query.qs1).to.equal('foo')
-      expect(body.request.query.qs2).to.deep.equal(['foo','bar'])
-      expect(body.request.query.qs3).to.deep.equal(['bat','baz'])
+      expect(body.request.query.qs2).to.equal('bar')
+      expect(body.request.multiValueQuery.qs2).to.deep.equal(['foo','bar'])
+      expect(body.request.multiValueQuery.qs3).to.deep.equal(['bat','baz'])
       // console.log(body);
     })
   })
