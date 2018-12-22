@@ -6,6 +6,7 @@ const expect = require('chai').expect // Assertion library
 const api = require('../index')({ version: 'v1.0', logger: false })
 const api2 = require('../index')({ version: 'v1.0', logger: false })
 const api3 = require('../index')({ version: 'v1.0', logger: false })
+const api4 = require('../index')({ version: 'v1.0', logger: false })
 
 let event = {
   httpMethod: 'get',
@@ -222,6 +223,32 @@ api3.METHOD([1,'DELETE'],'/multimethod/badtype', (req,res) => {
   res.status(200).json({ method: req.method, path: '/multimethod/badtype' })
 })
 
+
+api4.get('/*', (req,res) => {
+  res.status(200).header('wildcard',true).json({ method: req.method, path: req.path })
+})
+
+api4.get('/test/*', (req,res) => {
+  res.status(200).header('wildcard',true).json({ method: req.method, path: req.path, nested: "true" })
+})
+
+api4.options('/test/*', (req,res) => {
+  res.status(200).header('wildcard',true).json({ method: req.method, path: req.path, nested: "true" })
+})
+
+api4.options('/test/test/*', (req,res) => {
+  res.status(200).header('wildcard',true).json({ method: req.method, path: req.path, nested: "true" })
+})
+
+api4.post('/*', (req,res) => {
+  res.status(200).header('wildcard',true).json({ method: req.method, path: req.path })
+})
+
+api4.post('/test/*', (req,res) => {
+  res.status(200).header('wildcard',true).json({ method: req.method, path: req.path, nested: "true" })
+})
+
+
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
 /******************************************************************************/
@@ -318,6 +345,28 @@ describe('Route Tests:', function() {
       let _event = Object.assign({},event,{ path: '/not_found' })
       let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Wildcard: /*', async function() {
+      let _event = Object.assign({},event,{ path: '/foo/bar' })
+      let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json', 'wildcard': true },
+        statusCode: 200,
+        body: '{"method":"GET","path":"/foo/bar"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Wildcard: /test/*', async function() {
+      let _event = Object.assign({},event,{ path: '/test/foo/bar' })
+      let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json', 'wildcard': true },
+        statusCode: 200,
+        body: '{"method":"GET","path":"/test/foo/bar","nested":"true"}',
+        isBase64Encoded: false
+      })
     }) // end it
 
   }) // end GET tests
@@ -484,6 +533,28 @@ describe('Route Tests:', function() {
       let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'post' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Wildcard: /*', async function() {
+      let _event = Object.assign({},event,{ path: '/foo/bar', httpMethod: 'post' })
+      let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json', 'wildcard': true },
+        statusCode: 200,
+        body: '{"method":"POST","path":"/foo/bar"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Wildcard: /test/*', async function() {
+      let _event = Object.assign({},event,{ path: '/test/foo/bar', httpMethod: 'post' })
+      let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json', 'wildcard': true },
+        statusCode: 200,
+        body: '{"method":"POST","path":"/test/foo/bar","nested":"true"}',
+        isBase64Encoded: false
+      })
     }) // end it
 
   }) // end POST tests
@@ -700,6 +771,28 @@ describe('Route Tests:', function() {
       let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'options' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 404, body: '{"error":"Route not found"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Wildcard: /test/*', async function() {
+      let _event = Object.assign({},event,{ path: '/test/foo/bar', httpMethod: 'options' })
+      let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json', 'wildcard': true },
+        statusCode: 200,
+        body: '{"method":"OPTIONS","path":"/test/foo/bar","nested":"true"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Wildcard: /test/test/* (higher level matching)', async function() {
+      let _event = Object.assign({},event,{ path: '/test/test/foo/bar', httpMethod: 'options' })
+      let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        headers: { 'content-type': 'application/json', 'wildcard': true },
+        statusCode: 200,
+        body: '{"method":"OPTIONS","path":"/test/test/foo/bar","nested":"true"}',
+        isBase64Encoded: false
+      })
     }) // end it
 
   }) // end OPTIONS tests
