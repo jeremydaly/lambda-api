@@ -1,0 +1,29 @@
+{
+  "requestContext": {
+    "elb": {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:XXXXXXXXXX:targetgroup/Test-ALB-Lambda/XXXXXXX"
+    }
+  },
+  "httpMethod": "GET",
+  "path": "/test/hello",
+  "multiValueQueryStringParameters": {
+    "qs1": [ "foo" ],
+    "qs2": [ "foo", "bar" ],
+    "qs3": [ "foo", "bar", "bat" ]
+  },
+  "multiValueHeaders": {
+    "accept": ["text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"],
+    "accept-encoding": ["br, gzip, deflate"],
+    "accept-language": ["en-us"],
+    "cookie": [""],
+    "host": ["wt6mne2s9k.execute-api.us-west-2.amazonaws.com"],
+    "user-agent": ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36 OPR/39.0.2256.48"],
+    "x-amzn-trace-id": ["Root=1-5c1db69f-XXXXXXXXXXX"],
+    "x-forwarded-for": ["192.168.100.1"],
+    "x-forwarded-port": ["443"],
+    "x-forwarded-proto": ["https"],
+    "test-header": ["val1","val2"]
+  },
+  "body": "",
+  "isBase64Encoded": true
+}
