@@ -11,6 +11,8 @@ const api = require('../index')({ version: 'v1.0' })
 api.get('/test/hello', function(req,res) {
   let request = Object.assign(req,{app:null})
   // console.log(JSON.stringify(request,null,2));
+  res.cookie('test','value')
+  res.cookie('test2','value2')
   res.status(200).json({ request })
 })
 
@@ -30,7 +32,7 @@ describe('Request Tests:', function() {
       let body = JSON.parse(result.body)
       // console.log(body);
       // console.log(body.request.multiValueHeaders);
-      expect(result.headers).to.deep.equal({ 'content-type': 'application/json' })
+      expect(result.multiValueHeaders).to.deep.equal({ 'content-type': ['application/json'], 'set-cookie': ['test=value; Path=/','test2=value2; Path=/'] })
       expect(body).to.have.property('request')
       expect(body.request.id).is.not.null
       expect(body.request.interface).to.equal('apigateway')
@@ -58,7 +60,7 @@ describe('Request Tests:', function() {
       delete _event.multiValueHeaders['x-forwarded-for'] // remove the header
       let result = await new Promise(r => api.run(_event,_context,(e,res) => { r(res) }))
       let body = JSON.parse(result.body)
-      expect(result.headers).to.deep.equal({ 'content-type': 'application/json' })
+      expect(result.multiValueHeaders).to.deep.equal({ 'content-type': ['application/json'], 'set-cookie': ['test=value; Path=/','test2=value2; Path=/'] })
       expect(body).to.have.property('request')
       expect(body.request.id).is.not.null
       expect(body.request.interface).to.equal('apigateway')
@@ -87,8 +89,7 @@ describe('Request Tests:', function() {
       let _context = require('./sample-context-alb1.json')
       let result = await new Promise(r => api.run(_event,_context,(e,res) => { r(res) }))
       let body = JSON.parse(result.body)
-      //console.log(body);
-      expect(result.headers).to.deep.equal({ 'content-type': 'application/json' })
+      expect(result.headers).to.deep.equal({ 'content-type': 'application/json', 'set-cookie': 'test2=value2; Path=/' })
       expect(body).to.have.property('request')
       expect(body.request.id).is.not.null
       expect(body.request.interface).to.equal('alb')
@@ -101,11 +102,6 @@ describe('Request Tests:', function() {
       expect(body.request.route).to.equal('/test/hello')
       expect(body.request.query.qs1).to.equal('foo')
       expect(body.request.multiValueQuery.qs1).to.deep.equal(['foo'])
-      console.log(body.request.multiValueHeaders)
-      // expect(body.request.query.qs2).to.equal('bar')
-      // expect(body.request.multiValueQuery.qs2).to.deep.equal(['foo','bar'])
-      // expect(body.request.multiValueQuery.qs3).to.deep.equal(['bat','baz'])
-
     })
 
 
@@ -114,8 +110,8 @@ describe('Request Tests:', function() {
       let _context = require('./sample-context-alb1.json')
       let result = await new Promise(r => api.run(_event,_context,(e,res) => { r(res) }))
       let body = JSON.parse(result.body)
-      // console.log(body);
-      expect(result.headers).to.deep.equal({ 'content-type': 'application/json' })
+      // console.log(JSON.stringify(result,null,2));
+      expect(result.multiValueHeaders).to.deep.equal({ 'content-type': ['application/json'], 'set-cookie': ['test=value; Path=/','test2=value2; Path=/'] })
       expect(body).to.have.property('request')
       expect(body.request.id).is.not.null
       expect(body.request.interface).to.equal('alb')

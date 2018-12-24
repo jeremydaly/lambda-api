@@ -12,21 +12,12 @@ const api5 = require('../index')({ version: 'v1.0' })
 const api6 = require('../index')({ version: 'v1.0' })
 const api7 = require('../index')({ version: 'v1.0' })
 
-// NOTE: Set test to true
-api._test = true;
-api2._test = true;
-api3._test = true;
-api4._test = true;
-api5._test = true;
-api6._test = true;
-api7._test = true;
-
 let event = {
   httpMethod: 'get',
   path: '/test',
   body: {},
-  headers: {
-    'Content-Type': 'application/json'
+  multiValueHeaders: {
+    'content-type': ['application/json']
   }
 }
 
@@ -244,45 +235,45 @@ describe('Middleware Tests:', function() {
   it('Set Values in res object', async function() {
     let _event = Object.assign({},event,{})
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddleware":"123","testMiddleware2":"456"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","testMiddleware":"123","testMiddleware2":"456"}', isBase64Encoded: false })
   }) // end it
 
   it('Access params, querystring, and body values', async function() {
     let _event = Object.assign({},event,{ httpMethod: 'post', path: '/test/123', queryStringParameters: { test: "456" }, body: { test: "789" } })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddleware3":"123","testMiddleware4":"456","testMiddleware5":"789"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","testMiddleware3":"123","testMiddleware4":"456","testMiddleware5":"789"}', isBase64Encoded: false })
   }) // end it
 
 
   it('Middleware with Promise/Delay', async function() {
     let _event = Object.assign({},event,{ path: '/testPromise'})
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","testMiddlewarePromise":"test"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","testMiddlewarePromise":"test"}', isBase64Encoded: false })
   }) // end it
 
 
   it('With matching string path', async function() {
     let _event = Object.assign({},event,{ path: '/test' })
     let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware":true,"middlewareWildcard":false,"middlewareParam":false,"middlewarePath":false}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware":true,"middlewareWildcard":false,"middlewareParam":false,"middlewarePath":false}', isBase64Encoded: false })
   }) // end it
 
   it('With non-matching string path', async function() {
     let _event = Object.assign({},event,{ path: '/test2/xyz' })
     let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware":false,"middlewareWildcard":false,"middlewareParam":false,"middlewarePath":false}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware":false,"middlewareWildcard":false,"middlewareParam":false,"middlewarePath":false}', isBase64Encoded: false })
   }) // end it
 
   it('Wildcard match', async function() {
     let _event = Object.assign({},event,{ path: '/test/xyz' })
     let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware":false,"middlewareWildcard":true,"middlewareParam":false,"middlewarePath":false}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware":false,"middlewareWildcard":true,"middlewareParam":false,"middlewarePath":false}', isBase64Encoded: false })
   }) // end it
 
   it('Parameter match', async function() {
     let _event = Object.assign({},event,{ path: '/test/testing' })
     let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware":false,"middlewareWildcard":true,"middlewareParam":true,"middlewarePath":true}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware":false,"middlewareWildcard":true,"middlewareParam":true,"middlewarePath":true}', isBase64Encoded: false })
   }) // end it
 
 
@@ -290,53 +281,53 @@ describe('Middleware Tests:', function() {
   it('Matching path (array)', async function() {
     let _event = Object.assign({},event,{ path: '/test' })
     let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware":true}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware":true}', isBase64Encoded: false })
   }) // end it
 
   it('Matching param (array)', async function() {
     let _event = Object.assign({},event,{ path: '/test/xyz' })
     let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware":true}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware":true}', isBase64Encoded: false })
   }) // end it
 
   it('Matching wildcard (array)', async function() {
     let _event = Object.assign({},event,{ path: '/test2/test' })
     let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware":true}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware":true}', isBase64Encoded: false })
   }) // end it
 
   it('Non-matching path (array)', async function() {
     let _event = Object.assign({},event,{ path: '/test3' })
     let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware":false}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware":false}', isBase64Encoded: false })
   }) // end it
 
 
   it('Multiple middlewares (no path)', async function() {
     let _event = Object.assign({},event,{ path: '/test' })
     let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware1":true,"middleware2":true}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware1":true,"middleware2":true}', isBase64Encoded: false })
   }) // end it
 
 
   it('Multiple middlewares (w/o matching path)', async function() {
     let _event = Object.assign({},event,{ path: '/test' })
     let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware1":false,"middleware2":false}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware1":false,"middleware2":false}', isBase64Encoded: false })
   }) // end it
 
 
   it('Multiple middlewares (w/ matching path)', async function() {
     let _event = Object.assign({},event,{ path: '/test/x' })
     let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware1":true,"middleware2":true}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware1":true,"middleware2":true}', isBase64Encoded: false })
   }) // end it
 
 
   it('Single middleware (w/ matching path)', async function() {
     let _event = Object.assign({},event,{ path: '/test/y' })
     let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","middleware1":true,"middleware2":false}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware1":true,"middleware2":false}', isBase64Encoded: false })
   }) // end it
 
 
@@ -344,7 +335,7 @@ describe('Middleware Tests:', function() {
     let _event = Object.assign({},event,{ path: '/test' })
     let result = await new Promise(r => api6.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json', middleware1: true },
+      multiValueHeaders: { 'content-type': ['application/json'], middleware1: [true] },
       statusCode: 200, body: 'return from middleware', isBase64Encoded: false })
   }) // end it
 
@@ -353,7 +344,7 @@ describe('Middleware Tests:', function() {
     let _event = Object.assign({},event,{ path: '/test' })
     let result = await new Promise(r => api7.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json', middleware1: true },
+      multiValueHeaders: { 'content-type': ['application/json'], middleware1: [true] },
       statusCode: 200, body: 'return from middleware', isBase64Encoded: false })
   }) // end it
 
@@ -362,7 +353,7 @@ describe('Middleware Tests:', function() {
     let _event = Object.assign({},event,{ path: '/test/error' })
     let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 401, body: '{"error":"Not Authorized"}', isBase64Encoded: false })
   }) // end it
 

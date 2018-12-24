@@ -12,8 +12,8 @@ let event = {
   httpMethod: 'get',
   path: '/test',
   body: {},
-  headers: {
-    'Content-Type': 'application/json'
+  multiValueHeaders: {
+    'Content-Type': ['application/json']
   }
 }
 
@@ -45,7 +45,7 @@ describe('Context Tests:', function() {
       identity: { cognitoIdentityId: 321 }
     },(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: '{"id":"1234","context":{"functionName":"testFunction","awsRequestId":"1234","log_group_name":"testLogGroup","log_stream_name":"testLogStream","clientContext":{},"identity":{"cognitoIdentityId":321}}}',
       isBase64Encoded: false })

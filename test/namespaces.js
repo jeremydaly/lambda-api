@@ -22,8 +22,8 @@ let event = {
   httpMethod: 'get',
   path: '/test',
   body: {},
-  headers: {
-    'Content-Type': 'application/json'
+  multiValueHeaders: {
+    'content-type': ['application/json']
   }
 }
 
@@ -59,13 +59,13 @@ describe('Namespace Tests:', function() {
   it('Invoke namespace', async function() {
     let _event = Object.assign({},event,{ path:'/testData' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","data":{"foo":"sample data","bar":"additional sample data"}}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","data":{"foo":"sample data","bar":"additional sample data"}}', isBase64Encoded: false })
   }) // end it
 
   it('Invoke namespace via required module', async function() {
     let _event = Object.assign({},event,{ path:'/testAppData' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","data":{"foo":"sample data","bar":"additional sample data"}}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","data":{"foo":"sample data","bar":"additional sample data"}}', isBase64Encoded: false })
   }) // end it
 
 }) // end MODULE tests

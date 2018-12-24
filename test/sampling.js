@@ -50,10 +50,10 @@ let event = {
   httpMethod: 'get',
   path: '/test',
   body: {},
-  headers: {
-    'content-type': 'application/json',
-    'x-forwarded-for': '12.34.56.78, 23.45.67.89',
-    'User-Agent': 'user-agent-string'
+  multiValueHeaders: {
+    'content-type': ['application/json'],
+    'x-forwarded-for': ['12.34.56.78, 23.45.67.89'],
+    'User-Agent': ['user-agent-string']
   }
 }
 

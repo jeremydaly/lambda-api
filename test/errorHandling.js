@@ -15,8 +15,8 @@ let event = {
   httpMethod: 'get',
   path: '/test',
   body: {},
-  headers: {
-    'Content-Type': 'application/json'
+  multiValueHeaders: {
+    'content-type': ['application/json']
   }
 }
 
@@ -162,19 +162,19 @@ describe('Error Handling Tests:', function() {
     it('Called Error', async function() {
       let _event = Object.assign({},event,{ path: '/testError'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test error message"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: '{"error":"This is a test error message"}', isBase64Encoded: false })
     }) // end it
 
     it('Thrown Error', async function() {
       let _event = Object.assign({},event,{ path: '/testErrorThrow'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test thrown error"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: '{"error":"This is a test thrown error"}', isBase64Encoded: false })
     }) // end it
 
     it('Simulated Error', async function() {
       let _event = Object.assign({},event,{ path: '/testErrorSimulated'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 405, body: '{"error":"This is a simulated error"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 405, body: '{"error":"This is a simulated error"}', isBase64Encoded: false })
     }) // end it
 
   })
@@ -184,31 +184,31 @@ describe('Error Handling Tests:', function() {
     it('Error Middleware', async function() {
       let _event = Object.assign({},event,{ path: '/testErrorMiddleware'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ headers: { 'content-type': 'text/plain' }, statusCode: 500, body: 'This is a test error message: 123/456', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['text/plain'] }, statusCode: 500, body: 'This is a test error message: 123/456', isBase64Encoded: false })
     }) // end it
 
     it('Error Middleware w/ Promise', async function() {
       let _event = Object.assign({},event,{ path: '/testErrorPromise'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ headers: { 'content-type': 'text/plain' }, statusCode: 500, body: 'This is a test error message: 123/456', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['text/plain'] }, statusCode: 500, body: 'This is a test error message: 123/456', isBase64Encoded: false })
     }) // end it
 
     it('Multiple error middlewares', async function() {
       let _event = Object.assign({},event,{ path: '/testError'})
       let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ headers: { 'content-type': 'text/plain' }, statusCode: 500, body: 'This is a test error message: true/true', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['text/plain'] }, statusCode: 500, body: 'This is a test error message: true/true', isBase64Encoded: false })
     }) // end it
 
     it('Returned error from middleware (async)', async function() {
       let _event = Object.assign({},event,{ path: '/testError'})
       let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ headers: { }, statusCode: 500, body: 'this is an error: false', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { }, statusCode: 500, body: 'this is an error: false', isBase64Encoded: false })
     }) // end it
 
     it('Returned error from middleware (callback)', async function() {
       let _event = Object.assign({},event,{ path: '/testError'})
       let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ headers: { }, statusCode: 500, body: 'this is an error: false', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { }, statusCode: 500, body: 'this is an error: false', isBase64Encoded: false })
     }) // end it
   })
 
@@ -216,31 +216,31 @@ describe('Error Handling Tests:', function() {
     it('RouteError', async function() {
       let _event = Object.assign({},event,{ path: '/testx'})
       let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ headers: { }, statusCode: 404, body: '{"errorType":"RouteError"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { }, statusCode: 404, body: '{"errorType":"RouteError"}', isBase64Encoded: false })
     }) // end it
 
     it('MethodError', async function() {
       let _event = Object.assign({},event,{ path: '/fileError', httpMethod: 'put' })
       let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ headers: { }, statusCode: 405, body: '{"errorType":"MethodError"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { }, statusCode: 405, body: '{"errorType":"MethodError"}', isBase64Encoded: false })
     }) // end it
 
     it('FileError (s3)', async function() {
       let _event = Object.assign({},event,{ path: '/fileError' })
       let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ headers: { }, statusCode: 500, body: '{"errorType":"FileError"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { }, statusCode: 500, body: '{"errorType":"FileError"}', isBase64Encoded: false })
     }) // end it
 
     it('FileError (local)', async function() {
       let _event = Object.assign({},event,{ path: '/fileErrorLocal' })
       let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ headers: { }, statusCode: 500, body: '{"errorType":"FileError"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { }, statusCode: 500, body: '{"errorType":"FileError"}', isBase64Encoded: false })
     }) // end it
 
     it('ResponseError', async function() {
       let _event = Object.assign({},event,{ path: '/responseError' })
       let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ headers: { }, statusCode: 500, body: '{"errorType":"ResponseError"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { }, statusCode: 500, body: '{"errorType":"ResponseError"}', isBase64Encoded: false })
     }) // end it
   })
 
@@ -255,7 +255,7 @@ describe('Error Handling Tests:', function() {
       let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
       api._test = true
       console.log = logger
-      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test thrown error"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: '{"error":"This is a test thrown error"}', isBase64Encoded: false })
       expect(_log.level).to.equal('fatal')
       expect(_log.msg).to.equal('This is a test thrown error')
     }) // end it
@@ -270,7 +270,7 @@ describe('Error Handling Tests:', function() {
       let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
       api._test = true
       console.log = logger
-      expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 500, body: '{"error":"This is a test error message"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: '{"error":"This is a test error message"}', isBase64Encoded: false })
       expect(_log.level).to.equal('error')
       expect(_log.msg).to.equal('This is a test error message')
     }) // end it

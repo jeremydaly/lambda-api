@@ -64,10 +64,11 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
   - [download()](#downloadfile--filename--options--callback)
   - [error()](#errorcode-message-detail)
   - [etag()](#etagboolean)
-  - [getHeader()](#getheaderkey)
+  - [getHeader()](#getheaderkey-value--asarray)
+  - [getHeaders()](#getheaders)
   - [getLink()](#getlinks3path-expires-callback)
   - [hasHeader()](#hasheaderkey)
-  - [header()](#headerkey-value)
+  - [header()](#headerkey-value--append)
   - [html()](#htmlbody)
   - [json()](#jsonbody)
   - [jsonp()](#jsonpbody)
@@ -429,19 +430,36 @@ api.get('/users', (req,res) => {
 })
 ```
 
-### header(key, value)
-The `header` method allows for you to set additional headers to return to the client. By default, just the `content-type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two string arguments. The first is the name of the header and then second is the value.
+### header(key, value [,append])
+The `header` method allows for you to set additional headers to return to the client. By default, just the `content-type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two string arguments. The first is the name of the header and then second is the value. You can utilize multi-value headers by specifying an array with multiple values as the `value`, or you can use an optional third boolean parameter and append multiple headers.
 
 ```javascript
 api.get('/users', (req,res) => {
   res.header('content-type','text/html').send('<div>This is HTML</div>')
 })
+
+// Set multiple header values
+api.get('/users', (req,res) => {
+  res.header('someHeader',['foo','bar').send({})
+})
+
+// Set multiple header by adding to existing header
+api.get('/users', (req,res) => {
+  res.header('someHeader','foo')
+    .header('someHeader','bar',true) // append another value
+      .send({})
+})
 ```
 
 **NOTE:** Header keys are converted and stored as lowercase in compliance with [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540) for HTTP/2. Header convenience methods (`getHeader`, `hasHeader`, and `removeHeader`) automatically ignore case.
 
-### getHeader([key])
-Retrieve the current header object or pass the optional `key` parameter and retrieve a specific header value. `key` is case insensitive.
+### getHeader(key [,asArray])
+Retrieve a specific header value. `key` is case insensitive. By default (and for backwards compatibility), header values are returned as a `string`. Multi-value headers will be concatenated using a comma (see [rfc2616 4.2. Message Headers](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2)). An optional second boolean parameter can be passed to return header values as an `array`.
+
+**NOTE:** The ability to retrieve the current header object by calling `getHeader()` is still possible, but the preferred method is to use the `getHeaders()` method. By default, `getHeader()` will return the object with `string` values.
+
+### getHeaders()
+Retrieve the current header object. Values are returned as `array`s.
 
 ### hasHeader(key)
 Returns a boolean indicating the existence of `key` in the response headers. `key` is case insensitive.

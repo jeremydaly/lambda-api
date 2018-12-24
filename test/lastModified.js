@@ -14,8 +14,8 @@ let event = {
   httpMethod: 'get',
   path: '/test',
   body: {},
-  headers: {
-    'Content-Type': 'application/json'
+  multiValueHeaders: {
+    'content-type': ['application/json']
   }
 }
 
@@ -58,40 +58,40 @@ describe('modified Tests:', function() {
     let _event = Object.assign({},event,{ path: '/modified' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'last-modified': result.multiValueHeaders['last-modified']
       },
       statusCode: 200,
       body: 'cache',
       isBase64Encoded: false
     })
-    expect(typeof result.headers['last-modified']).to.not.be.null
-    expect(typeof result.headers['last-modified']).to.not.be.empty
+    expect(typeof result.multiValueHeaders['last-modified']).to.not.be.null
+    expect(typeof result.multiValueHeaders['last-modified']).to.not.be.empty
   }) // end it
 
   it('modified (true)', async function() {
     let _event = Object.assign({},event,{ path: '/modifiedTrue' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'last-modified': result.multiValueHeaders['last-modified']
       },
       statusCode: 200,
       body: 'cache',
       isBase64Encoded: false
     })
-    expect(typeof result.headers['last-modified']).to.not.be.null
-    expect(typeof result.headers['last-modified']).to.not.be.empty
+    expect(typeof result.multiValueHeaders['last-modified']).to.not.be.null
+    expect(typeof result.multiValueHeaders['last-modified']).to.not.be.empty
   }) // end it
 
   it('modified (false)', async function() {
     let _event = Object.assign({},event,{ path: '/modifiedFalse' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json'
+      multiValueHeaders: {
+        'content-type': ['application/json']
       },
       statusCode: 200,
       body: 'cache',
@@ -103,9 +103,9 @@ describe('modified Tests:', function() {
     let _event = Object.assign({},event,{ path: '/modifiedDate' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'last-modified': 'Wed, 01 Aug 2018 00:00:00 GMT'
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'last-modified': ['Wed, 01 Aug 2018 00:00:00 GMT']
       },
       statusCode: 200,
       body: 'cache',
@@ -117,9 +117,9 @@ describe('modified Tests:', function() {
     let _event = Object.assign({},event,{ path: '/modifiedString' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'last-modified': 'Wed, 01 Aug 2018 00:00:00 GMT'
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'last-modified': ['Wed, 01 Aug 2018 00:00:00 GMT']
       },
       statusCode: 200,
       body: 'cache',
@@ -132,15 +132,15 @@ describe('modified Tests:', function() {
     let _event = Object.assign({},event,{ path: '/modifiedBadString' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'last-modified': result.multiValueHeaders['last-modified']
       },
       statusCode: 200,
       body: 'cache',
       isBase64Encoded: false
     })
-    expect(new Date(result.headers['last-modified'])).to.be.above(new Date('2018-08-02'))
+    expect(new Date(result.multiValueHeaders['last-modified'])).to.be.above(new Date('2018-08-02'))
 
   }) // end it
 

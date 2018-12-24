@@ -12,8 +12,8 @@ let event = {
   httpMethod: 'get',
   path: '/test',
   body: {},
-  headers: {
-    'Content-Type': 'application/json'
+  multiValueHeaders: {
+    'Content-Type': ['application/json']
   }
 }
 
@@ -43,19 +43,19 @@ describe('Base Path Tests:', function() {
   it('Simple path with base: /v1/test', async function() {
     let _event = Object.assign({},event,{ path: '/v1/test' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
   }) // end it
 
   it('Path with base and parameter: /v1/test/123', async function() {
     let _event = Object.assign({},event,{ path: '/v1/test/123' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123"}', isBase64Encoded: false })
   }) // end it
 
   it('Nested path with base: /v1/test/test2/test3', async function() {
     let _event = Object.assign({},event,{ path: '/v1/test/test2/test3' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"path":"/v1/test/test2/test3","method":"get","status":"ok"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"path":"/v1/test/test2/test3","method":"get","status":"ok"}', isBase64Encoded: false })
   }) // end it
 
 }) // end BASEPATH tests

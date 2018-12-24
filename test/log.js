@@ -61,15 +61,15 @@ let event = {
   httpMethod: 'get',
   path: '/test',
   body: {},
-  headers: {
-    'content-type': 'application/json',
-    'x-forwarded-for': '12.34.56.78, 23.45.67.89',
-    'User-Agent': 'user-agent-string',
-    'CloudFront-Is-Desktop-Viewer': 'false',
-    'CloudFront-Is-Mobile-Viewer': 'true',
-    'CloudFront-Is-SmartTV-Viewer': 'false',
-    'CloudFront-Is-Tablet-Viewer': 'false',
-    'CloudFront-Viewer-Country': 'US'
+  multiValueHeaders: {
+    'content-type': ['application/json'],
+    'x-forwarded-for': ['12.34.56.78, 23.45.67.89'],
+    'user-agent': ['user-agent-string'],
+    'cloudfront-is-desktop-viewer': ['false'],
+    'cloudfront-is-mobile-viewer': ['true'],
+    'cloudfront-is-smarttv-viewer': ['false'],
+    'cloudfront-is-tablet-viewer': ['false'],
+    'cloudfront-viewer-country': ['US']
   }
 }
 
@@ -213,7 +213,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -250,7 +250,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -266,7 +266,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -302,7 +302,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -318,7 +318,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -355,7 +355,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -393,7 +393,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -430,7 +430,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -467,7 +467,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -505,14 +505,14 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
     })
 
     expect(result2).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -563,7 +563,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -598,7 +598,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -637,7 +637,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -685,7 +685,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -729,7 +729,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -776,7 +776,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -867,7 +867,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 500,
       body: '{"error":"undefinedVar is not defined"}',
       isBase64Encoded: false
