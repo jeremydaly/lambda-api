@@ -192,6 +192,43 @@ describe('Utility Function Tests:', function() {
   }) // end encodeBody tests
 
 
+  describe('statusLookup:', function() {
+
+    it('200', function() {
+      expect(utils.statusLookup(200)).to.equal('OK')
+    }) // end it
+
+    it('201', function() {
+      expect(utils.statusLookup(201)).to.equal('Created')
+    }) // end it
+
+    it('304', function() {
+      expect(utils.statusLookup(304)).to.equal('Not Modified')
+    }) // end it
+
+    it('404', function() {
+      expect(utils.statusLookup(404)).to.equal('Not Found')
+    }) // end it
+
+    it('502', function() {
+      expect(utils.statusLookup(502)).to.equal('Bad Gateway')
+    }) // end it
+
+    it('999 Uknown', function() {
+      expect(utils.statusLookup(999)).to.equal('Unknown')
+    }) // end it
+
+    it('As string (parsable as int)', function() {
+      expect(utils.statusLookup('200')).to.equal('OK')
+    }) // end it
+
+    it('As string (not parsable as int)', function() {
+      expect(utils.statusLookup('foo')).to.equal('Unknown')
+    }) // end it
+
+  }) // end encodeBody tests
+
+
   describe('extractRoutes:', function() {
 
     it('Sample routes', function() {
