@@ -78,6 +78,7 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
   - [removeHeader()](#removeheaderkey)
   - [send()](#sendbody)
   - [sendFile()](#sendfilefile--options--callback)
+  - [sendStatus()](#sendstatuscode)
   - [status()](#statuscode)
   - [type()](#typetype)
 - [Enabling Binary Support](#enabling-binary-support)
@@ -429,6 +430,17 @@ api.get('/users', (req,res) => {
   res.status(304).send('Not Modified')
 })
 ```
+
+### sendStatus(code)
+The `sendStatus` method sets the status code and returns its string representation as the response body. The `sendStatus()` method accepts a single integer argument.
+
+```javascript
+res.sendStatus(200) // equivalent to res.status(200).send('OK')
+res.sendStatus(304) // equivalent to res.status(304).send('Not Modified')
+res.sendStatus(403) // equivalent to res.status(403).send('Forbidden')
+```
+
+**NOTE:** If an unsupported status code is send, it will return 'Unknown' as the body.
 
 ### header(key, value [,append])
 The `header` method allows for you to set additional headers to return to the client. By default, just the `content-type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two string arguments. The first is the name of the header and then second is the value. You can utilize multi-value headers by specifying an array with multiple values as the `value`, or you can use an optional third boolean parameter and append multiple headers.
