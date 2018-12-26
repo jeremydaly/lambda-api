@@ -812,6 +812,7 @@ Logging can be enabled by setting the `logger` option to `true` when creating th
 | level | `string` | Minimum logging level to send logs for. See [Logging Levels](#logging-levels). | `info` |
 | levels | `object` | Key/value pairs of custom log levels and their priority. See [Custom Logging Levels](#custom-logging-levels). | |
 | messageKey | `string` | Sets the JSON property name of the log "message". | `msg` |
+| multiValue | `boolean` | Enables multi-value support for querystrings. If enabled, the `qs` parameter will return all values as `array`s and will include multiple values if they exist. | `false` |
 | nested | `boolean` | Enables/disables nesting of JSON logs for serializer data. See [Serializers](#serializers). | `false` |
 | timestamp | `boolean` or `function` | By default, timestamps will return the epoch time in milliseconds. A value of `false` disables log timestamps. A function that returns a value can be used to override the default format. | `true` |
 | sampling | `object` | Enables log sampling for periodic request tracing. See [Sampling](#sampling). | |
