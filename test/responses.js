@@ -52,6 +52,14 @@ api.get('/testJSONPResponse', function(req,res) {
   res.jsonp({ foo: 'bar' })
 })
 
+api.get('/testSendStatus', function(req,res) {
+  res.sendStatus(200)
+})
+
+api.get('/testSendStatus403', function(req,res) {
+  res.sendStatus(403)
+})
+
 // Secondary route
 api2.get('/testJSONPResponse', function(req,res) {
   res.jsonp({ foo: 'bar' })
@@ -139,6 +147,18 @@ describe('Response Tests:', function() {
     let _event = Object.assign({},event,{ path: '/testEmptyResponse'})
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '', isBase64Encoded: false })
+  }) // end it
+
+  it('sendStatus 200', async function() {
+    let _event = Object.assign({},event,{ path: '/testSendStatus'})
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: 'OK', isBase64Encoded: false })
+  }) // end it
+
+  it('sendStatus 403', async function() {
+    let _event = Object.assign({},event,{ path: '/testSendStatus403'})
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 403, body: 'Forbidden', isBase64Encoded: false })
   }) // end it
 
   it('JSONP response (default callback)', async function() {
