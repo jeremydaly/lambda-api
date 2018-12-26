@@ -97,6 +97,7 @@ describe('Request Tests:', function() {
       // console.log(JSON.stringify(result,null,2));
       expect(result.headers).to.deep.equal({ 'content-type': 'application/json', 'set-cookie': 'test2=value2; Path=/' })
       expect(body).to.have.property('request')
+      expect(result.statusDescription).to.equal('200 OK')
       expect(body.request.id).is.not.null
       expect(body.request.interface).to.equal('alb')
       expect(body.request.userAgent).to.equal('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36 OPR/39.0.2256.48')
@@ -119,6 +120,7 @@ describe('Request Tests:', function() {
       // console.log(JSON.stringify(result,null,2));
       expect(result.multiValueHeaders).to.deep.equal({ 'content-type': ['application/json'], 'set-cookie': ['test=value; Path=/','test2=value2; Path=/'] })
       expect(body).to.have.property('request')
+      expect(result.statusDescription).to.equal('200 OK')
       expect(body.request.id).is.not.null
       expect(body.request.interface).to.equal('alb')
       expect(body.request.userAgent).to.equal('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36 OPR/39.0.2256.48')
@@ -137,7 +139,7 @@ describe('Request Tests:', function() {
     })
 
 
-    it('Alternate statuss code', async function() {
+    it('Alternate status code', async function() {
       let _event = Object.assign(require('./sample-event-alb2.json'),{ path: '/test/201' })
       let _context = require('./sample-context-alb1.json')
       let result = await new Promise(r => api.run(_event,_context,(e,res) => { r(res) }))
