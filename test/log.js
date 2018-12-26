@@ -241,6 +241,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[4]).to.have.property('coldStart')
     expect(_log[4]).to.have.property('statusCode')
@@ -278,6 +279,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[4]).to.have.property('coldStart')
     expect(_log[4]).to.have.property('statusCode')
@@ -331,6 +333,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[5]).to.have.property('coldStart')
     expect(_log[5]).to.have.property('statusCode')
@@ -384,6 +387,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[1]).to.have.property('coldStart')
     expect(_log[1]).to.have.property('statusCode')
@@ -422,6 +426,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[1]).to.have.property('coldStart')
     expect(_log[1]).to.have.property('statusCode')
@@ -458,6 +463,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[1]).to.have.property('coldStart')
     expect(_log[1]).to.have.property('statusCode')
@@ -495,6 +501,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[1]).to.have.property('coldStart')
     expect(_log[1]).to.have.property('statusCode')
@@ -533,6 +540,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[1]).to.have.property('coldStart')
     expect(_log[1]).to.have.property('statusCode')
@@ -577,6 +585,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     expect(_log[0]).to.have.property('coldStart')
     expect(_log[0]).to.have.property('path')
     expect(_log[0]).to.have.property('ip')
@@ -593,6 +602,7 @@ describe('Logging Tests:', function() {
     expect(_log[1]).to.have.property('remaining')
     expect(_log[1]).to.have.property('function')
     expect(_log[1]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     expect(_log[1]).to.have.property('coldStart')
     expect(_log[1]).to.have.property('path')
     expect(_log[1]).to.have.property('ip')
@@ -627,6 +637,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // these should NOT exist
     expect(_log[0]).to.not.have.property('coldStart')
     expect(_log[0]).to.not.have.property('statusCode')
@@ -664,6 +675,7 @@ describe('Logging Tests:', function() {
     expect(_log[0].context).to.have.property('remaining')
     expect(_log[0].context).to.have.property('function')
     expect(_log[0].context).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     expect(_log[0]).to.have.property('custom')
     expect(_log[0].custom).to.have.property('customMsg')
     // access log
@@ -702,6 +714,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     expect(_log[0]).to.have.property('path')
     expect(_log[0]).to.have.property('ip')
     expect(_log[0]).to.have.property('ua')
@@ -752,6 +765,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('timer')
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[3]).to.have.property('time')
     expect(_log[3]).to.have.property('id')
@@ -793,6 +807,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('msg')
     expect(_log[0]).to.have.property('timer')
     expect(_log[0]).to.have.property('remaining')
+    expect(_log[0]).to.have.property('int')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('TEST_CUSTOM')
     expect(_log[0]).to.have.property('TEST_CONTEXT')
@@ -839,6 +854,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('msg')
     expect(_log[0]).to.have.property('timer')
     expect(_log[0]).to.have.property('remaining')
+    expect(_log[0]).to.have.property('int')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('custom')
     // access log
@@ -932,6 +948,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     expect(_log[0]).to.have.property('stack')
 
     expect(_log[1]).to.have.property('time')

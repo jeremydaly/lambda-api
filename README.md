@@ -385,7 +385,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `app`: A reference to an instance of the app
 - `version`: The version set at initialization
 - `id`: The awsRequestId from the Lambda `context`
-- `interface`: The interface being used to access Lambda (either `apigateway` or `alb`)
+- `interface`: The interface being used to access Lambda (`apigateway`,`alb`, or `edge`)
 - `params`: Dynamic path parameters parsed from the path (see [path parameters](#path-parameters))
 - `method`: The HTTP method of the request
 - `path`: The path passed in by the request including the `base` and any `prefix` assigned to routes
@@ -850,6 +850,7 @@ Logs are generated using Lambda API's standard JSON format. The log format can b
     "remaining": 2000, // remaining milliseconds until function timeout
     "function": "my-function-v1", // function name
     "memory": 2048, // allocated function memory
+    "int": "apigateway", // interface used to access the Lambda function
     "sample": true // is generated during sampling request?
   }
 ```
