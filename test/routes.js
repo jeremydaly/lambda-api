@@ -65,58 +65,51 @@ api.options('/test', function(req,res) {
   res.status(200).json({ method: 'options', status: 'ok' })
 })
 
+api.get('/test/:testX', function(req,res,next) {
+  next()
+})
+
 api.get('/test/:test', function(req,res) {
-  // console.log(req)
-  res.status(200).json({ method: 'get', status: 'ok', param: req.params.test })
+  res.status(200).json({ method: 'get', status: 'ok', param: req.params.test, param2: req.params.testX })
 })
 
 api.post('/test/:test', function(req,res) {
-  // console.log(req)
   res.status(200).json({ method: 'post', status: 'ok', param: req.params.test })
 })
 
 api.put('/test/:test', function(req,res) {
-  // console.log(req)
   res.status(200).json({ method: 'put', status: 'ok', param: req.params.test })
 })
 
 api.patch('/test/:test', function(req,res) {
-  // console.log(req)
   res.status(200).json({ method: 'patch', status: 'ok', param: req.params.test })
 })
 
 api.delete('/test/:test', function(req,res) {
-  // console.log(req)
   res.status(200).json({ method: 'delete', status: 'ok', param: req.params.test })
 })
 
 api.options('/test/:test', function(req,res) {
-  // console.log(req)
   res.status(200).json({ method: 'options', status: 'ok', param: req.params.test })
 })
 
 api.patch('/test/:test/:test2', function(req,res) {
-  // console.log(req)
   res.status(200).json({ method: 'patch', status: 'ok', params: req.params })
 })
 
 api.delete('/test/:test/:test2', function(req,res) {
-  // console.log(req)
   res.status(200).json({ method: 'delete', status: 'ok', params: req.params })
 })
 
 api.get('/test/:test/query', function(req,res) {
-  // console.log(req)
   res.status(200).json({ method: 'get', status: 'ok', param: req.params.test, query: req.query, multiValueQuery: req.multiValueQuery })
 })
 
 api.post('/test/:test/query', function(req,res) {
-  // console.log(req)
   res.status(200).json({ method: 'post', status: 'ok', param: req.params.test, query: req.query, multiValueQuery: req.multiValueQuery })
 })
 
 api.put('/test/:test/query', function(req,res) {
-  // console.log(req)
   res.status(200).json({ method: 'put', status: 'ok', param: req.params.test, query: req.query, multiValueQuery: req.multiValueQuery })
 })
 
@@ -164,16 +157,16 @@ api.METHOD('TEST','/test_options2/:param1/test', function(req,res) {
   res.status(200).json({ method: 'test', status: 'ok', body: req.body })
 })
 
-api.options('/*', function(req,res) {
-  res.status(200).json({ method: 'options', status: 'ok', path: '/*'})
+api.options('/test_options2/:param1/*', function(req,res) {
+  res.status(200).json({ method: 'options', status: 'ok', path: '/test_options2/:param1/*', params:req.params})
 })
 
 api.options('/test_options2/*', function(req,res) {
   res.status(200).json({ method: 'options', status: 'ok', path: '/test_options2/*'})
 })
 
-api.options('/test_options2/:param1/*', function(req,res) {
-  res.status(200).json({ method: 'options', status: 'ok', path: '/test_options2/:param1/*', params:req.params})
+api.options('/*', function(req,res) {
+  res.status(200).json({ method: 'options', status: 'ok', path: '/*'})
 })
 
 api.get('/override/head/request', (req,res) => {
@@ -188,11 +181,11 @@ api.any('/any', (req,res) => {
   res.status(200).json({ method: req.method, path: '/any', anyRoute: true })
 })
 
-api.any('/any2', (req,res) => {
+api.any('/any2', function any2(req,res) {
   res.status(200).json({ method: req.method, path: '/any2', anyRoute: true })
 })
 
-api.post('/any2', (req,res) => {
+api.post('/any2', function any2post(req,res) {
   res.status(200).json({ method: req.method, path: '/any2', anyRoute: false })
 })
 
@@ -224,11 +217,15 @@ api3.METHOD([1,'DELETE'],'/multimethod/badtype', (req,res) => {
 })
 
 
+api4.get('/test/*', (req,res) => {
+  res.status(200).header('wildcard',true).json({ method: req.method, path: req.path, nested: "true" })
+})
+
 api4.get('/*', (req,res) => {
   res.status(200).header('wildcard',true).json({ method: req.method, path: req.path })
 })
 
-api4.get('/test/*', (req,res) => {
+api4.options('/test/test/*', (req,res) => {
   res.status(200).header('wildcard',true).json({ method: req.method, path: req.path, nested: "true" })
 })
 
@@ -236,18 +233,13 @@ api4.options('/test/*', (req,res) => {
   res.status(200).header('wildcard',true).json({ method: req.method, path: req.path, nested: "true" })
 })
 
-api4.options('/test/test/*', (req,res) => {
+api4.post('/test/*', (req,res) => {
   res.status(200).header('wildcard',true).json({ method: req.method, path: req.path, nested: "true" })
 })
 
 api4.post('/*', (req,res) => {
   res.status(200).header('wildcard',true).json({ method: req.method, path: req.path })
 })
-
-api4.post('/test/*', (req,res) => {
-  res.status(200).header('wildcard',true).json({ method: req.method, path: req.path, nested: "true" })
-})
-
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
@@ -306,7 +298,7 @@ describe('Route Tests:', function() {
     it('Path with parameter: /test/123', async function() {
       let _event = Object.assign({},event,{ path: '/test/123' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123"}', isBase64Encoded: false })
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","param":"123","param2":"123"}', isBase64Encoded: false })
     }) // end it
 
     it('Path with parameter and querystring: /test/123/query/?test=321', async function() {
@@ -356,6 +348,7 @@ describe('Route Tests:', function() {
     it('Wildcard: /*', async function() {
       let _event = Object.assign({},event,{ path: '/foo/bar' })
       let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
+      // console.log(JSON.stringify(api4._routes,null,2));
       expect(result).to.deep.equal({
         multiValueHeaders: { 'content-type': ['application/json'], 'wildcard': [true] },
         statusCode: 200,
@@ -964,11 +957,11 @@ describe('Route Tests:', function() {
 
     it('Expected routes', function() {
       expect(api3.routes()).to.deep.equal([
-        [ 'POST', '/multimethod/test' ],
         [ 'GET', '/multimethod/test' ],
-        [ 'DELETE', '/multimethod/:var' ],
-        [ 'PUT', '/multimethod/:var' ],
+        [ 'POST', '/multimethod/test' ],
         [ 'GET', '/multimethod/:var' ],
+        [ 'PUT', '/multimethod/:var' ],
+        [ 'DELETE', '/multimethod/:var' ],
         [ 'DELETE', '/multimethod/badtype' ]
       ])
     }) // end it
@@ -988,7 +981,7 @@ describe('Route Tests:', function() {
         error = e
       }
       expect(error.name).to.equal('ConfigurationError')
-      expect(error.message).to.equal('No route handler specified for GET method on /test-missing-handler route.')
+      expect(error.message).to.equal('No handler or middleware specified for GET method on /test-missing-handler route.')
     }) // end it
 
     // TODO: ???
@@ -1016,6 +1009,19 @@ describe('Route Tests:', function() {
       }
       expect(error.name).to.equal('ConfigurationError')
       expect(error.message).to.equal('Middleware must have 3 or 4 parameters')
+    }) // end it
+
+    it('Invalid route-based middleware', async function() {
+      let error
+      try {
+        const api_error2 = require('../index')({ version: 'v1.0' })
+        api_error2.get('/',() => {},(res,req) => {},(res,req) => {})
+      } catch(e) {
+        // console.log(e);
+        error = e
+      }
+      expect(error.name).to.equal('ConfigurationError')
+      expect(error.message).to.equal('Route-based middleware must have 3 parameters')
     }) // end it
 
   }) // end Configuration errors

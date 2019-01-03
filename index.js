@@ -58,9 +58,6 @@ class API {
     // Init callback
     this._cb
 
-    // Middleware stack
-    this._middleware = []
-
     // Error middleware stack
     this._errors = []
 
@@ -73,27 +70,31 @@ class API {
     // Global error status (used for response parsing errors)
     this._errorStatus = 500
 
+    // Methods
+    this._methods = ['get','post','put','patch','delete','options','head','any']
+
+    // Convenience methods for METHOD
+    this._methods.forEach(m => {
+      this[m] = (...a) => this.METHOD(m.toUpperCase(),...a)
+    })
+
   } // end constructor
 
+  // METHOD: Adds method, middleware, and handlers to routes
+  METHOD(method,...args) {
 
+    // Extract path if provided, otherwise default to global wildcard
+    let path = typeof args[0] === 'string' ? args.shift() : '/*'
 
-  // Convenience methods (path, handler)
-  get(p,h) { this.METHOD('GET',p,h) }
-  post(p,h) { this.METHOD('POST',p,h) }
-  put(p,h) { this.METHOD('PUT',p,h) }
-  patch(p,h) { this.METHOD('PATCH',p,h) }
-  delete(p,h) { this.METHOD('DELETE',p,h) }
-  options(p,h) { this.METHOD('OPTIONS',p,h) }
-  head(p,h) { this.METHOD('HEAD',p,h) }
-  any(p,h) { this.METHOD('ANY',p,h) }
+    // Extract the execution stack
+    let stack = args.map((fn,i) => {
+      if (typeof fn === 'function' && (fn.length === 3 || (fn.length === 2 && i === args.length-1)))
+        return fn
+      throw new ConfigurationError('Route-based middleware must have 3 parameters')
+    })
 
-
-  // METHOD: Adds method and handler to routes
-  METHOD(method, path, handler) {
-
-    if (typeof handler !== 'function') {
-      throw new ConfigurationError(`No route handler specified for ${method} method on ${path} route.`)
-    }
+    if (stack.length === 0)
+      throw new ConfigurationError(`No handler or middleware specified for ${method} method on ${path} route.`)
 
     // Ensure method is an array
     let methods = Array.isArray(method) ? method : method.split(',')
@@ -105,45 +106,99 @@ class API {
     let route = this._prefix.concat(parsedPath)
 
     // For root path support
-    if (route.length === 0) { route.push('')}
+    if (route.length === 0) { route.push('') }
 
     // Keep track of path variables
     let pathVars = {}
 
+    // Make a local copy of routes
+    let routes = this._routes
+
+    // Create a local stack for inheritance
+    let _stack = {}
+
     // Loop through the paths
     for (let i=0; i<route.length; i++) {
+
+      let end = i === route.length-1
 
       // If this is a variable
       if (/^:(.*)$/.test(route[i])) {
         // Assign it to the pathVars (trim off the : at the beginning)
-        pathVars[i] = route[i].substr(1)
+        pathVars[i] = [route[i].substr(1)]
         // Set the route to __VAR__
         route[i] = '__VAR__'
       } // end if variable
 
+      // Add methods to routess
       methods.forEach(_method => {
         if (typeof _method === 'string') {
+
+          if (routes['ROUTES']) {
+
+            // Wildcard routes
+            if (routes['ROUTES']['*']) {
+
+              // Inherit middleware
+              if (routes['ROUTES']['*']['MIDDLEWARE']) {
+                _stack[method] = _stack[method] ?
+                  _stack[method].concat(routes['ROUTES']['*']['MIDDLEWARE'].stack)
+                  : routes['ROUTES']['*']['MIDDLEWARE'].stack
+              }
+
+              // Inherit methods and ANY
+              if (routes['ROUTES']['*']['METHODS'] && routes['ROUTES']['*']['METHODS']) {
+                ['ANY',method].forEach(m => {
+                  if (routes['ROUTES']['*']['METHODS'][m]) {
+                    _stack[method] = _stack[method] ?
+                      _stack[method].concat(routes['ROUTES']['*']['METHODS'][m].stack)
+                      : routes['ROUTES']['*']['METHODS'][m].stack
+                  }
+                }) // end for
+              }
+            }
+
+            // Matching routes
+            if (routes['ROUTES'][route[i]]) {
+
+              // Inherit middleware
+              if (end && routes['ROUTES'][route[i]]['MIDDLEWARE']) {
+                _stack[method] = _stack[method] ?
+                  _stack[method].concat(routes['ROUTES'][route[i]]['MIDDLEWARE'].stack)
+                  : routes['ROUTES'][route[i]]['MIDDLEWARE'].stack
+              }
+
+              // Inherit ANY methods (DISABLED)
+              // if (end && routes['ROUTES'][route[i]]['METHODS'] && routes['ROUTES'][route[i]]['METHODS']['ANY']) {
+              //   _stack[method] = _stack[method] ?
+              //     _stack[method].concat(routes['ROUTES'][route[i]]['METHODS']['ANY'].stack)
+              //       : routes['ROUTES'][route[i]]['METHODS']['ANY'].stack
+              // }
+            }
+          }
+
           // Add the route to the global _routes
           this.setRoute(
             this._routes,
-            (i === route.length-1 ? {
-              ['__'+_method.trim().toUpperCase()]: {
-                vars: pathVars,
-                handler: handler,
-                route: '/'+parsedPath.join('/'),
-                path: '/'+this._prefix.concat(parsedPath).join('/') }
-            } : {}),
+            _method.trim().toUpperCase(),
+            (end ? {
+              vars: pathVars,
+              stack,
+              inherited: _stack[method] ? _stack[method] : [],
+              route: '/'+parsedPath.join('/'),
+              path: '/'+this._prefix.concat(parsedPath).join('/')
+            } : null),
             route.slice(0,i+1)
           )
+
         }
       }) // end methods loop
 
+      routes = routes['ROUTES'][route[i]]
 
     } // end for loop
 
   } // end main METHOD function
-
-
 
   // RUN: This runs the routes
   async run(event,context,cb) {
@@ -162,43 +217,23 @@ class API {
       // Parse the request
       await request.parseRequest()
 
-      // Loop through the middleware and await response
-      for (const mw of this._middleware) {
-        // Only run middleware if in processing state
+      // Loop through the execution stack
+      for (const fn of request._stack) {
+        // Only run if in processing state
         if (response._state !== 'processing') break
 
-        // Init for matching routes
-        let matched = false
-
-        // Test paths if they are supplied
-        for (const path of mw[0]) {
-          if (
-            path === request.path || // If exact path match
-            path === request.route || // If exact route match
-            // If a wildcard match
-            (path.substr(-1) === '*' && new RegExp('^' + path.slice(0, -1) + '.*$').test(request.route))
-          ) {
-            matched = true
-            break
-          }
-        }
-
-        if (mw[0].length > 0 && !matched) continue
-
-        // Promisify middleware
         await new Promise(async r => {
-          let rtn = await mw[1](request,response,() => { r() })
-          if (rtn) response.send(rtn)
-          if (response._state === 'done') r() // if state is done, resolve promise
+          try {
+            let rtn = await fn(request,response,() => { r() })
+            if (rtn) response.send(rtn)
+            if (response._state === 'done') r() // if state is done, resolve promise
+          } catch(e) {
+            await this.catchErrors(e,response)
+            r() // resolve the promise
+          }
         })
 
       } // end for
-
-      // Execute the primary handler if in processing state
-      if (response._state === 'processing') {
-        let rtn = await request._handler(request,response)
-        if (rtn) response.send(rtn)
-      }
 
     } catch(e) {
       await this.catchErrors(e,response)
@@ -213,8 +248,6 @@ class API {
 
   // Catch all async/sync errors
   async catchErrors(e,response,code,detail) {
-
-    // console.log('\n\n------------------------\n',e,'\n------------------------\n\n');
 
     // Error messages should never be base64 encoded
     response._isBase64 = false
@@ -297,22 +330,32 @@ class API {
 
 
   // Middleware handler
-  use(path) {
+  use(...args) {
 
     // Extract routes
-    let routes = typeof path === 'string' ? Array.of(path) : (Array.isArray(path) ? path : [])
+    let routes = typeof args[0] === 'string' ? Array.of(args.shift()) : (Array.isArray(args[0]) ? args.shift() : ['/*'])
+
+    // Init middleware stack
+    let middleware = []
 
     // Add func args as middleware
-    for (let arg in arguments) {
-      if (typeof arguments[arg] === 'function') {
-        if (arguments[arg].length === 3) {
-          this._middleware.push([routes,arguments[arg]])
-        } else if (arguments[arg].length === 4) {
-          this._errors.push(arguments[arg])
+    for (let arg in args) {
+      if (typeof args[arg] === 'function') {
+        if (args[arg].length === 3) {
+          middleware.push(args[arg])
+        } else if (args[arg].length === 4) {
+          this._errors.push(args[arg])
         } else {
           throw new ConfigurationError('Middleware must have 3 or 4 parameters')
         }
       }
+    }
+
+    // Add middleware to path
+    if (middleware.length > 0) {
+      routes.forEach(route => {
+        this.METHOD('__MW__',route,...middleware)
+      })
     }
 
   } // end use
@@ -333,27 +376,57 @@ class API {
     return path.trim().replace(/^\/(.*?)(\/)*$/,'$1').split('/').filter(x => x.trim() !== '')
   }
 
-  // Recursive function to create routes object
-  setRoute(obj, value, path) {
-    if (typeof path === 'string') {
-      path = path.split('.')
-    }
-
-    if (path.length > 1){
+  // Recursive function to create/merge routes object
+  setRoute(obj, method, value, path) {
+    if (path.length > 1) {
       let p = path.shift()
-      if (obj[p] === null) {
-        obj[p] = {}
-      }
-      this.setRoute(obj[p], value, path)
+      if (p === '*') { throw new ConfigurationError('Wildcards can only be at the end of a route definition.') }
+      this.setRoute(obj['ROUTES'][p], method, value, path)
     } else {
-      if (obj[path[0]] === null) {
-        obj[path[0]] = value
-      } else {
-        obj[path[0]] = Object.assign(value,obj[path[0]])
+      // Create routes and add path if they don't exist
+      if (!obj['ROUTES']) obj['ROUTES'] = {}
+      if (!obj['ROUTES'][path[0]]) obj['ROUTES'][path[0]] = {}
+
+      // If a value exists in this iteration
+      if (value !== null) {
+
+        // TEMP: debug
+        // value._STACK = value.stack.map(x => x.name)
+        // value._STACK2 = value.inherited.map(x => x.name)
+
+        // If mounting middleware
+        if (method === '__MW__') {
+          // Merge stacks if middleware exists
+          if (obj['ROUTES'][path[0]]['MIDDLEWARE']) {
+            value.stack = obj['ROUTES'][path[0]]['MIDDLEWARE'].stack.concat(value.stack)
+            value.vars = UTILS.mergeObjects(obj['ROUTES'][path[0]]['MIDDLEWARE'].vars,value.vars)
+          }
+
+          // Add/Update the middleware
+          obj['ROUTES'][path[0]]['MIDDLEWARE'] = value
+
+        // Else if mounting a regular route
+        } else {
+
+          // Create the methods section if it doesn't exist
+          if (!obj['ROUTES'][path[0]]['METHODS']) obj['ROUTES'][path[0]]['METHODS'] = {}
+
+          // Merge stacks if method exists
+          if (obj['ROUTES'][path[0]]['METHODS'][method]) {
+            value.stack = obj['ROUTES'][path[0]]['METHODS'][method].stack.concat(value.stack)
+            value.vars = UTILS.mergeObjects(obj['ROUTES'][path[0]]['METHODS'][method].vars,value.vars)
+          }
+
+          // Add/Update the method
+          obj['ROUTES'][path[0]]['METHODS'] = Object.assign(
+            {},obj['ROUTES'][path[0]]['METHODS'],{ [method]: value }
+          )
+
+        }
       }
+
     }
   } // end setRoute
-
 
   // Load app packages
   app(packages) {
