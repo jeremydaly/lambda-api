@@ -7,6 +7,8 @@ const api = require('../index')({ version: 'v1.0', logger: false })
 const api2 = require('../index')({ version: 'v1.0', logger: false })
 const api3 = require('../index')({ version: 'v1.0', logger: false })
 const api4 = require('../index')({ version: 'v1.0', logger: false })
+const api5 = require('../index')({ version: 'v1.0', logger: false })
+const api6 = require('../index')({ version: 'v1.0', logger: false })
 
 let event = {
   httpMethod: 'get',
@@ -241,6 +243,22 @@ api4.post('/*', (req,res) => {
   res.status(200).header('wildcard',true).json({ method: req.method, path: req.path })
 })
 
+// Default route
+api5.get(function(req,res) {
+  res.status(200).json({ method: 'get', status: 'ok' })
+})
+
+api5.METHOD('any',function(req,res) {
+  res.status(200).json({ method: 'any', status: 'ok' })
+})
+
+api6.any('/*', function anyWildcard(req,res,next) { next() })
+api6.get('/*', function getWildcard(req,res,next) { next() })
+api6.get('/test', function testHandler(req,res) {
+  res.send({ status: 'ok' })
+})
+
+
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
 /******************************************************************************/
@@ -366,6 +384,12 @@ describe('Route Tests:', function() {
         body: '{"method":"GET","path":"/test/foo/bar","nested":"true"}',
         isBase64Encoded: false
       })
+    }) // end it
+
+    it('Default path', async function() {
+      let _event = Object.assign({},event,{ path: '/test' })
+      let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
   }) // end GET tests
@@ -955,6 +979,12 @@ describe('Route Tests:', function() {
       })
     }) // end it
 
+    it('Default path', async function() {
+      let _event = Object.assign({},event,{ path: '/test', httpMethod: 'post' })
+      let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"any","status":"ok"}', isBase64Encoded: false })
+    }) // end it
+
     it('Expected routes', function() {
       expect(api3.routes()).to.deep.equal([
         [ 'GET', '/multimethod/test' ],
@@ -1024,7 +1054,31 @@ describe('Route Tests:', function() {
       expect(error.message).to.equal('Route-based middleware must have 3 parameters')
     }) // end it
 
+    it('Invalid wildcard (mid-route)', async function() {
+      let error
+      try {
+        const api_error2 = require('../index')({ version: 'v1.0' })
+        api_error2.get('/test/*/test',(res,req) => {})
+      } catch(e) {
+        // console.log(e);
+        error = e
+      }
+      expect(error.name).to.equal('ConfigurationError')
+      expect(error.message).to.equal('Wildcards can only be at the end of a route definition')
+    }) // end it
+
   }) // end Configuration errors
+
+  describe('Route Method Inheritance', function() {
+
+    it('Inherit multiple wildcard routes', async function() {
+      let _event = Object.assign({},event,{ path: '/test' })
+      let result = await new Promise(r => api6.run(_event,{},(e,res) => { r(res) }))
+      expect(api6._response._request._stack.map(x => x.name)).to.deep.equal([ 'anyWildcard', 'getWildcard', 'testHandler' ])
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"status":"ok"}', isBase64Encoded: false })
+    }) // end it
+
+  }) // end Route Method Inheritance
 
   describe('routes() (debug method)', function() {
 
@@ -1043,6 +1097,25 @@ describe('Route Tests:', function() {
         [ 'DELETE', '/test/:var/delete' ]
       ])
     }) // end it
+
+    it('Sample routes (print)', function() {
+      // Create an api instance
+      let api2 = require('../index')()
+      api2.get('/', (req,res) => {})
+      api2.post('/test', (req,res) => {})
+      api2.put('/test/put', (req,res) => {})
+      api2.delete('/test/:var/delete', (req,res) => {})
+
+
+      let _log
+      let logger = console.log
+      console.log = log => { try { _log = JSON.parse(log) } catch(e) { _log = log } }
+      api2.routes(true)
+      console.log = logger
+
+      expect(_log).to.equal('╔══════════╤═════════════════════╗\n║  \u001b[1mMETHOD\u001b[0m  │  \u001b[1mROUTE            \u001b[0m  ║\n╟──────────┼─────────────────────╢\n║  GET     │  /                  ║\n╟──────────┼─────────────────────╢\n║  POST    │  /test              ║\n╟──────────┼─────────────────────╢\n║  PUT     │  /test/put          ║\n╟──────────┼─────────────────────╢\n║  DELETE  │  /test/:var/delete  ║\n╚══════════╧═════════════════════╝')
+    }) // end it
+
   }) // end routes() test
 
 }) // end ROUTE tests

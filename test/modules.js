@@ -8,9 +8,6 @@ const api = require('../index')({ version: 'v1.0' })
 
 const appTest = require('./_testApp')
 
-// NOTE: Set test to true
-api._test = true;
-
 let event = {
   httpMethod: 'get',
   path: '/test',

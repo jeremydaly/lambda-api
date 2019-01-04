@@ -68,6 +68,11 @@ api2.use('/test/*',function testMiddlewareWildcard(req,res,next) {
   next()
 })
 
+api2.use('/test/test2/*',function testMiddlewareWildcard2(req,res,next) {
+  req.testMiddlewareWildcard2 = true
+  next()
+})
+
 api2.use('/test/:param1',function testMiddlewareParam(req,res,next) {
   req.testMiddlewareParam = true
   next()

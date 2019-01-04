@@ -132,6 +132,9 @@ api5.get('/testErrorThrow', function(req,res) {
   throw new Error('This is a test thrown error')
 })
 
+api5.get('/testErrorDetail', function(req,res) {
+  res.error('This is a test error message','details')
+})
 
 api_errors.use(function(err,req,res,next) {
   res.send({ errorType: err.name })
@@ -250,10 +253,8 @@ describe('Error Handling Tests:', function() {
       let _log
       let _event = Object.assign({},event,{ path: '/testErrorThrow'})
       let logger = console.log
-      api._test = false
       console.log = log => { try { _log = JSON.parse(log) } catch(e) { _log = log } }
       let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
-      api._test = true
       console.log = logger
       expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: '{"error":"This is a test thrown error"}', isBase64Encoded: false })
       expect(_log.level).to.equal('fatal')
@@ -265,14 +266,25 @@ describe('Error Handling Tests:', function() {
       let _log
       let _event = Object.assign({},event,{ path: '/testError'})
       let logger = console.log
-      api._test = false
       console.log = log => { try { _log = JSON.parse(log) } catch(e) { _log = log } }
       let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
-      api._test = true
       console.log = logger
       expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: '{"error":"This is a test error message"}', isBase64Encoded: false })
       expect(_log.level).to.equal('error')
       expect(_log.msg).to.equal('This is a test error message')
+    }) // end it
+
+    it('Error with Detail', async function() {
+      let _log
+      let _event = Object.assign({},event,{ path: '/testErrorDetail'})
+      let logger = console.log
+      console.log = log => { try { _log = JSON.parse(log) } catch(e) { _log = log } }
+      let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
+      console.log = logger
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: '{"error":"This is a test error message"}', isBase64Encoded: false })
+      expect(_log.level).to.equal('error')
+      expect(_log.msg).to.equal('This is a test error message')
+      expect(_log.detail).to.equal('details')
     }) // end it
 
   })

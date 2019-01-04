@@ -384,4 +384,42 @@ describe('Utility Function Tests:', function() {
 
   }) // end parseS3 tests
 
+  describe('mergeObjects:', function() {
+    it('Duplicate Items', function() {
+      let obj1 = { 1: ['test'] }
+      let obj2 = { 1: ['test'] }
+      expect(utils.mergeObjects(obj1,obj2)).to.deep.equal({ 1: ['test'] })
+    })
+
+    it('Single Items', function() {
+      let obj1 = { 1: ['test'] }
+      let obj2 = { 1: ['test2'] }
+      expect(utils.mergeObjects(obj1,obj2)).to.deep.equal({ 1: ['test','test2'] })
+    })
+
+    it('Multiple Items', function() {
+      let obj1 = { 1: ['test'], 2: ['testA'] }
+      let obj2 = { 1: ['test2'], 2: ['testB'] }
+      expect(utils.mergeObjects(obj1,obj2)).to.deep.equal({ 1: ['test','test2'], 2: ['testA','testB'] })
+    })
+
+    it('Missing Items (obj1)', function() {
+      let obj1 = { 1: ['test'] }
+      let obj2 = { 1: ['test2'], 2: ['testB'] }
+      expect(utils.mergeObjects(obj1,obj2)).to.deep.equal({ 1: ['test','test2'], 2: ['testB'] })
+    })
+
+    it('Missing Items (obj2)', function() {
+      let obj1 = { 1: ['test'], 2: ['testA'] }
+      let obj2 = { 1: ['test2'] }
+      expect(utils.mergeObjects(obj1,obj2)).to.deep.equal({ 1: ['test','test2'], 2: ['testA'] })
+    })
+
+    it('No similarities', function() {
+      let obj1 = { 1: ['test'] }
+      let obj2 = { 2: ['testA'] }
+      expect(utils.mergeObjects(obj1,obj2)).to.deep.equal({ 1: ['test'], 2: ['testA'] })
+    })
+  }) // end parseS3 tests
+
 }) // end UTILITY tests

@@ -293,6 +293,43 @@ describe('Logging Tests:', function() {
     expect(_log[4]).to.have.property('country')
   }) // end it
 
+  it('Multi-value support (no parameters)', async function() {
+    console.log = logger
+    let _event = Object.assign({},event,{ path: '/', multiValueQueryStringParameters: { } })
+    let result = await new Promise(r => api_multi.run(_event,context,(e,res) => { r(res) }))
+    console.log = consoleLog
+
+    expect(result).to.deep.equal({
+      multiValueHeaders: { 'content-type': ['application/json'] },
+      statusCode: 200,
+      body: 'done',
+      isBase64Encoded: false
+    })
+    expect(_log).to.have.length(5)
+    expect(_log[0].level).to.equal('info')
+    expect(_log[4].level).to.equal('access')
+    // standard log
+    expect(_log[0]).to.have.property('time')
+    expect(_log[0]).to.have.property('id')
+    expect(_log[0]).to.have.property('route')
+    expect(_log[0]).to.have.property('msg')
+    expect(_log[0]).to.have.property('timer')
+    expect(_log[0]).to.have.property('remaining')
+    expect(_log[0]).to.have.property('function')
+    expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
+    // access log
+    expect(_log[4]).to.have.property('coldStart')
+    expect(_log[4]).to.have.property('statusCode')
+    expect(_log[4]).to.have.property('path')
+    expect(_log[4]).to.have.property('ip')
+    expect(_log[4]).to.have.property('ua')
+    expect(_log[4]).to.have.property('version')
+    expect(_log[4]).to.not.have.property('qs')
+    expect(_log[4]).to.have.property('device')
+    expect(_log[4]).to.have.property('country')
+  }) // end it
+
   it('Default options (no logs in routes)', async function() {
     console.log = logger
     let _event = Object.assign({},event,{ path: '/test' })

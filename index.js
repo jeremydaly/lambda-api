@@ -141,9 +141,10 @@ class API {
 
               // Inherit middleware
               if (routes['ROUTES']['*']['MIDDLEWARE']) {
-                _stack[method] = _stack[method] ?
-                  _stack[method].concat(routes['ROUTES']['*']['MIDDLEWARE'].stack)
-                  : routes['ROUTES']['*']['MIDDLEWARE'].stack
+                _stack[method] = routes['ROUTES']['*']['MIDDLEWARE'].stack
+                //_stack[method] ?
+                  // _stack[method].concat(routes['ROUTES']['*']['MIDDLEWARE'].stack)
+                  // : routes['ROUTES']['*']['MIDDLEWARE'].stack
               }
 
               // Inherit methods and ANY
@@ -380,7 +381,7 @@ class API {
   setRoute(obj, method, value, path) {
     if (path.length > 1) {
       let p = path.shift()
-      if (p === '*') { throw new ConfigurationError('Wildcards can only be at the end of a route definition.') }
+      if (p === '*') { throw new ConfigurationError('Wildcards can only be at the end of a route definition') }
       this.setRoute(obj['ROUTES'][p], method, value, path)
     } else {
       // Create routes and add path if they don't exist
