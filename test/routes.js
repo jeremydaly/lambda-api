@@ -9,6 +9,7 @@ const api3 = require('../index')({ version: 'v1.0', logger: false })
 const api4 = require('../index')({ version: 'v1.0', logger: false })
 const api5 = require('../index')({ version: 'v1.0', logger: false })
 const api6 = require('../index')({ version: 'v1.0', logger: false })
+const api7 = require('../index')({ version: 'v1.0', logger: false })
 
 let event = {
   httpMethod: 'get',
@@ -207,6 +208,10 @@ api.head('/head/*', (req,res) => {
   res.status(200).header('wildcard',true).json({ })
 })
 
+api.get('/methodNotAllowed', (req,res) => {
+  res.send({status: 'OK'})
+})
+
 // Multi methods
 api3.METHOD('get,post','/multimethod/test', (req,res) => {
   res.status(200).json({ method: req.method, path: '/multimethod/test' })
@@ -256,6 +261,10 @@ api6.any('/*', function anyWildcard(req,res,next) { next() })
 api6.get('/*', function getWildcard(req,res,next) { next() })
 api6.get('/test', function testHandler(req,res) {
   res.send({ status: 'ok' })
+})
+
+api7.get(function(req,res) {
+  res.status(200).json({ method: 'get', status: 'ok' })
 })
 
 
@@ -390,6 +399,25 @@ describe('Route Tests:', function() {
       let _event = Object.assign({},event,{ path: '/test' })
       let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Method not allowed', async function() {
+      let _event = Object.assign({},event,{ path: '/methodNotAllowed', httpMethod: 'post' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 405, body: '{"error":"Method not allowed"}', isBase64Encoded: false })
+    }) // end it
+
+
+    it('Method not allowed (/* path - valid method)', async function() {
+      let _event = Object.assign({},event,{ path: '/methodNotAllowedStar', httpMethod: 'get' })
+      let result = await new Promise(r => api7.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+    }) // end it
+
+    it('Method not allowed (/* path)', async function() {
+      let _event = Object.assign({},event,{ path: '/methodNotAllowedStar', httpMethod: 'post' })
+      let result = await new Promise(r => api7.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 405, body: '{"error":"Method not allowed"}', isBase64Encoded: false })
     }) // end it
 
   }) // end GET tests
