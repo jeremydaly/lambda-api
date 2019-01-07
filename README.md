@@ -41,7 +41,7 @@ Lambda API was written to be *extremely lightweight* and built specifically for 
 ### Single Purpose Functions
 You may have heard that a serverless "best practice" is to keep your functions small and limit them to a single purpose. I generally agree since building monolith applications is not what serverless was designed for. However, what exactly is a "single purpose" when it comes to building serverless APIs and web services? Should we create a separate function for our "create user" `POST` endpoint and then another one for our "update user" `PUT` endpoint? Should we create yet another function for our "delete user" `DELETE` endpoint? You certainly could, but that seems like a lot of repeated boilerplate code. On the other hand, you could create just one function that handled all your user management features. It may even make sense (in certain circumstances) to create one big serverless function handling several related components that can share your VPC database connections.
 
-Whatever you decide is best for your use case, **Lambda API** is there to support you. Whether your function has over a hundred routes, or just one, Lambda API's small size and lightning fast load time has virtually no impact on your function's performance. Yet despite its small footprint, it gives you the power of a full-featured web framework.
+Whatever you decide is best for your use case, **Lambda API** is there to support you. Whether your function has over a hundred routes, or just one, Lambda API's small size and lightning fast load time has virtually no impact on your function's performance. You can even define global wildcard routes that will process any incoming request, allowing you to use API Gateway or ALB to determine the routing. Yet despite its small footprint, it gives you the power of a full-featured web framework.
 
 ## Table of Contents
 - [Installation](#installation)
@@ -100,7 +100,9 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
   - [Error Logging](#error-logging)
 - [Namespaces](#namespaces)
 - [CORS Support](#cors-support)
+- [Execution Stacks](#execution-stacks)
 - [Lambda Proxy Integration](#lambda-proxy-integration)
+- [ALB Integration](#alb-integration)
 - [Configuring Routes in API Gateway](#configuring-routes-in-api-gateway)
 - [TypeScript Support](#typescript-support)
 - [Contributions](#contributions)
@@ -170,7 +172,11 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 
 ## Routes and HTTP Methods
 
-Routes are defined by using convenience methods or the `METHOD` method. There are currently eight convenience route methods: `get()`, `post()`, `put()`, `patch()`, `delete()`, `head()`, `options()` and `any()`. Convenience route methods require two parameters, a *route* and a function that accepts two arguments. A *route* is simply a path such as `/users`. The second parameter must be a function that accepts a `REQUEST` and a `RESPONSE` argument. These arguments can be named whatever you like, but convention dictates `req` and `res`. Examples using convenience route methods:
+Routes are defined by using convenience methods or the `METHOD` method. There are currently eight convenience route methods: `get()`, `post()`, `put()`, `patch()`, `delete()`, `head()`, `options()` and `any()`. Convenience route methods require an optional *route* and one or more handler functions. A *route* is simply a path such as `/users`. If a *route* is not provided, then it will default to `/*` and will execute on every path. Handler functions accept a `REQUEST`, `RESPONSE`, and optional `next()` argument. These arguments can be named whatever you like, but convention dictates `req`, `res`, and `next`.
+
+Multiple handler functions can be assigned to a path, which can be used to execute middleware for specific paths and methods. For more information, see [Middleware](#middleware) and [Execution Stacks](#execution-stacks).
+
+Examples using convenience route methods:
 
 ```javascript
 api.get('/users', (req,res) => {
@@ -184,8 +190,23 @@ api.post('/users', (req,res) => {
 api.delete('/users', (req,res) => {
   // do something
 })
+
+api.get('/users',
+  (req,res,next) => {
+    // do some middleware
+    next() // continue execution
+  }),
+  (req,res) => {
+    // do something
+  }
+)
+
+api.post((req,res) => {
+  // do something for ALL post requests
+})
+
 ```
-Additional methods are support by calling the `METHOD` method with three arguments. The first argument is the HTTP method (or array of methods), a *route*, and a function that accepts a `REQUEST` and a `RESPONSE` argument.
+Additional methods are support by calling `METHOD`. Arguments must include an HTTP method (or array of methods), an optional *route*, and one or more handler functions. Like the convenience methods above, handler functions accept a `REQUEST`, `RESPONSE`, and optional `next` argument.
 
 ```javascript
 api.METHOD('trace','/users', (req,res) => {
@@ -195,6 +216,16 @@ api.METHOD('trace','/users', (req,res) => {
 api.METHOD(['post','put'],'/users', (req,res) => {
   // do something on POST -or- PUT
 })
+
+api.METHOD('get','/users',
+  (req,res,next) => {
+    // do some middleware
+    next() // continue execution
+  }),
+  (req,res) => {
+  // do something
+  }
+)
 ```
 
 All `GET` methods have a `HEAD` alias that executes the `GET` request but returns a blank `body`. `GET` requests should be idempotent with no side effects. The `head()` convenience method can be used to set specific paths for `HEAD` requests or to override default `GET` aliasing.
@@ -415,6 +446,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `userAgent`: The `User-Agent` header sent by the client making the request
 - `clientType`: Either `desktop`, `mobile`, `tv`, `tablet` or `unknown` based on CloudFront's analysis of the `User-Agent` header
 - `clientCountry`: Two letter country code representing the origin of the requests as determined by CloudFront
+- `stack`: An array of function names executed as part of a route's [Execution Stack](#execution-stack), which is useful for debugging
 
 The request object can be used to pass additional information through the processing chain. For example, if you are using a piece of authentication middleware, you can add additional keys to the `REQUEST` object with information about the user. See [middleware](#middleware) for more information.
 
@@ -786,7 +818,7 @@ A path can contain as many parameters as you want. E.g. `/users/:param1/:param2/
 ## Wildcard Routes
 Wildcard routes are supported for matching arbitrary paths. Wildcards only work at the *end of a route definition* such as `/*` or `/users/*`. Wildcards within a path, e.g. `/users/*/posts` are not supported. Wildcard routes do support parameters, however, so `/users/:id/*` would capture the `:id` parameter in your wildcard handler.
 
-Wildcard routes will match any deep paths after the wildcard. For example, an `GET` method for path `/users/*` would match `/users/1/posts/latest`. The only exception is for the `OPTIONS` method. A path **must** exist for a wildcard on an `OPTIONS` route in order to execute the handler. If a wildcard route is defined for another method higher up the path, then the `OPTIONS` handler will fire. For example, if there was a `POST` method defined on `/users/*`, then an `OPTIONS` method for `/users/2/posts/*` would fire as it assumes that the `POST` path would exist.
+Wildcard routes will match any deep paths after the wildcard. For example, a `GET` method for path `/users/*` would match `/users/1/posts/latest`. The only exception is for the `OPTIONS` method. A path **must** exist for a wildcard on an `OPTIONS` route in order to execute the handler. If a wildcard route is defined for another method higher up the path, then the `OPTIONS` handler will fire. For example, if there was a `POST` method defined on `/users/*`, then an `OPTIONS` method for `/users/2/posts/*` would fire as it assumes that the `POST` path would exist.
 
 In most cases, [Path Parameters](#path-parameters) should be used in favor of wildcard routes. However, if you need to support unpredictable path lengths, or your are building single purpose functions and will be mapping routes from API Gateway, the wildcards are a powerful pattern. Another good use case is to use the `OPTIONS` method to provide CORS headers.
 
@@ -1055,7 +1087,7 @@ const api = require('lambda-api')({
 Any combination of rules can be provided to customize sampling behavior. Note that each rule tracks requests and velocity separately, which could limit the number of samples for infrequently accessed routes.
 
 ## Middleware
-The API supports middleware to preprocess requests before they execute their matching routes. Middleware is defined using the `use` method and requires a function with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
+The API supports middleware to preprocess requests before they execute their matching routes. Global middleware is defined using the `use` method one or more functions with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
 
 ```javascript
 api.use((req,res,next) => {
@@ -1083,7 +1115,6 @@ The `next()` callback tells the system to continue executing. If this is not cal
 **NOTE:** Middleware can use either callbacks like `res.send()` or `return` to trigger a response to the user. Please note that calling either one of these from within a middleware function will return the response immediately and terminate API execution.
 
 ### Restricting middleware execution to certain path(s)
-
 By default, middleware will execute on every path. If you only need it to execute for specific paths, pass the path (or array of paths) as the first parameter to the `use` method.
 
 ```javascript
@@ -1103,10 +1134,9 @@ api.use('/users/:userId',(req,res,next) => { next() })
 api.use(['/comments','/users/:userId','/posts/*'],(req,res,next) => { next() })
 ```
 
-Path matching checks both the supplied `path` and the defined `route`. This means that parameterized paths can be matched by either the parameter (e.g. `/users/:param1`) or by an exact matching path (e.g. `/users/123`).
+**NOTE:** Path matching checks the defined `route`. This means that parameterized paths must be matched by the parameter (e.g. `/users/:param1`).
 
 ### Specifying multiple middleware
-
 In addition to restricting middleware to certain paths, you can also add multiple middleware using a single `use` method. This is a convenient way to assign several pieces of middleware to the same path or minimize your code.
 
 ```javascript
@@ -1125,6 +1155,31 @@ api.use('/users', middleware1, middleware2)
 api.use(middleware1, middleware2)
 ```
 
+### Method-based middleware
+Middleware can be restricted to a specific method (or array of methods) by using the route convenience methods or `METHOD`. Method-based middleware behaves exactly like global middleware, requiring a `REQUEST`, `RESPONSE`, and `next` parameter. You can specify multiple middlewares for each method/path using a single method call, or by using multiple method calls. Lambda API will merge the [execution stacks](#execution-stacks) for you.
+
+```javascript
+const middleware1 = (req,res,next) => {
+  // middleware code
+}
+
+const middleware2 = (req,res,next) => {
+  // middleware code
+}
+
+// Execute middleware1 and middleware2 on /users route
+api.get('/users', middleware1, middleware2, (req,res) => {
+  // handler function
+})
+
+// Execute middleware1 on /users route
+api.get('/users', middleware1)
+
+// Add middleware2 and handler
+api.get('/users', middleware2, (req,res) => {
+  // handler function
+})
+```
 
 ## Clean Up
 The API has a built-in clean up method called 'finally()' that will execute after all middleware and routes have been completed, but before execution is complete. This can be used to close database connections or to perform other clean up functions. A clean up function can be defined using the `finally` method and requires a function with two parameters for the REQUEST and the RESPONSE as its only argument. For example:
@@ -1260,69 +1315,26 @@ You can also use the `cors()` ([see here](#corsoptions)) convenience method to a
 
 Conditional route support could be added via middleware or with conditional logic within the `OPTIONS` route.
 
+## Execution Stacks
+Lambda API v0.10 introduced execution stacks as a way to more efficiently process middleware. Execution stacks are automatically created for you when adding routes and middleware using the standard route convenience methods, as well as `METHOD()` and `use()`. This is a technical implementation that has made method-based middleware and additional wildcard functionality possible.
+
+Execution stacks are backwards compatible, so no code changes need to be made when upgrading from a lower version. The only caveat is with matching middleware to specific parameterized paths. Path-based middleware creates mount points that require methods to execute. This means that a `/users/:userId` middleware path, would not execute if you defined a `/users/test` path.
+
+Execution stacks allow you to execute multiple middlewares based on a number of factors including path and method. For example, you can specify a global middleware to run on every `/user/*` route, with additional middleware running on just `/user/settings/*` routes, with more middleware running on just `GET` requests to `/users/settings/name`. Execution stacks inherit middleware from matching routes and methods higher up the stack, building a final stack that is unique to each route. Definition order also matters, meaning that routes defined *before* global middleware **will not** have it as part of its execution stack. The same is true of any wildcard-based route, giving you flexibility and control over when middleware is applied.
+
+For debugging purposes, a new `REQUEST` property called `stack` has been added. If you name your middleware functions (either by assigning them to variables or using standard named functions), the `stack` property will return an array that lists the function names of the execution stack in processing order.
+
 ## Lambda Proxy Integration
-Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled looks like this:
+Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled can be found [here](https://docs.aws.amazon.com/lambda/latest/dg/eventsources.html#eventsources-api-gateway-request).
 
-```javascript
-{
-  "resource": "/v1/posts",
-  "path": "/v1/posts",
-  "httpMethod": "GET",
-  "headers": {
-    "Authorization": "Bearer ...",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Encoding": "gzip, deflate",
-    "Accept-Language": "en-us",
-    "cache-control": "max-age=0",
-    "CloudFront-Forwarded-Proto": "https",
-    "CloudFront-Is-Desktop-Viewer": "true",
-    "CloudFront-Is-Mobile-Viewer": "false",
-    "CloudFront-Is-SmartTV-Viewer": "false",
-    "CloudFront-Is-Tablet-Viewer": "false",
-    "CloudFront-Viewer-Country": "US",
-    "Cookie": "...",
-    "Host": "...",
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) ...",
-    "Via": "2.0 ... (CloudFront)",
-    "X-Amz-Cf-Id": "...",
-    "X-Amzn-Trace-Id": "...",
-    "X-Forwarded-For": "xxx.xxx.xxx.xxx",
-    "X-Forwarded-Port": "443",
-    "X-Forwarded-Proto": "https"
-  },
-  "queryStringParameters": {
-    "qs1": "q1"
-  },
-  "stageVariables": null,
-  "requestContext": {
-    "accountId": "...",
-    "resourceId": "...",
-    "stage": "prod",
-    "requestId": "...",
-    "identity": {
-      "cognitoIdentityPoolId": null,
-      "accountId": null,
-      "cognitoIdentityId": null,
-      "caller": null,
-      "apiKey": null,
-      "sourceIp": "xxx.xxx.xxx.xxx",
-      "accessKey": null,
-      "cognitoAuthenticationType": null,
-      "cognitoAuthenticationProvider": null,
-      "userArn": null,
-      "userAgent": "...",
-      "user": null
-    },
-    "resourcePath": "/v1/posts",
-    "httpMethod": "GET",
-    "apiId": "..."
-  },
-  "body": null,
-  "isBase64Encoded": false
-}
-```
+Lambda API automatically parses this information to create a normalized `REQUEST` object. The request can then be routed using the APIs methods.
 
-The API automatically parses this information to create a normalized `REQUEST` object. The request can then be routed using the APIs methods.
+## ALB Integration
+AWS recently added support for Lambda functions as targets for Application Load Balancers. While the events from ALBs are similar to API Gateway, there are a number of differences that would require code changes based on implementation. Lambda API detects the event `interface` and automatically normalizes the `REQUEST` object. It also correctly formats the `RESPONSE` (supporting both multi-header and non-multi-header mode) for you. This allows you to call your Lambda function from API Gateway, ALB, or both, without requiring any code changes.
+
+Please note that ALB events do not contain all of the same headers as API Gateway (such as `clientType`), but Lambda API provides defaults for seamless integration between the interfaces. ALB also automatically enables binary support, giving you the ability to serve images and other binary file types. Lambda API reads the `path` parameter supplied by the ALB event and uses that to route your requests. If you specify a wildcard in your listener rule, then all matching paths will be forwarded to your Lambda function. Lambda API's routing system can be used to process these routes just like with API Gateway. This includes static paths, parameterized paths, wildcards, middleware, etc.
+
+Sample ALB request and response events can be found [here](https://docs.aws.amazon.com/lambda/latest/dg/services-alb.html).
 
 ## Configuring Routes in API Gateway
 Routes must be configured in API Gateway in order to support routing to the Lambda function. The easiest way to support all of your routes without recreating them is to use [API Gateway's Proxy Integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-set-up-simple-proxy.html#api-gateway-proxy-resource?icmpid=docs_apigateway_console).
