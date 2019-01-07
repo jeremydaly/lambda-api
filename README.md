@@ -7,7 +7,7 @@
 
 ### Lightweight web framework for your serverless applications
 
-Lambda API is a lightweight web framework for use with AWS API Gateway and AWS Lambda using Lambda Proxy Integration. This closely mirrors (and is based on) other web frameworks like Express.js and Fastify, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
+Lambda API is a lightweight web framework for use with AWS Lambda using AWS API Gateway Lambda Proxy Integration or ALB Lambda Target Support. This closely mirrors (and is based on) other web frameworks like Express.js and Fastify, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
 
 ## Simple Example
 
@@ -137,10 +137,13 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ## Recent Updates
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
 
+### v0.10: ALB support, method-based middleware, and multi-value headers and query string parameters
+Lambda API now allows you to seamlessly switch between API Gateway and Application Load Balancers. New [execution stacks](execution-stacks) enables method-based middleware and more wildcard functionality. Plus full support for multi-value headers and query string parameters.
+
 ### v0.9: New error types, custom serializers, and TypeScript support
 Lambda API now generates typed errors for easier parsing in middleware. You can also supply your own custom serializer for formatting output rather than using the default `JSON.stringify`. And thanks to @hassankhan, a TypeScript declaration file is now available.
 
-### v0.8: Logging Support with Sampling
+### v0.8: Logging support with sampling
 Lambda API has added a powerful (and customizable) logging engine that utilizes native JSON support for CloudWatch Logs. Log entries can be manually added using standard severities like `info` and `warn`. In addition, "access logs" can be automatically generated with detailed information about each requests. See [Logging](#logging) for more information about logging and auto sampling for request tracing.
 
 ### v0.7: Restrict middleware execution to certain paths
@@ -149,13 +152,13 @@ Middleware now supports an optional path parameter that supports multiple paths,
 ### v0.6: Support for both `callback-style` and `async-await`
 In additional to `res.send()`, you can now simply `return` the body from your route and middleware functions. See [Returning Responses](#returning-responses) for more information.
 
-### v0.5: Remove Bluebird Promises Dependency
+### v0.5: Remove Bluebird promises dependency
 Now that AWS Lambda supports Node v8.10, asynchronous operations can be handled more efficiently with `async/await` rather than with promises. The core Lambda API execution engine has been rewritten to take advantage of `async/await`, which means we no longer need to depend on Bluebird. We now have **ZERO** dependencies.
 
-### v0.4: Binary Support
+### v0.4: Binary support
 Binary support has been added! This allows you to both send and receive binary files from API Gateway. For more information, see [Enabling Binary Support](#enabling-binary-support).
 
-### v0.3: New Instantiation Method
+### v0.3: New instantiation method
 Please note that the invocation method has been changed. You no longer need to use the `new` keyword to instantiate Lambda API. It can now be instantiated in one line:
 
  ```javascript
