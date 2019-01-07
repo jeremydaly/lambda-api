@@ -39,7 +39,7 @@ export declare interface App {
 export declare type Middleware = (req: Request, res: Response, next: Middleware) => void;
 export declare type ErrorHandlingMiddleware = (error: Error, req: Request, res: Response, next: ErrorHandlingMiddleware) => void;
 export declare type ErrorCallback = (error?: Error) => void;
-export declare type HandlerFunction = (req: Request, res: Response) => void | {} | Promise<{}>;
+export declare type HandlerFunction = (req: Request, res: Response, next?: NextFunction) => void | {} | Promise<{}>;
 export declare type LoggerFunction = (message: string) => void;
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
@@ -175,20 +175,32 @@ export declare class API {
   app(namespace: string, handler: HandlerFunction): App;
   app(options: App): App;
 
-  get(path: string, handler: HandlerFunction): void;
-  post(path: string, handler: HandlerFunction): void;
-  put(path: string, handler: HandlerFunction): void;
-  patch(path: string, handler: HandlerFunction): void;
-  delete(path: string, handler: HandlerFunction): void;
-  options(path: string, handler: HandlerFunction): void;
-  head(path: string, handler: HandlerFunction): void;
-  any(path: string, handler: HandlerFunction): void;
-  METHOD(method: METHODS, path: string, handler: HandlerFunction): void;
+  get(path: string, ...handler: HandlerFunction[]): void;
+  get(...handler: HandlerFunction[]): void;
+  post(path: string, ...handler: HandlerFunction[]): void;
+  post(...handler: HandlerFunction[]): void;
+  put(path: string, ...handler: HandlerFunction[]): void;
+  put(...handler: HandlerFunction[]): void;
+  patch(path: string, ...handler: HandlerFunction[]): void;
+  patch(...handler: HandlerFunction[]): void;
+  delete(path: string, ...handler: HandlerFunction[]): void;
+  delete(...handler: HandlerFunction[]): void;
+  options(path: string, ...handler: HandlerFunction[]): void;
+  options(...handler: HandlerFunction[]): void;
+  head(path: string, ...handler: HandlerFunction[]): void;
+  head(...handler: HandlerFunction[]): void;
+  any(path: string, ...handler: HandlerFunction[]): void;
+  any(...handler: HandlerFunction[]): void;
+  METHOD(method: METHODS, path: string, ...handler: HandlerFunction[]): void;
+  METHOD(method: METHODS, ...handler: HandlerFunction[]): void;
 
 
-  use(paths: string[], middleware: Middleware);
-  use (middleware: Middleware);
-  use (errorHandlingMiddleware: ErrorHandlingMiddleware);
+
+
+  use(path: string, ...middleware: Middleware[]);
+  use(paths: string[], ...middleware: Middleware[]);
+  use (...middleware: Middleware[]);
+  use (...errorHandlingMiddleware: ErrorHandlingMiddleware[]);
 
   finally(callback: FinallyFunction): void;
 
