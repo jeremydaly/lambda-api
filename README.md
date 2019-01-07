@@ -7,7 +7,7 @@
 
 ### Lightweight web framework for your serverless applications
 
-Lambda API is a lightweight web framework for use with AWS Lambda using AWS API Gateway Lambda Proxy Integration or ALB Lambda Target Support. This closely mirrors (and is based on) other web frameworks like Express.js and Fastify, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
+Lambda API is a lightweight web framework for AWS Lambda using AWS API Gateway Lambda Proxy Integration or ALB Lambda Target Support. This closely mirrors (and is based on) other web frameworks like Express.js and Fastify, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
 
 ## Simple Example
 
@@ -1321,7 +1321,7 @@ Conditional route support could be added via middleware or with conditional logi
 ## Execution Stacks
 Lambda API v0.10 introduced execution stacks as a way to more efficiently process middleware. Execution stacks are automatically created for you when adding routes and middleware using the standard route convenience methods, as well as `METHOD()` and `use()`. This is a technical implementation that has made method-based middleware and additional wildcard functionality possible.
 
-Execution stacks are backwards compatible, so no code changes need to be made when upgrading from a lower version. The only caveat is with matching middleware to specific parameterized paths. Path-based middleware creates mount points that require methods to execute. This means that a `/users/:userId` middleware path, would not execute if you defined a `/users/test` path.
+Execution stacks are backwards compatible, so no code changes need to be made when upgrading from a lower version. The only caveat is with matching middleware to specific parameterized paths. Path-based middleware creates mount points that require methods to execute. This means that a `/users/:userId` middleware path would not execute if you defined a `/users/test` path.
 
 Execution stacks allow you to execute multiple middlewares based on a number of factors including path and method. For example, you can specify a global middleware to run on every `/user/*` route, with additional middleware running on just `/user/settings/*` routes, with more middleware running on just `GET` requests to `/users/settings/name`. Execution stacks inherit middleware from matching routes and methods higher up the stack, building a final stack that is unique to each route. Definition order also matters, meaning that routes defined *before* global middleware **will not** have it as part of its execution stack. The same is true of any wildcard-based route, giving you flexibility and control over when middleware is applied.
 
