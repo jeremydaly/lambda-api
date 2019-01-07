@@ -143,8 +143,8 @@ class API {
               if (routes['ROUTES']['*']['MIDDLEWARE']) {
                 _stack[method] = routes['ROUTES']['*']['MIDDLEWARE'].stack
                 //_stack[method] ?
-                  // _stack[method].concat(routes['ROUTES']['*']['MIDDLEWARE'].stack)
-                  // : routes['ROUTES']['*']['MIDDLEWARE'].stack
+                // _stack[method].concat(routes['ROUTES']['*']['MIDDLEWARE'].stack)
+                // : routes['ROUTES']['*']['MIDDLEWARE'].stack
               }
 
               // Inherit methods and ANY
