@@ -14,8 +14,8 @@ let event = {
   httpMethod: 'get',
   path: '/test',
   body: {},
-  headers: {
-    'Content-Type': 'application/json'
+  multiValueHeaders: {
+    'Content-Type': ['application/json']
   }
 }
 
@@ -75,10 +75,10 @@ describe('cacheControl Tests:', function() {
     let _event = Object.assign({},event,{ path: '/cache' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires
       },
       statusCode: 200,
       body: 'cache',
@@ -90,10 +90,10 @@ describe('cacheControl Tests:', function() {
     let _event = Object.assign({},event,{ path: '/cacheTrue' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires
       },
       statusCode: 200,
       body: 'cache',
@@ -105,9 +105,9 @@ describe('cacheControl Tests:', function() {
     let _event = Object.assign({},event,{ path: '/cacheFalse' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'no-cache, no-store, must-revalidate'
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'cache-control': ['no-cache, no-store, must-revalidate']
       },
       statusCode: 200,
       body: 'cache',
@@ -119,10 +119,10 @@ describe('cacheControl Tests:', function() {
     let _event = Object.assign({},event,{ path: '/cacheMaxAge' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'max-age=1',
-        'expires': result.headers.expires
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'cache-control': ['max-age=1'],
+        'expires': result.multiValueHeaders.expires
       },
       statusCode: 200,
       body: 'cache',
@@ -134,10 +134,10 @@ describe('cacheControl Tests:', function() {
     let _event = Object.assign({},event,{ path: '/cachePrivate' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'private, max-age=1',
-        'expires': result.headers.expires
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'cache-control': ['private, max-age=1'],
+        'expires': result.multiValueHeaders.expires
       },
       statusCode: 200,
       body: 'cache',
@@ -149,10 +149,10 @@ describe('cacheControl Tests:', function() {
     let _event = Object.assign({},event,{ path: '/cachePrivateFalse' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'max-age=1',
-        'expires': result.headers.expires
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'cache-control': ['max-age=1'],
+        'expires': result.multiValueHeaders.expires
       },
       statusCode: 200,
       body: 'cache',
@@ -164,10 +164,10 @@ describe('cacheControl Tests:', function() {
     let _event = Object.assign({},event,{ path: '/cachePrivateInvalid' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'max-age=1',
-        'expires': result.headers.expires
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'cache-control': ['max-age=1'],
+        'expires': result.multiValueHeaders.expires
       },
       statusCode: 200,
       body: 'cache',
@@ -179,10 +179,10 @@ describe('cacheControl Tests:', function() {
     let _event = Object.assign({},event,{ path: '/cacheCustomUndefined' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires
       },
       statusCode: 200,
       body: 'cache',
@@ -194,10 +194,10 @@ describe('cacheControl Tests:', function() {
     let _event = Object.assign({},event,{ path: '/cacheCustomNull' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires
       },
       statusCode: 200,
       body: 'cache',
@@ -209,9 +209,9 @@ describe('cacheControl Tests:', function() {
     let _event = Object.assign({},event,{ path: '/cacheCustom' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'custom value'
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'cache-control': ['custom value']
       },
       statusCode: 200,
       body: 'cache',

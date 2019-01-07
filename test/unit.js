@@ -25,25 +25,40 @@ let event = {
 
 describe('Unit Tests:', function() {
 
-  it('setRoute - string path', async function() {
+  it('setRoute', async function() {
     let routes = {}
-    api.setRoute(routes,{['_GET']: { route: '/testPath' } },['testPath'])
-    api.setRoute(routes,{['_GET']: { route: '/testPath/testx' } },'testPath.testx')
-    expect(routes).to.deep.equal({ testPath: { _GET: { route: '/testPath' }, testx: { _GET: { route: '/testPath/testx' } } } })
+    api.setRoute(routes,'GET', { route: '/testPath' }, ['testPath'])
+    api.setRoute(routes,'GET', { route: '/testPath/testx' }, ['testPath','testx'])
+    expect(routes).to.deep.equal({
+      ROUTES: {
+        testPath: {
+          METHODS: {
+            GET: { route: '/testPath' }
+          },
+          ROUTES: {
+            testx: {
+              METHODS: {
+                GET: { route: '/testPath/testx' }
+              }
+            }
+          }
+        }
+      }
+    })
   }) // end it
 
 
-  it('setRoute - null path', async function() {
-    let routes = { testPath: null }
-    api.setRoute(routes,{['_GET']: { route: '/testPath/testx' } },'testPath.testx')
-    expect(routes).to.deep.equal({ testPath: { testx: { _GET: { route: '/testPath/testx' } } } })
-  }) // end it
-
-  it('setRoute - null single path', async function() {
-    let routes = { testPath: null }
-    api.setRoute(routes,{['_GET']: { route: '/testPath' } },['testPath'])
-    expect(routes).to.deep.equal({ testPath: { _GET: { route: '/testPath' } } })
-  }) // end it
+  // it('setRoute - null path', async function() {
+  //   let routes = { testPath: null }
+  //   api.setRoute(routes,{['_GET']: { route: '/testPath/testx' } },'testPath.testx')
+  //   expect(routes).to.deep.equal({ testPath: { testx: { _GET: { route: '/testPath/testx' } } } })
+  // }) // end it
+  //
+  // it('setRoute - null single path', async function() {
+  //   let routes = { testPath: null }
+  //   api.setRoute(routes,{['_GET']: { route: '/testPath' } },['testPath'])
+  //   expect(routes).to.deep.equal({ testPath: { _GET: { route: '/testPath' } } })
+  // }) // end it
 
 
 }) // end UNIT tests

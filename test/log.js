@@ -4,6 +4,7 @@ const expect = require('chai').expect // Assertion library
 
 // Init API instance
 const api_default = require('../index')({ logger: true }) // default logger
+const api_multi = require('../index')({ logger: { multiValue: true } })
 const api_customLevel = require('../index')({ version: 'v1.0', logger: { level: 'debug' } })
 const api_disableLevel = require('../index')({ version: 'v1.0', logger: { level: 'none' } })
 const api_customMsgKey = require('../index')({ version: 'v1.0', logger: { messageKey: 'customKey' } })
@@ -61,15 +62,15 @@ let event = {
   httpMethod: 'get',
   path: '/test',
   body: {},
-  headers: {
-    'content-type': 'application/json',
-    'x-forwarded-for': '12.34.56.78, 23.45.67.89',
-    'User-Agent': 'user-agent-string',
-    'CloudFront-Is-Desktop-Viewer': 'false',
-    'CloudFront-Is-Mobile-Viewer': 'true',
-    'CloudFront-Is-SmartTV-Viewer': 'false',
-    'CloudFront-Is-Tablet-Viewer': 'false',
-    'CloudFront-Viewer-Country': 'US'
+  multiValueHeaders: {
+    'content-type': ['application/json'],
+    'x-forwarded-for': ['12.34.56.78, 23.45.67.89'],
+    'user-agent': ['user-agent-string'],
+    'cloudfront-is-desktop-viewer': ['false'],
+    'cloudfront-is-mobile-viewer': ['true'],
+    'cloudfront-is-smarttv-viewer': ['false'],
+    'cloudfront-is-tablet-viewer': ['false'],
+    'cloudfront-viewer-country': ['US']
   }
 }
 
@@ -87,6 +88,16 @@ let context = {
 /******************************************************************************/
 
 api_default.get('/', (req,res) => {
+  req.log.trace('trace message')
+  req.log.debug('debug message')
+  req.log.info('info message')
+  req.log.warn('warn message')
+  req.log.error('error message')
+  req.log.fatal('fatal message')
+  res.send('done')
+})
+
+api_multi.get('/', (req,res) => {
   req.log.trace('trace message')
   req.log.debug('debug message')
   req.log.info('info message')
@@ -208,12 +219,12 @@ describe('Logging Tests:', function() {
 
   it('Default options (logging: true)', async function() {
     console.log = logger
-    let _event = Object.assign({},event,{ path: '/', queryStringParameters: { test: true } })
+    let _event = Object.assign({},event,{ path: '/', multiValueQueryStringParameters: { test: ['val1'] } })
     let result = await new Promise(r => api_default.run(_event,context,(e,res) => { r(res) }))
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -230,6 +241,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[4]).to.have.property('coldStart')
     expect(_log[4]).to.have.property('statusCode')
@@ -238,10 +250,85 @@ describe('Logging Tests:', function() {
     expect(_log[4]).to.have.property('ua')
     expect(_log[4]).to.have.property('version')
     expect(_log[4]).to.have.property('qs')
+    expect(_log[4].qs.test).to.be.a('string')
     expect(_log[4]).to.have.property('device')
     expect(_log[4]).to.have.property('country')
   }) // end it
 
+  it('Multi-value support', async function() {
+    console.log = logger
+    let _event = Object.assign({},event,{ path: '/', multiValueQueryStringParameters: { test: ['val1'] } })
+    let result = await new Promise(r => api_multi.run(_event,context,(e,res) => { r(res) }))
+    console.log = consoleLog
+
+    expect(result).to.deep.equal({
+      multiValueHeaders: { 'content-type': ['application/json'] },
+      statusCode: 200,
+      body: 'done',
+      isBase64Encoded: false
+    })
+    expect(_log).to.have.length(5)
+    expect(_log[0].level).to.equal('info')
+    expect(_log[4].level).to.equal('access')
+    // standard log
+    expect(_log[0]).to.have.property('time')
+    expect(_log[0]).to.have.property('id')
+    expect(_log[0]).to.have.property('route')
+    expect(_log[0]).to.have.property('msg')
+    expect(_log[0]).to.have.property('timer')
+    expect(_log[0]).to.have.property('remaining')
+    expect(_log[0]).to.have.property('function')
+    expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
+    // access log
+    expect(_log[4]).to.have.property('coldStart')
+    expect(_log[4]).to.have.property('statusCode')
+    expect(_log[4]).to.have.property('path')
+    expect(_log[4]).to.have.property('ip')
+    expect(_log[4]).to.have.property('ua')
+    expect(_log[4]).to.have.property('version')
+    expect(_log[4]).to.have.property('qs')
+    expect(_log[4].qs.test).to.be.a('array')
+    expect(_log[4]).to.have.property('device')
+    expect(_log[4]).to.have.property('country')
+  }) // end it
+
+  it('Multi-value support (no parameters)', async function() {
+    console.log = logger
+    let _event = Object.assign({},event,{ path: '/', multiValueQueryStringParameters: { } })
+    let result = await new Promise(r => api_multi.run(_event,context,(e,res) => { r(res) }))
+    console.log = consoleLog
+
+    expect(result).to.deep.equal({
+      multiValueHeaders: { 'content-type': ['application/json'] },
+      statusCode: 200,
+      body: 'done',
+      isBase64Encoded: false
+    })
+    expect(_log).to.have.length(5)
+    expect(_log[0].level).to.equal('info')
+    expect(_log[4].level).to.equal('access')
+    // standard log
+    expect(_log[0]).to.have.property('time')
+    expect(_log[0]).to.have.property('id')
+    expect(_log[0]).to.have.property('route')
+    expect(_log[0]).to.have.property('msg')
+    expect(_log[0]).to.have.property('timer')
+    expect(_log[0]).to.have.property('remaining')
+    expect(_log[0]).to.have.property('function')
+    expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
+    // access log
+    expect(_log[4]).to.have.property('coldStart')
+    expect(_log[4]).to.have.property('statusCode')
+    expect(_log[4]).to.have.property('path')
+    expect(_log[4]).to.have.property('ip')
+    expect(_log[4]).to.have.property('ua')
+    expect(_log[4]).to.have.property('version')
+    expect(_log[4]).to.not.have.property('qs')
+    expect(_log[4]).to.have.property('device')
+    expect(_log[4]).to.have.property('country')
+  }) // end it
 
   it('Default options (no logs in routes)', async function() {
     console.log = logger
@@ -250,7 +337,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -266,7 +353,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -283,6 +370,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[5]).to.have.property('coldStart')
     expect(_log[5]).to.have.property('statusCode')
@@ -302,7 +390,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -318,7 +406,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -336,6 +424,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[1]).to.have.property('coldStart')
     expect(_log[1]).to.have.property('statusCode')
@@ -355,7 +444,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -374,6 +463,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[1]).to.have.property('coldStart')
     expect(_log[1]).to.have.property('statusCode')
@@ -393,7 +483,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -410,6 +500,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[1]).to.have.property('coldStart')
     expect(_log[1]).to.have.property('statusCode')
@@ -430,7 +521,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -447,6 +538,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[1]).to.have.property('coldStart')
     expect(_log[1]).to.have.property('statusCode')
@@ -467,7 +559,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -485,6 +577,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[1]).to.have.property('coldStart')
     expect(_log[1]).to.have.property('statusCode')
@@ -505,14 +598,14 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
     })
 
     expect(result2).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -529,6 +622,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     expect(_log[0]).to.have.property('coldStart')
     expect(_log[0]).to.have.property('path')
     expect(_log[0]).to.have.property('ip')
@@ -545,6 +639,7 @@ describe('Logging Tests:', function() {
     expect(_log[1]).to.have.property('remaining')
     expect(_log[1]).to.have.property('function')
     expect(_log[1]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     expect(_log[1]).to.have.property('coldStart')
     expect(_log[1]).to.have.property('path')
     expect(_log[1]).to.have.property('ip')
@@ -563,7 +658,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -579,6 +674,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     // these should NOT exist
     expect(_log[0]).to.not.have.property('coldStart')
     expect(_log[0]).to.not.have.property('statusCode')
@@ -598,7 +694,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -616,6 +712,7 @@ describe('Logging Tests:', function() {
     expect(_log[0].context).to.have.property('remaining')
     expect(_log[0].context).to.have.property('function')
     expect(_log[0].context).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     expect(_log[0]).to.have.property('custom')
     expect(_log[0].custom).to.have.property('customMsg')
     // access log
@@ -637,7 +734,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -654,6 +751,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     expect(_log[0]).to.have.property('path')
     expect(_log[0]).to.have.property('ip')
     expect(_log[0]).to.have.property('ua')
@@ -685,7 +783,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -704,6 +802,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('timer')
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
+    expect(_log[0]).to.have.property('int')
     // access log
     expect(_log[3]).to.have.property('time')
     expect(_log[3]).to.have.property('id')
@@ -729,7 +828,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -745,6 +844,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('msg')
     expect(_log[0]).to.have.property('timer')
     expect(_log[0]).to.have.property('remaining')
+    expect(_log[0]).to.have.property('int')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('TEST_CUSTOM')
     expect(_log[0]).to.have.property('TEST_CONTEXT')
@@ -776,7 +876,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'done',
       isBase64Encoded: false
@@ -791,6 +891,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('msg')
     expect(_log[0]).to.have.property('timer')
     expect(_log[0]).to.have.property('remaining')
+    expect(_log[0]).to.have.property('int')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('custom')
     // access log
@@ -867,7 +968,7 @@ describe('Logging Tests:', function() {
     console.log = consoleLog
 
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 500,
       body: '{"error":"undefinedVar is not defined"}',
       isBase64Encoded: false
@@ -884,6 +985,7 @@ describe('Logging Tests:', function() {
     expect(_log[0]).to.have.property('remaining')
     expect(_log[0]).to.have.property('function')
     expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
     expect(_log[0]).to.have.property('stack')
 
     expect(_log[1]).to.have.property('time')

@@ -192,7 +192,8 @@ export declare class API {
 
   finally(callback: FinallyFunction): void;
 
-  run(event: APIGatewayEvent, context: Context): {};
+  run(event: APIGatewayEvent, context: Context, cb: (err: Error, result: any) => void): void;
+  run(event: APIGatewayEvent, context: Context): Promise<any>;
 }
 
 export declare class RouteError extends Error {

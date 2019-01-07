@@ -7,7 +7,7 @@
 
 ### Lightweight web framework for your serverless applications
 
-Lambda API is a lightweight web framework for use with AWS API Gateway and AWS Lambda using Lambda Proxy Integration. This closely mirrors (and is based on) other web frameworks like Express.js and Fastify, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
+Lambda API is a lightweight web framework for use with AWS Lambda using AWS API Gateway Lambda Proxy Integration or ALB Lambda Target Support. This closely mirrors (and is based on) other web frameworks like Express.js and Fastify, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
 
 ## Simple Example
 
@@ -41,7 +41,7 @@ Lambda API was written to be *extremely lightweight* and built specifically for 
 ### Single Purpose Functions
 You may have heard that a serverless "best practice" is to keep your functions small and limit them to a single purpose. I generally agree since building monolith applications is not what serverless was designed for. However, what exactly is a "single purpose" when it comes to building serverless APIs and web services? Should we create a separate function for our "create user" `POST` endpoint and then another one for our "update user" `PUT` endpoint? Should we create yet another function for our "delete user" `DELETE` endpoint? You certainly could, but that seems like a lot of repeated boilerplate code. On the other hand, you could create just one function that handled all your user management features. It may even make sense (in certain circumstances) to create one big serverless function handling several related components that can share your VPC database connections.
 
-Whatever you decide is best for your use case, **Lambda API** is there to support you. Whether your function has over a hundred routes, or just one, Lambda API's small size and lightning fast load time has virtually no impact on your function's performance. Yet despite its small footprint, it gives you the power of a full-featured web framework.
+Whatever you decide is best for your use case, **Lambda API** is there to support you. Whether your function has over a hundred routes, or just one, Lambda API's small size and lightning fast load time has virtually no impact on your function's performance. You can even define global wildcard routes that will process any incoming request, allowing you to use API Gateway or ALB to determine the routing. Yet despite its small footprint, it gives you the power of a full-featured web framework.
 
 ## Table of Contents
 - [Installation](#installation)
@@ -64,10 +64,11 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
   - [download()](#downloadfile--filename--options--callback)
   - [error()](#errorcode-message-detail)
   - [etag()](#etagboolean)
-  - [getHeader()](#getheaderkey)
+  - [getHeader()](#getheaderkey-value--asarray)
+  - [getHeaders()](#getheaders)
   - [getLink()](#getlinks3path-expires-callback)
   - [hasHeader()](#hasheaderkey)
-  - [header()](#headerkey-value)
+  - [header()](#headerkey-value--append)
   - [html()](#htmlbody)
   - [json()](#jsonbody)
   - [jsonp()](#jsonpbody)
@@ -77,6 +78,7 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
   - [removeHeader()](#removeheaderkey)
   - [send()](#sendbody)
   - [sendFile()](#sendfilefile--options--callback)
+  - [sendStatus()](#sendstatuscode)
   - [status()](#statuscode)
   - [type()](#typetype)
 - [Enabling Binary Support](#enabling-binary-support)
@@ -98,7 +100,9 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
   - [Error Logging](#error-logging)
 - [Namespaces](#namespaces)
 - [CORS Support](#cors-support)
+- [Execution Stacks](#execution-stacks)
 - [Lambda Proxy Integration](#lambda-proxy-integration)
+- [ALB Integration](#alb-integration)
 - [Configuring Routes in API Gateway](#configuring-routes-in-api-gateway)
 - [TypeScript Support](#typescript-support)
 - [Contributions](#contributions)
@@ -133,10 +137,13 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ## Recent Updates
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
 
+### v0.10: ALB support, method-based middleware, and multi-value headers and query string parameters
+Lambda API now allows you to seamlessly switch between API Gateway and Application Load Balancers. New [execution stacks](execution-stacks) enables method-based middleware and more wildcard functionality. Plus full support for multi-value headers and query string parameters.
+
 ### v0.9: New error types, custom serializers, and TypeScript support
 Lambda API now generates typed errors for easier parsing in middleware. You can also supply your own custom serializer for formatting output rather than using the default `JSON.stringify`. And thanks to @hassankhan, a TypeScript declaration file is now available.
 
-### v0.8: Logging Support with Sampling
+### v0.8: Logging support with sampling
 Lambda API has added a powerful (and customizable) logging engine that utilizes native JSON support for CloudWatch Logs. Log entries can be manually added using standard severities like `info` and `warn`. In addition, "access logs" can be automatically generated with detailed information about each requests. See [Logging](#logging) for more information about logging and auto sampling for request tracing.
 
 ### v0.7: Restrict middleware execution to certain paths
@@ -145,13 +152,13 @@ Middleware now supports an optional path parameter that supports multiple paths,
 ### v0.6: Support for both `callback-style` and `async-await`
 In additional to `res.send()`, you can now simply `return` the body from your route and middleware functions. See [Returning Responses](#returning-responses) for more information.
 
-### v0.5: Remove Bluebird Promises Dependency
+### v0.5: Remove Bluebird promises dependency
 Now that AWS Lambda supports Node v8.10, asynchronous operations can be handled more efficiently with `async/await` rather than with promises. The core Lambda API execution engine has been rewritten to take advantage of `async/await`, which means we no longer need to depend on Bluebird. We now have **ZERO** dependencies.
 
-### v0.4: Binary Support
+### v0.4: Binary support
 Binary support has been added! This allows you to both send and receive binary files from API Gateway. For more information, see [Enabling Binary Support](#enabling-binary-support).
 
-### v0.3: New Instantiation Method
+### v0.3: New instantiation method
 Please note that the invocation method has been changed. You no longer need to use the `new` keyword to instantiate Lambda API. It can now be instantiated in one line:
 
  ```javascript
@@ -168,7 +175,11 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 
 ## Routes and HTTP Methods
 
-Routes are defined by using convenience methods or the `METHOD` method. There are currently eight convenience route methods: `get()`, `post()`, `put()`, `patch()`, `delete()`, `head()`, `options()` and `any()`. Convenience route methods require two parameters, a *route* and a function that accepts two arguments. A *route* is simply a path such as `/users`. The second parameter must be a function that accepts a `REQUEST` and a `RESPONSE` argument. These arguments can be named whatever you like, but convention dictates `req` and `res`. Examples using convenience route methods:
+Routes are defined by using convenience methods or the `METHOD` method. There are currently eight convenience route methods: `get()`, `post()`, `put()`, `patch()`, `delete()`, `head()`, `options()` and `any()`. Convenience route methods require an optional *route* and one or more handler functions. A *route* is simply a path such as `/users`. If a *route* is not provided, then it will default to `/*` and will execute on every path. Handler functions accept a `REQUEST`, `RESPONSE`, and optional `next()` argument. These arguments can be named whatever you like, but convention dictates `req`, `res`, and `next`.
+
+Multiple handler functions can be assigned to a path, which can be used to execute middleware for specific paths and methods. For more information, see [Middleware](#middleware) and [Execution Stacks](#execution-stacks).
+
+Examples using convenience route methods:
 
 ```javascript
 api.get('/users', (req,res) => {
@@ -182,8 +193,23 @@ api.post('/users', (req,res) => {
 api.delete('/users', (req,res) => {
   // do something
 })
+
+api.get('/users',
+  (req,res,next) => {
+    // do some middleware
+    next() // continue execution
+  }),
+  (req,res) => {
+    // do something
+  }
+)
+
+api.post((req,res) => {
+  // do something for ALL post requests
+})
+
 ```
-Additional methods are support by calling the `METHOD` method with three arguments. The first argument is the HTTP method (or array of methods), a *route*, and a function that accepts a `REQUEST` and a `RESPONSE` argument.
+Additional methods are support by calling `METHOD`. Arguments must include an HTTP method (or array of methods), an optional *route*, and one or more handler functions. Like the convenience methods above, handler functions accept a `REQUEST`, `RESPONSE`, and optional `next` argument.
 
 ```javascript
 api.METHOD('trace','/users', (req,res) => {
@@ -193,6 +219,16 @@ api.METHOD('trace','/users', (req,res) => {
 api.METHOD(['post','put'],'/users', (req,res) => {
   // do something on POST -or- PUT
 })
+
+api.METHOD('get','/users',
+  (req,res,next) => {
+    // do some middleware
+    next() // continue execution
+  }),
+  (req,res) => {
+  // do something
+  }
+)
 ```
 
 All `GET` methods have a `HEAD` alias that executes the `GET` request but returns a blank `body`. `GET` requests should be idempotent with no side effects. The `head()` convenience method can be used to set specific paths for `HEAD` requests or to override default `GET` aliasing.
@@ -384,12 +420,15 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `app`: A reference to an instance of the app
 - `version`: The version set at initialization
 - `id`: The awsRequestId from the Lambda `context`
+- `interface`: The interface being used to access Lambda (`apigateway`,`alb`, or `edge`)
 - `params`: Dynamic path parameters parsed from the path (see [path parameters](#path-parameters))
 - `method`: The HTTP method of the request
 - `path`: The path passed in by the request including the `base` and any `prefix` assigned to routes
 - `query`: Querystring parameters parsed into an object
-- `headers`: An object containing the request headers (properties converted to lowercase for HTTP/2, see [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540))
+- `multiValueQuery`: Querystring parameters with multiple values parsed into an object with array values
+- `headers`: An object containing the request headers (properties converted to lowercase for HTTP/2, see [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540)). Note that multi-value headers are concatenated with a comma per [rfc2616 4.2. Message Headers](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2).
 - `rawHeaders`: An object containing the original request headers (property case preserved)
+- `multiValueHeaders`: An object containing header values as multi-value arrays
 - `body`: The body of the request. If the `isBase64Encoded` flag is `true`, it will be decoded automatically.
   - If the `content-type` header is `application/json`, it will attempt to parse the request using `JSON.parse()`
   - If the `content-type` header is `application/x-www-form-urlencoded`, it will attempt to parse a URL encoded string using `querystring`
@@ -410,6 +449,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `userAgent`: The `User-Agent` header sent by the client making the request
 - `clientType`: Either `desktop`, `mobile`, `tv`, `tablet` or `unknown` based on CloudFront's analysis of the `User-Agent` header
 - `clientCountry`: Two letter country code representing the origin of the requests as determined by CloudFront
+- `stack`: An array of function names executed as part of a route's [Execution Stack](#execution-stack), which is useful for debugging
 
 The request object can be used to pass additional information through the processing chain. For example, if you are using a piece of authentication middleware, you can add additional keys to the `REQUEST` object with information about the user. See [middleware](#middleware) for more information.
 
@@ -426,19 +466,47 @@ api.get('/users', (req,res) => {
 })
 ```
 
-### header(key, value)
-The `header` method allows for you to set additional headers to return to the client. By default, just the `content-type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two string arguments. The first is the name of the header and then second is the value.
+### sendStatus(code)
+The `sendStatus` method sets the status code and returns its string representation as the response body. The `sendStatus()` method accepts a single integer argument.
+
+```javascript
+res.sendStatus(200) // equivalent to res.status(200).send('OK')
+res.sendStatus(304) // equivalent to res.status(304).send('Not Modified')
+res.sendStatus(403) // equivalent to res.status(403).send('Forbidden')
+```
+
+**NOTE:** If an unsupported status code is provided, it will return 'Unknown' as the body.
+
+### header(key, value [,append])
+The `header` method allows for you to set additional headers to return to the client. By default, just the `content-type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two string arguments. The first is the name of the header and then second is the value. You can utilize multi-value headers by specifying an array with multiple values as the `value`, or you can use an optional third boolean parameter and append multiple headers.
 
 ```javascript
 api.get('/users', (req,res) => {
   res.header('content-type','text/html').send('<div>This is HTML</div>')
 })
+
+// Set multiple header values
+api.get('/users', (req,res) => {
+  res.header('someHeader',['foo','bar').send({})
+})
+
+// Set multiple header by adding to existing header
+api.get('/users', (req,res) => {
+  res.header('someHeader','foo')
+    .header('someHeader','bar',true) // append another value
+      .send({})
+})
 ```
 
 **NOTE:** Header keys are converted and stored as lowercase in compliance with [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540) for HTTP/2. Header convenience methods (`getHeader`, `hasHeader`, and `removeHeader`) automatically ignore case.
 
-### getHeader([key])
-Retrieve the current header object or pass the optional `key` parameter and retrieve a specific header value. `key` is case insensitive.
+### getHeader(key [,asArray])
+Retrieve a specific header value. `key` is case insensitive. By default (and for backwards compatibility), header values are returned as a `string`. Multi-value headers will be concatenated using a comma (see [rfc2616 4.2. Message Headers](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2)). An optional second boolean parameter can be passed to return header values as an `array`.
+
+**NOTE:** The ability to retrieve the current header object by calling `getHeader()` is still possible, but the preferred method is to use the `getHeaders()` method. By default, `getHeader()` will return the object with `string` values.
+
+### getHeaders()
+Retrieve the current header object. Values are returned as `array`s.
 
 ### hasHeader(key)
 Returns a boolean indicating the existence of `key` in the response headers. `key` is case insensitive.
@@ -751,16 +819,16 @@ Path parameters act as wildcards that capture the value into the `params` object
 A path can contain as many parameters as you want. E.g. `/users/:param1/:param2/:param3`.
 
 ## Wildcard Routes
-Wildcard routes are supported for methods that **match an existing route**. E.g. `options` on an existing `get` route. Wildcards only work at the *end of a route definition* such as `/*` or `/users/*`. Wildcards within a path, e.g. `/users/*/posts` are not supported. Wildcard routes do support parameters, so `/users/:id/*` would capture the `:id` parameter in your wildcard handler.
+Wildcard routes are supported for matching arbitrary paths. Wildcards only work at the *end of a route definition* such as `/*` or `/users/*`. Wildcards within a path, e.g. `/users/*/posts` are not supported. Wildcard routes do support parameters, however, so `/users/:id/*` would capture the `:id` parameter in your wildcard handler.
 
-Wildcard routes will match deep paths if the route exists. For example, an `OPTIONS` method for path `/users/*` would match `/users/:id/posts/latest` if that path was defined by another method.
+Wildcard routes will match any deep paths after the wildcard. For example, a `GET` method for path `/users/*` would match `/users/1/posts/latest`. The only exception is for the `OPTIONS` method. A path **must** exist for a wildcard on an `OPTIONS` route in order to execute the handler. If a wildcard route is defined for another method higher up the path, then the `OPTIONS` handler will fire. For example, if there was a `POST` method defined on `/users/*`, then an `OPTIONS` method for `/users/2/posts/*` would fire as it assumes that the `POST` path would exist.
 
-The best use case is for the `OPTIONS` method to provide CORS headers. For more control over variable paths, use [Path Parameters](#path-parameters) instead.
+In most cases, [Path Parameters](#path-parameters) should be used in favor of wildcard routes. However, if you need to support unpredictable path lengths, or your are building single purpose functions and will be mapping routes from API Gateway, the wildcards are a powerful pattern. Another good use case is to use the `OPTIONS` method to provide CORS headers.
 
 ```javascript
-api.options('/users/*', (req,res) => {
-  // Do something
-  res.status(200).send({})
+api.options('/*', (req,res) => {
+  // Return CORS headers
+  res.cors().send({})
 })
 ```
 
@@ -791,6 +859,7 @@ Logging can be enabled by setting the `logger` option to `true` when creating th
 | level | `string` | Minimum logging level to send logs for. See [Logging Levels](#logging-levels). | `info` |
 | levels | `object` | Key/value pairs of custom log levels and their priority. See [Custom Logging Levels](#custom-logging-levels). | |
 | messageKey | `string` | Sets the JSON property name of the log "message". | `msg` |
+| multiValue | `boolean` | Enables multi-value support for querystrings. If enabled, the `qs` parameter will return all values as `array`s and will include multiple values if they exist. | `false` |
 | nested | `boolean` | Enables/disables nesting of JSON logs for serializer data. See [Serializers](#serializers). | `false` |
 | timestamp | `boolean` or `function` | By default, timestamps will return the epoch time in milliseconds. A value of `false` disables log timestamps. A function that returns a value can be used to override the default format. | `true` |
 | sampling | `object` | Enables log sampling for periodic request tracing. See [Sampling](#sampling). | |
@@ -828,6 +897,7 @@ Logs are generated using Lambda API's standard JSON format. The log format can b
     "remaining": 2000, // remaining milliseconds until function timeout
     "function": "my-function-v1", // function name
     "memory": 2048, // allocated function memory
+    "int": "apigateway", // interface used to access the Lambda function
     "sample": true // is generated during sampling request?
   }
 ```
@@ -1020,7 +1090,7 @@ const api = require('lambda-api')({
 Any combination of rules can be provided to customize sampling behavior. Note that each rule tracks requests and velocity separately, which could limit the number of samples for infrequently accessed routes.
 
 ## Middleware
-The API supports middleware to preprocess requests before they execute their matching routes. Middleware is defined using the `use` method and requires a function with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
+The API supports middleware to preprocess requests before they execute their matching routes. Global middleware is defined using the `use` method one or more functions with three parameters for the `REQUEST`, `RESPONSE`, and `next` callback. For example:
 
 ```javascript
 api.use((req,res,next) => {
@@ -1048,7 +1118,6 @@ The `next()` callback tells the system to continue executing. If this is not cal
 **NOTE:** Middleware can use either callbacks like `res.send()` or `return` to trigger a response to the user. Please note that calling either one of these from within a middleware function will return the response immediately and terminate API execution.
 
 ### Restricting middleware execution to certain path(s)
-
 By default, middleware will execute on every path. If you only need it to execute for specific paths, pass the path (or array of paths) as the first parameter to the `use` method.
 
 ```javascript
@@ -1068,10 +1137,9 @@ api.use('/users/:userId',(req,res,next) => { next() })
 api.use(['/comments','/users/:userId','/posts/*'],(req,res,next) => { next() })
 ```
 
-Path matching checks both the supplied `path` and the defined `route`. This means that parameterized paths can be matched by either the parameter (e.g. `/users/:param1`) or by an exact matching path (e.g. `/users/123`).
+**NOTE:** Path matching checks the defined `route`. This means that parameterized paths must be matched by the parameter (e.g. `/users/:param1`).
 
 ### Specifying multiple middleware
-
 In addition to restricting middleware to certain paths, you can also add multiple middleware using a single `use` method. This is a convenient way to assign several pieces of middleware to the same path or minimize your code.
 
 ```javascript
@@ -1090,6 +1158,31 @@ api.use('/users', middleware1, middleware2)
 api.use(middleware1, middleware2)
 ```
 
+### Method-based middleware
+Middleware can be restricted to a specific method (or array of methods) by using the route convenience methods or `METHOD`. Method-based middleware behaves exactly like global middleware, requiring a `REQUEST`, `RESPONSE`, and `next` parameter. You can specify multiple middlewares for each method/path using a single method call, or by using multiple method calls. Lambda API will merge the [execution stacks](#execution-stacks) for you.
+
+```javascript
+const middleware1 = (req,res,next) => {
+  // middleware code
+}
+
+const middleware2 = (req,res,next) => {
+  // middleware code
+}
+
+// Execute middleware1 and middleware2 on /users route
+api.get('/users', middleware1, middleware2, (req,res) => {
+  // handler function
+})
+
+// Execute middleware1 on /users route
+api.get('/users', middleware1)
+
+// Add middleware2 and handler
+api.get('/users', middleware2, (req,res) => {
+  // handler function
+})
+```
 
 ## Clean Up
 The API has a built-in clean up method called 'finally()' that will execute after all middleware and routes have been completed, but before execution is complete. This can be used to close database connections or to perform other clean up functions. A clean up function can be defined using the `finally` method and requires a function with two parameters for the REQUEST and the RESPONSE as its only argument. For example:
@@ -1225,69 +1318,26 @@ You can also use the `cors()` ([see here](#corsoptions)) convenience method to a
 
 Conditional route support could be added via middleware or with conditional logic within the `OPTIONS` route.
 
+## Execution Stacks
+Lambda API v0.10 introduced execution stacks as a way to more efficiently process middleware. Execution stacks are automatically created for you when adding routes and middleware using the standard route convenience methods, as well as `METHOD()` and `use()`. This is a technical implementation that has made method-based middleware and additional wildcard functionality possible.
+
+Execution stacks are backwards compatible, so no code changes need to be made when upgrading from a lower version. The only caveat is with matching middleware to specific parameterized paths. Path-based middleware creates mount points that require methods to execute. This means that a `/users/:userId` middleware path, would not execute if you defined a `/users/test` path.
+
+Execution stacks allow you to execute multiple middlewares based on a number of factors including path and method. For example, you can specify a global middleware to run on every `/user/*` route, with additional middleware running on just `/user/settings/*` routes, with more middleware running on just `GET` requests to `/users/settings/name`. Execution stacks inherit middleware from matching routes and methods higher up the stack, building a final stack that is unique to each route. Definition order also matters, meaning that routes defined *before* global middleware **will not** have it as part of its execution stack. The same is true of any wildcard-based route, giving you flexibility and control over when middleware is applied.
+
+For debugging purposes, a new `REQUEST` property called `stack` has been added. If you name your middleware functions (either by assigning them to variables or using standard named functions), the `stack` property will return an array that lists the function names of the execution stack in processing order.
+
 ## Lambda Proxy Integration
-Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled looks like this:
+Lambda Proxy Integration is an option in API Gateway that allows the details of an API request to be passed as the `event` parameter of a Lambda function. A typical API Gateway request event with Lambda Proxy Integration enabled can be found [here](https://docs.aws.amazon.com/lambda/latest/dg/eventsources.html#eventsources-api-gateway-request).
 
-```javascript
-{
-  "resource": "/v1/posts",
-  "path": "/v1/posts",
-  "httpMethod": "GET",
-  "headers": {
-    "Authorization": "Bearer ...",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Encoding": "gzip, deflate",
-    "Accept-Language": "en-us",
-    "cache-control": "max-age=0",
-    "CloudFront-Forwarded-Proto": "https",
-    "CloudFront-Is-Desktop-Viewer": "true",
-    "CloudFront-Is-Mobile-Viewer": "false",
-    "CloudFront-Is-SmartTV-Viewer": "false",
-    "CloudFront-Is-Tablet-Viewer": "false",
-    "CloudFront-Viewer-Country": "US",
-    "Cookie": "...",
-    "Host": "...",
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) ...",
-    "Via": "2.0 ... (CloudFront)",
-    "X-Amz-Cf-Id": "...",
-    "X-Amzn-Trace-Id": "...",
-    "X-Forwarded-For": "xxx.xxx.xxx.xxx",
-    "X-Forwarded-Port": "443",
-    "X-Forwarded-Proto": "https"
-  },
-  "queryStringParameters": {
-    "qs1": "q1"
-  },
-  "stageVariables": null,
-  "requestContext": {
-    "accountId": "...",
-    "resourceId": "...",
-    "stage": "prod",
-    "requestId": "...",
-    "identity": {
-      "cognitoIdentityPoolId": null,
-      "accountId": null,
-      "cognitoIdentityId": null,
-      "caller": null,
-      "apiKey": null,
-      "sourceIp": "xxx.xxx.xxx.xxx",
-      "accessKey": null,
-      "cognitoAuthenticationType": null,
-      "cognitoAuthenticationProvider": null,
-      "userArn": null,
-      "userAgent": "...",
-      "user": null
-    },
-    "resourcePath": "/v1/posts",
-    "httpMethod": "GET",
-    "apiId": "..."
-  },
-  "body": null,
-  "isBase64Encoded": false
-}
-```
+Lambda API automatically parses this information to create a normalized `REQUEST` object. The request can then be routed using the APIs methods.
 
-The API automatically parses this information to create a normalized `REQUEST` object. The request can then be routed using the APIs methods.
+## ALB Integration
+AWS recently added support for Lambda functions as targets for Application Load Balancers. While the events from ALBs are similar to API Gateway, there are a number of differences that would require code changes based on implementation. Lambda API detects the event `interface` and automatically normalizes the `REQUEST` object. It also correctly formats the `RESPONSE` (supporting both multi-header and non-multi-header mode) for you. This allows you to call your Lambda function from API Gateway, ALB, or both, without requiring any code changes.
+
+Please note that ALB events do not contain all of the same headers as API Gateway (such as `clientType`), but Lambda API provides defaults for seamless integration between the interfaces. ALB also automatically enables binary support, giving you the ability to serve images and other binary file types. Lambda API reads the `path` parameter supplied by the ALB event and uses that to route your requests. If you specify a wildcard in your listener rule, then all matching paths will be forwarded to your Lambda function. Lambda API's routing system can be used to process these routes just like with API Gateway. This includes static paths, parameterized paths, wildcards, middleware, etc.
+
+Sample ALB request and response events can be found [here](https://docs.aws.amazon.com/lambda/latest/dg/services-alb.html).
 
 ## Configuring Routes in API Gateway
 Routes must be configured in API Gateway in order to support routing to the Lambda function. The easiest way to support all of your routes without recreating them is to use [API Gateway's Proxy Integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-set-up-simple-proxy.html#api-gateway-proxy-resource?icmpid=docs_apigateway_console).

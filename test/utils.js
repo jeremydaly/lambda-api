@@ -192,6 +192,43 @@ describe('Utility Function Tests:', function() {
   }) // end encodeBody tests
 
 
+  describe('statusLookup:', function() {
+
+    it('200', function() {
+      expect(utils.statusLookup(200)).to.equal('OK')
+    }) // end it
+
+    it('201', function() {
+      expect(utils.statusLookup(201)).to.equal('Created')
+    }) // end it
+
+    it('304', function() {
+      expect(utils.statusLookup(304)).to.equal('Not Modified')
+    }) // end it
+
+    it('404', function() {
+      expect(utils.statusLookup(404)).to.equal('Not Found')
+    }) // end it
+
+    it('502', function() {
+      expect(utils.statusLookup(502)).to.equal('Bad Gateway')
+    }) // end it
+
+    it('999 Uknown', function() {
+      expect(utils.statusLookup(999)).to.equal('Unknown')
+    }) // end it
+
+    it('As string (parsable as int)', function() {
+      expect(utils.statusLookup('200')).to.equal('OK')
+    }) // end it
+
+    it('As string (not parsable as int)', function() {
+      expect(utils.statusLookup('foo')).to.equal('Unknown')
+    }) // end it
+
+  }) // end encodeBody tests
+
+
   describe('extractRoutes:', function() {
 
     it('Sample routes', function() {
@@ -345,6 +382,44 @@ describe('Utility Function Tests:', function() {
       expect(func).to.throw('Invalid S3 path')
     })
 
+  }) // end parseS3 tests
+
+  describe('mergeObjects:', function() {
+    it('Duplicate Items', function() {
+      let obj1 = { 1: ['test'] }
+      let obj2 = { 1: ['test'] }
+      expect(utils.mergeObjects(obj1,obj2)).to.deep.equal({ 1: ['test'] })
+    })
+
+    it('Single Items', function() {
+      let obj1 = { 1: ['test'] }
+      let obj2 = { 1: ['test2'] }
+      expect(utils.mergeObjects(obj1,obj2)).to.deep.equal({ 1: ['test','test2'] })
+    })
+
+    it('Multiple Items', function() {
+      let obj1 = { 1: ['test'], 2: ['testA'] }
+      let obj2 = { 1: ['test2'], 2: ['testB'] }
+      expect(utils.mergeObjects(obj1,obj2)).to.deep.equal({ 1: ['test','test2'], 2: ['testA','testB'] })
+    })
+
+    it('Missing Items (obj1)', function() {
+      let obj1 = { 1: ['test'] }
+      let obj2 = { 1: ['test2'], 2: ['testB'] }
+      expect(utils.mergeObjects(obj1,obj2)).to.deep.equal({ 1: ['test','test2'], 2: ['testB'] })
+    })
+
+    it('Missing Items (obj2)', function() {
+      let obj1 = { 1: ['test'], 2: ['testA'] }
+      let obj2 = { 1: ['test2'] }
+      expect(utils.mergeObjects(obj1,obj2)).to.deep.equal({ 1: ['test','test2'], 2: ['testA'] })
+    })
+
+    it('No similarities', function() {
+      let obj1 = { 1: ['test'] }
+      let obj2 = { 2: ['testA'] }
+      expect(utils.mergeObjects(obj1,obj2)).to.deep.equal({ 1: ['test'], 2: ['testA'] })
+    })
   }) // end parseS3 tests
 
 }) // end UTILITY tests

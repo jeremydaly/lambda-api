@@ -1,4 +1,4 @@
-'use strict';
+multiValueHeaders:'use strict';
 
 const Promise = require('bluebird') // Promise library
 const expect = require('chai').expect // Assertion library
@@ -17,15 +17,12 @@ const S3 = require('../lib/s3-service') // Init S3 Service
 // Init API instance
 const api = require('../index')({ version: 'v1.0', mimeTypes: { test: 'text/test' } })
 
-// NOTE: Set test to true
-api._test = true;
-
 let event = {
   httpMethod: 'get',
   path: '/',
   body: {},
-  headers: {
-    'content-type': 'application/json'
+  multiValueHeaders: {
+    'content-type': ['application/json']
   }
 }
 
@@ -93,9 +90,16 @@ api.get('/sendfile/buffer', function(req,res) {
   res.sendFile(fs.readFileSync('test/test.txt'))
 })
 
-api.get('/sendfile/headers', function(req,res) {
+api.get('/sendfile/multiValueHeaders', function(req,res) {
   res.sendFile('test/test.txt', {
     headers: { 'x-test': 'test', 'x-timestamp': 1 }
+  })
+})
+
+api.get('/sendfile/headers', function(req,res) {
+  res.sendFile('test/test.txt', {
+    headers: { 'x-test': 'test', 'x-timestamp': 1 },
+    private: false
   })
 })
 
@@ -200,30 +204,30 @@ describe('SendFile Tests:', function() {
   it('Bad path', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/badpath' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json','x-error': 'true' }, statusCode: 500, body: '{"error":"Invalid file"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 500, body: '{"error":"Invalid file"}', isBase64Encoded: false })
   }) // end it
 
   it('Missing file', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json','x-error': 'true' }, statusCode: 500, body: '{"error":"No such file"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 500, body: '{"error":"No such file"}', isBase64Encoded: false })
   }) // end it
 
   it('Missing file with custom catch', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/err' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json','x-error': 'true' }, statusCode: 404, body: '{"error":"There was an error accessing the requested file"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 404, body: '{"error":"There was an error accessing the requested file"}', isBase64Encoded: false })
   }) // end it
 
   it('Text file w/ callback override (promise)', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/test' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires,
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires,
+        'last-modified': result.multiValueHeaders['last-modified']
       },
       statusCode: 201, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
@@ -232,24 +236,24 @@ describe('SendFile Tests:', function() {
   it('Text file error w/ callback override (promise)', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/test', queryStringParameters: { test: 'x' } })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json','x-error': 'true' }, statusCode: 501, body: '{"error":"Custom File Error"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 501, body: '{"error":"Custom File Error"}', isBase64Encoded: false })
   }) // end it
 
   it('Text file error w/ callback override (promise - no end)', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/error', queryStringParameters: { test: 'x' } })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json','x-error': 'true' }, statusCode: 500, body: result.body, isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 500, body: result.body, isBase64Encoded: false })
   }) // end it
 
   it('Buffer Input', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/buffer' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires,
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires,
+        'last-modified': result.multiValueHeaders['last-modified']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -258,13 +262,13 @@ describe('SendFile Tests:', function() {
     let _event = Object.assign({},event,{ path: '/sendfile/headers' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'x-test': 'test',
-        'x-timestamp': 1,
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires,
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'x-test': ['test'],
+        'x-timestamp': [1],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires,
+        'last-modified': result.multiValueHeaders['last-modified']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -273,11 +277,11 @@ describe('SendFile Tests:', function() {
     let _event = Object.assign({},event,{ path: '/sendfile/root' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires,
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires,
+        'last-modified': result.multiValueHeaders['last-modified']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -286,13 +290,13 @@ describe('SendFile Tests:', function() {
     let _event = Object.assign({},event,{ path: '/sendfile/headers-private' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'x-test': 'test',
-        'x-timestamp': 1,
-        'cache-control': 'private, max-age=0',
-        'expires': result.headers.expires,
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'x-test': ['test'],
+        'x-timestamp': [1],
+        'cache-control': ['private, max-age=0'],
+        'expires': result.multiValueHeaders.expires,
+        'last-modified': result.multiValueHeaders['last-modified']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -301,11 +305,11 @@ describe('SendFile Tests:', function() {
     let _event = Object.assign({},event,{ path: '/sendfile/last-modified' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires,
-        'last-modified': 'Mon, 01 Jan 2018 00:00:00 GMT'
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires,
+        'last-modified': ['Mon, 01 Jan 2018 00:00:00 GMT']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -315,10 +319,10 @@ describe('SendFile Tests:', function() {
     let _event = Object.assign({},event,{ path: '/sendfile/no-last-modified' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -328,9 +332,9 @@ describe('SendFile Tests:', function() {
     let _event = Object.assign({},event,{ path: '/sendfile/no-cache-control' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'last-modified': result.multiValueHeaders['last-modified']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -340,10 +344,10 @@ describe('SendFile Tests:', function() {
     let _event = Object.assign({},event,{ path: '/sendfile/custom-cache-control' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'cache-control': 'no-cache, no-store',
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'cache-control': ['no-cache, no-store'],
+        'last-modified': result.multiValueHeaders['last-modified']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -353,12 +357,12 @@ describe('SendFile Tests:', function() {
     let _event = Object.assign({},event,{ path: '/sendfile/s3' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'cache-control': 'max-age=0',
-        'expires': result.headers['expires'],
-        'etag': '"ae771fbbba6a74eeeb77754355831713"',
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders['expires'],
+        'etag': ['"ae771fbbba6a74eeeb77754355831713"'],
+        'last-modified': result.multiValueHeaders['last-modified']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -367,12 +371,12 @@ describe('SendFile Tests:', function() {
     let _event = Object.assign({},event,{ path: '/sendfile/s3path' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'cache-control': 'max-age=0',
-        'expires': result.headers['expires'],
-        'etag': '"ae771fbbba6a74eeeb77754355831713"',
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders['expires'],
+        'etag': ['"ae771fbbba6a74eeeb77754355831713"'],
+        'last-modified': result.multiValueHeaders['last-modified']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -381,9 +385,9 @@ describe('SendFile Tests:', function() {
     let _event = Object.assign({},event,{ path: '/sendfile/s3missing' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'x-error': 'true'
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'x-error': ['true']
       }, statusCode: 500, body: '{"error":"NoSuchKey: The specified key does not exist."}', isBase64Encoded: false
     })
   }) // end it
@@ -393,9 +397,9 @@ describe('SendFile Tests:', function() {
     let _event = Object.assign({},event,{ path: '/sendfile/s3-bad-path' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'x-error': 'true'
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'x-error': ['true']
       }, statusCode: 500, body: '{"error":"Invalid S3 path"}', isBase64Encoded: false
     })
   }) // end it

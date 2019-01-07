@@ -8,15 +8,12 @@ const api = require('../index')({ version: 'v1.0' })
 
 const appTest = require('./_testApp')
 
-// NOTE: Set test to true
-api._test = true;
-
 let event = {
   httpMethod: 'get',
   path: '/test',
   body: {},
-  headers: {
-    'Content-Type': 'application/json'
+  multiValueHeaders: {
+    'Content-Type': ['application/json']
   }
 }
 
@@ -52,25 +49,25 @@ describe('Module Tests:', function() {
   it('Standard module response', async function() {
     let _event = Object.assign({},event,{ path:'/testApp' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","app":"app1"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","app":"app1"}', isBase64Encoded: false })
   }) // end it
 
   it('Module with promise', async function() {
     let _event = Object.assign({},event,{ path:'/testAppPromise' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 200, body: '{"method":"get","status":"ok","app":"app2"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","app":"app2"}', isBase64Encoded: false })
   }) // end it
 
   it('Module with called error', async function() {
     let _event = Object.assign({},event,{ path:'/testAppError' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 500, body: '{"error":"This is a called module error"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: '{"error":"This is a called module error"}', isBase64Encoded: false })
   }) // end it
 
   it('Module with thrown error', async function() {
     let _event = Object.assign({},event,{ path:'/testAppThrownError' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json' }, statusCode: 500, body: '{"error":"This is a thrown module error"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: '{"error":"This is a thrown module error"}', isBase64Encoded: false })
   }) // end it
 
 }) // end MODULE tests

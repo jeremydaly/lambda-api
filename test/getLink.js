@@ -22,7 +22,7 @@ let event = {
   httpMethod: 'get',
   path: '/test',
   body: {},
-  headers: {
+  multiValueHeaders: {
     'Content-Type': 'application/json'
   }
 }
@@ -111,7 +111,7 @@ describe('getLink Tests:', function() {
     let _event = Object.assign({},event,{ path: '/s3Link' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'https://s3.amazonaws.com/my-test-bucket/test/test.txt?AWSAccessKeyId=AKXYZ&Expires=1534290845&Signature=XYZ',
       isBase64Encoded: false
@@ -123,7 +123,7 @@ describe('getLink Tests:', function() {
     let _event = Object.assign({},event,{ path: '/s3LinkExpire' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'https://s3.amazonaws.com/my-test-bucket/test/test.txt?AWSAccessKeyId=AKXYZ&Expires=1534290845&Signature=XYZ',
       isBase64Encoded: false
@@ -136,7 +136,7 @@ describe('getLink Tests:', function() {
     let _event = Object.assign({},event,{ path: '/s3LinkInvalidExpire' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'https://s3.amazonaws.com/my-test-bucket/test/test.txt?AWSAccessKeyId=AKXYZ&Expires=1534290845&Signature=XYZ',
       isBase64Encoded: false
@@ -149,7 +149,7 @@ describe('getLink Tests:', function() {
     let _event = Object.assign({},event,{ path: '/s3LinkExpireFloat' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: 'https://s3.amazonaws.com/my-test-bucket/test/test.txt?AWSAccessKeyId=AKXYZ&Expires=1534290845&Signature=XYZ',
       isBase64Encoded: false
@@ -162,7 +162,7 @@ describe('getLink Tests:', function() {
     let _event = Object.assign({},event,{ path: '/s3LinkError' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 500,
       body: '{"error":"getSignedUrl error"}',
       isBase64Encoded: false
@@ -174,7 +174,7 @@ describe('getLink Tests:', function() {
     let _event = Object.assign({},event,{ path: '/s3LinkErrorCustom' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 500,
       body: '{"error":"Custom error"}',
       isBase64Encoded: false
@@ -186,7 +186,7 @@ describe('getLink Tests:', function() {
     let _event = Object.assign({},event,{ path: '/s3LinkErrorStandard' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 500,
       body: '{"error":"getSignedUrl error"}',
       isBase64Encoded: false
@@ -198,7 +198,7 @@ describe('getLink Tests:', function() {
     let _event = Object.assign({},event,{ path: '/s3LinkInvalid' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: { 'content-type': 'application/json' },
+      multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 500,
       body: '{"error":"Invalid S3 path"}',
       isBase64Encoded: false

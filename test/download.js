@@ -14,15 +14,12 @@ const S3 = require('../lib/s3-service') // Init S3 Service
 // Init API instance
 const api = require('../index')({ version: 'v1.0', mimeTypes: { test: 'text/test' } })
 
-// NOTE: Set test to true
-api._test = true;
-
 let event = {
   httpMethod: 'get',
   path: '/',
   body: {},
-  headers: {
-    'content-type': 'application/json'
+  multiValueHeaders: {
+    'content-type': ['application/json']
   }
 }
 
@@ -154,31 +151,31 @@ describe('Download Tests:', function() {
   it('Bad path', async function() {
     let _event = Object.assign({},event,{ path: '/download/badpath' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json', 'x-error': 'true' }, statusCode: 500, body: '{"error":"Invalid file"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 500, body: '{"error":"Invalid file"}', isBase64Encoded: false })
   }) // end it
 
   it('Missing file', async function() {
     let _event = Object.assign({},event,{ path: '/download' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json', 'x-error': 'true' }, statusCode: 500, body: '{"error":"No such file"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 500, body: '{"error":"No such file"}', isBase64Encoded: false })
   }) // end it
 
   it('Missing file with custom catch', async function() {
     let _event = Object.assign({},event,{ path: '/download/err' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json', 'x-error': 'true' }, statusCode: 404, body: '{"error":"There was an error accessing the requested file"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 404, body: '{"error":"There was an error accessing the requested file"}', isBase64Encoded: false })
   }) // end it
 
   it('Text file w/ callback override (promise)', async function() {
     let _event = Object.assign({},event,{ path: '/download/test' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires,
-        'last-modified': result.headers['last-modified'],
-        'content-disposition': 'attachment; filename="test.txt"'
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires,
+        'last-modified': result.multiValueHeaders['last-modified'],
+        'content-disposition': ['attachment; filename="test.txt"']
       },
       statusCode: 201, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
@@ -187,19 +184,19 @@ describe('Download Tests:', function() {
   it('Text file error w/ callback override (promise)', async function() {
     let _event = Object.assign({},event,{ path: '/download/test', queryStringParameters: { test: 'x' } })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ headers: { 'content-type': 'application/json', 'x-error': 'true' }, statusCode: 501, body: '{"error":"Custom File Error"}', isBase64Encoded: false })
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 501, body: '{"error":"Custom File Error"}', isBase64Encoded: false })
   }) // end it
 
   it('Buffer Input (no filename)', async function() {
     let _event = Object.assign({},event,{ path: '/download/buffer' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires,
-        'last-modified': result.headers['last-modified'],
-        'content-disposition': 'attachment'
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires,
+        'last-modified': result.multiValueHeaders['last-modified'],
+        'content-disposition': ['attachment']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -208,12 +205,12 @@ describe('Download Tests:', function() {
     let _event = Object.assign({},event,{ path: '/download/buffer', queryStringParameters: { filename: 'test.txt' } })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires,
-        'last-modified': result.headers['last-modified'],
-        'content-disposition': 'attachment; filename="test.txt"'
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires,
+        'last-modified': result.multiValueHeaders['last-modified'],
+        'content-disposition': ['attachment; filename="test.txt"']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -223,14 +220,14 @@ describe('Download Tests:', function() {
     let _event = Object.assign({},event,{ path: '/download/headers' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'x-test': 'test',
-        'x-timestamp': 1,
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires,
-        'last-modified': result.headers['last-modified'],
-        'content-disposition': 'attachment; filename="test.txt"'
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'x-test': ['test'],
+        'x-timestamp': [1],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires,
+        'last-modified': result.multiValueHeaders['last-modified'],
+        'content-disposition': ['attachment; filename="test.txt"']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -240,13 +237,13 @@ describe('Download Tests:', function() {
     let _event = Object.assign({},event,{ path: '/download/all' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'x-callback': 'true',
-        'cache-control': 'private, max-age=3600',
-        'expires': result.headers.expires,
-        'last-modified': result.headers['last-modified'],
-        'content-disposition': 'attachment; filename="test-file.txt"'
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'x-callback': ['true'],
+        'cache-control': ['private, max-age=3600'],
+        'expires': result.multiValueHeaders.expires,
+        'last-modified': result.multiValueHeaders['last-modified'],
+        'content-disposition': ['attachment; filename="test-file.txt"']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -256,13 +253,13 @@ describe('Download Tests:', function() {
     let _event = Object.assign({},event,{ path: '/download/no-options' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'x-callback': 'true',
-        'cache-control': 'max-age=0',
-        'expires': result.headers.expires,
-        'last-modified': result.headers['last-modified'],
-        'content-disposition': 'attachment; filename="test-file.txt"'
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'x-callback': ['true'],
+        'cache-control': ['max-age=0'],
+        'expires': result.multiValueHeaders.expires,
+        'last-modified': result.multiValueHeaders['last-modified'],
+        'content-disposition': ['attachment; filename="test-file.txt"']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -272,13 +269,13 @@ describe('Download Tests:', function() {
     let _event = Object.assign({},event,{ path: '/download/s3' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'cache-control': 'max-age=0',
-        'content-disposition': 'attachment; filename="test.txt"',
-        'expires': result.headers['expires'],
-        'etag': '"ae771fbbba6a74eeeb77754355831713"',
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'cache-control': ['max-age=0'],
+        'content-disposition': ['attachment; filename="test.txt"'],
+        'expires': result.multiValueHeaders['expires'],
+        'etag': ['"ae771fbbba6a74eeeb77754355831713"'],
+        'last-modified': result.multiValueHeaders['last-modified']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -287,13 +284,13 @@ describe('Download Tests:', function() {
     let _event = Object.assign({},event,{ path: '/download/s3path' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'text/plain',
-        'cache-control': 'max-age=0',
-        'content-disposition': 'attachment; filename="test.txt"',
-        'expires': result.headers['expires'],
-        'etag': '"ae771fbbba6a74eeeb77754355831713"',
-        'last-modified': result.headers['last-modified']
+      multiValueHeaders: {
+        'content-type': ['text/plain'],
+        'cache-control': ['max-age=0'],
+        'content-disposition': ['attachment; filename="test.txt"'],
+        'expires': result.multiValueHeaders['expires'],
+        'etag': ['"ae771fbbba6a74eeeb77754355831713"'],
+        'last-modified': result.multiValueHeaders['last-modified']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
   }) // end it
@@ -302,9 +299,9 @@ describe('Download Tests:', function() {
     let _event = Object.assign({},event,{ path: '/download/s3missing' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({
-      headers: {
-        'content-type': 'application/json',
-        'x-error': 'true'
+      multiValueHeaders: {
+        'content-type': ['application/json'],
+        'x-error': ['true']
       }, statusCode: 500, body: '{"error":"NoSuchKey: The specified key does not exist."}', isBase64Encoded: false
     })
   }) // end it
