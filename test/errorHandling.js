@@ -11,6 +11,15 @@ const api4 = require('../index')({ version: 'v1.0' })
 const api5 = require('../index')({ version: 'v1.0', logger: { access: 'never' }})
 const api_errors = require('../index')({ version: 'v1.0' })
 
+class CustomError extends Error {
+  constructor(message,code) {
+    super(message)
+    this.name = this.constructor.name
+    this.code = code
+  }
+}
+
+
 let event = {
   httpMethod: 'get',
   path: '/test',
@@ -86,6 +95,13 @@ const callError = (err,req,res,next) => {
 
 api4.use(callError,errorMiddleware1)
 
+api5.use((err,req,res,next) => {
+  if (err instanceof CustomError) {
+    res.status(401)
+  }
+  next()
+})
+
 /******************************************************************************/
 /***  DEFINE TEST ROUTES                                                    ***/
 /******************************************************************************/
@@ -134,6 +150,10 @@ api5.get('/testErrorThrow', function(req,res) {
 
 api5.get('/testErrorDetail', function(req,res) {
   res.error('This is a test error message','details')
+})
+
+api5.get('/testErrorCustom', function(req,res) {
+  throw new CustomError('This is a custom error',403)
 })
 
 api_errors.use(function(err,req,res,next) {
@@ -285,6 +305,19 @@ describe('Error Handling Tests:', function() {
       expect(_log.level).to.equal('error')
       expect(_log.msg).to.equal('This is a test error message')
       expect(_log.detail).to.equal('details')
+    }) // end it
+
+    it('Custom Error', async function() {
+      let _log
+      let _event = Object.assign({},event,{ path: '/testErrorCustom'})
+      let logger = console.log
+      console.log = log => { try { _log = JSON.parse(log) } catch(e) { _log = log } }
+      let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
+      console.log = logger
+      // console.log(JSON.stringify(_log,null,2));
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 401, body: '{"error":"This is a custom error"}', isBase64Encoded: false })
+      expect(_log.level).to.equal('fatal')
+      expect(_log.msg).to.equal('This is a custom error')
     }) // end it
 
   })
