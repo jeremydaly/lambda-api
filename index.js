@@ -258,6 +258,9 @@ class API {
 
     let message
 
+    // Set the status code
+    response.status(code ? code : this._errorStatus)
+
     let info = {
       detail,
       statusCode: response._statusCode,
@@ -266,13 +269,11 @@ class API {
     }
 
     if (e instanceof Error) {
-      response.status(code ? code : this._errorStatus)
       message = e.message
-      this.log.fatal(message, info)
+      this.log.fatal(message,info)
     } else {
-      response.status(code)
       message = e
-      this.log.error(message, info)
+      this.log.error(message,info)
     }
 
     // If first time through, process error middleware
@@ -322,6 +323,9 @@ class API {
       )
       console.log(JSON.stringify(this._logger.format(access,response._request,response))) // eslint-disable-line no-console
     }
+
+    // Reset global error code
+    this._errorStatus = 500
 
     // Execute the primary callback
     typeof this._cb === 'function' && this._cb(err,res)
