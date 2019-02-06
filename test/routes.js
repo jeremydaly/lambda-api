@@ -1044,16 +1044,16 @@ describe('Route Tests:', function() {
 
     // TODO: ???
     it('Missing callback', async function() {
-      let _event = Object.assign({},event,{ path: '/test', httpMethod: 'get' })
-      let result = await api.run(_event,{}).then(res => { return res })
-
-      expect(result).to.deep.equal({
-        multiValueHeaders: { 'content-type': ['application/json'] },
-        statusCode: 200,
-        body: '{"method":"get","status":"ok"}',
-        isBase64Encoded: false
-      })
-
+      let error
+      try {
+        const api_error1 = require('../index')({ version: 'v1.0' })
+        api_error1.get()
+      } catch(e) {
+        // console.log(e);
+        error = e
+      }
+      expect(error.name).to.equal('ConfigurationError')
+      expect(error.message).to.equal('No handler or middleware specified for GET method on /* route.')
     }) // end it
 
     it('Invalid middleware', async function() {
