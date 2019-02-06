@@ -28,7 +28,12 @@ api.get('/', function(req,res) {
   res.status(200).json({ method: 'get', status: 'ok' })
 })
 
+
 api.get('/return', async function(req,res) {
+  return { method: 'get', status: 'ok' }
+})
+
+api.get('/returnNoArgs', async () => {
   return { method: 'get', status: 'ok' }
 })
 
@@ -300,6 +305,18 @@ describe('Route Tests:', function() {
 
     it('Simple path w/ async return', async function() {
       let _event = Object.assign({},event,{ path: '/return' })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        multiValueHeaders: { 'content-type': ['application/json'] },
+        statusCode: 200,
+        body: '{"method":"get","status":"ok"}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+
+    it('Simple path w/ async return (no args)', async function() {
+      let _event = Object.assign({},event,{ path: '/returnNoArgs' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
       expect(result).to.deep.equal({
         multiValueHeaders: { 'content-type': ['application/json'] },
@@ -1029,7 +1046,7 @@ describe('Route Tests:', function() {
 
   describe('Configuration errors', function() {
 
-    it('Missing handler', async function() {
+    it('Missing handler (w/ route)', async function() {
       let error
       try {
         const api_error1 = require('../index')({ version: 'v1.0' })
@@ -1042,18 +1059,17 @@ describe('Route Tests:', function() {
       expect(error.message).to.equal('No handler or middleware specified for GET method on /test-missing-handler route.')
     }) // end it
 
-    // TODO: ???
-    it('Missing callback', async function() {
-      let _event = Object.assign({},event,{ path: '/test', httpMethod: 'get' })
-      let result = await api.run(_event,{}).then(res => { return res })
-
-      expect(result).to.deep.equal({
-        multiValueHeaders: { 'content-type': ['application/json'] },
-        statusCode: 200,
-        body: '{"method":"get","status":"ok"}',
-        isBase64Encoded: false
-      })
-
+    it('Missing handler', async function() {
+      let error
+      try {
+        const api_error1 = require('../index')({ version: 'v1.0' })
+        api_error1.get()
+      } catch(e) {
+        // console.log(e);
+        error = e
+      }
+      expect(error.name).to.equal('ConfigurationError')
+      expect(error.message).to.equal('No handler or middleware specified for GET method on /* route.')
     }) // end it
 
     it('Invalid middleware', async function() {

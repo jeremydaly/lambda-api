@@ -88,7 +88,7 @@ class API {
 
     // Extract the execution stack
     let stack = args.map((fn,i) => {
-      if (typeof fn === 'function' && (fn.length === 3 || (fn.length === 2 && i === args.length-1)))
+      if (typeof fn === 'function' && (fn.length === 3 || (i === args.length-1)))
         return fn
       throw new ConfigurationError('Route-based middleware must have 3 parameters')
     })
@@ -394,10 +394,6 @@ class API {
 
       // If a value exists in this iteration
       if (value !== null) {
-
-        // TEMP: debug
-        // value._STACK = value.stack.map(x => x.name)
-        // value._STACK2 = value.inherited.map(x => x.name)
 
         // If mounting middleware
         if (method === '__MW__') {
