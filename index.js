@@ -395,10 +395,6 @@ class API {
       // If a value exists in this iteration
       if (value !== null) {
 
-        // TEMP: debug
-        // value._STACK = value.stack.map(x => x.name)
-        // value._STACK2 = value.inherited.map(x => x.name)
-
         // If mounting middleware
         if (method === '__MW__') {
           // Merge stacks if middleware exists
