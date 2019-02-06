@@ -88,7 +88,7 @@ class API {
 
     // Extract the execution stack
     let stack = args.map((fn,i) => {
-      if (typeof fn === 'function' && (fn.length === 3 || (fn.length === 2 && i === args.length-1)))
+      if (typeof fn === 'function' && (fn.length === 3 || (i === args.length-1)))
         return fn
       throw new ConfigurationError('Route-based middleware must have 3 parameters')
     })
