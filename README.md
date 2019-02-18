@@ -1358,7 +1358,7 @@ import API from 'lambda-api'
 
 ## Sponsors
 
-[![IOpipe](http://jeremydaly.com/wp-content/uploads/2019/02/io-_logo_black_rgb-300x167.png)](https://www.iopipe.com/?utm_source=github&utm_medium=lambda-warmer-lambda-api&utm_campaign=open%20source%20sponsorship)
+[![IOpipe](http://jeremydaly.com/wp-content/uploads/2019/02/iopipe-logo.png)](https://www.iopipe.com/?utm_source=github&utm_medium=lambda-warmer-lambda-api&utm_campaign=open%20source%20sponsorship)
 
 IOpipe is all about making it more fun to be a developer through the support of the open source serverless community. Sign up with [IOpipe](https://www.iopipe.com/?utm_source=github&utm_medium=lambda-warmer-lambda-api&utm_campaign=open%20source%20sponsorship) for free to get real-time visibility into the most detailed behaviors of your Lambda applications.
 
