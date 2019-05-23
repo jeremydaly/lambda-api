@@ -149,7 +149,7 @@ export declare class Response {
   getHeader(key: string): string;
   hasHeader(key: string): boolean;
   removeHeader(key: string): this;
-  getLink(s3Path: string, expires?: number, callback?: (err, data) => void);
+  getLink(s3Path: string, expires?: number, callback?: ErrorCallback): Promise<string>;
   send(body: any): void;
   json(body: any): void;
   jsonp(body: any): void;
@@ -159,16 +159,16 @@ export declare class Response {
   redirect(status: number, path: string): void;
   redirect(path: string): void;
   cors(options: CorsOptions): this;
-  error(message: string, detail?: any);
-  error(code: number, message: string, detail?: any);
+  error(message: string, detail?: any): void;
+  error(code: number, message: string, detail?: any): void;
   cookie(name: string, value: string, options?: CookieOptions): this;
   clearCookie(name: string, options?: CookieOptions): this;
   etag(enable?: boolean): this;
   cache(age?: boolean | number | string, private?: boolean): this;
   modified(date: boolean | string | Date): this;
   attachment(fileName?: string): this;
-  download(file: string | Buffer, fileName?: string, options?: FileOptions, callback?: ErrorCallback);
-  sendFile(file: string | Buffer, options?: FileOptions, callback?: ErrorCallback);
+  download(file: string | Buffer, fileName?: string, options?: FileOptions, callback?: ErrorCallback): void;
+  sendFile(file: string | Buffer, options?: FileOptions, callback?: ErrorCallback): Promise<void>;
 }
 
 export declare class API {
@@ -197,10 +197,10 @@ export declare class API {
 
 
 
-  use(path: string, ...middleware: Middleware[]);
-  use(paths: string[], ...middleware: Middleware[]);
-  use (...middleware: Middleware[]);
-  use (...errorHandlingMiddleware: ErrorHandlingMiddleware[]);
+  use(path: string, ...middleware: Middleware[]): void;
+  use(paths: string[], ...middleware: Middleware[]): void;
+  use(...middleware: Middleware[]): void;
+  use(...errorHandlingMiddleware: ErrorHandlingMiddleware[]): void;
 
   finally(callback: FinallyFunction): void;
 
