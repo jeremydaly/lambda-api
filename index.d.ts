@@ -27,7 +27,7 @@ export declare interface FileOptions {
   maxAge?: number;
   root?: string;
   lastModified?: boolean | string;
-  headers?: {};
+  headers?: { [key: string]: string };
   cacheControl?: boolean | string;
   private?: boolean;
 }
@@ -36,10 +36,10 @@ export declare interface App {
   [namespace: string]: HandlerFunction;
 }
 
-export declare type Middleware = (req: Request, res: Response, next: Middleware) => void;
+export declare type Middleware = (req: Request, res: Response, next: () => void) => void;
 export declare type ErrorHandlingMiddleware = (error: Error, req: Request, res: Response, next: ErrorHandlingMiddleware) => void;
 export declare type ErrorCallback = (error?: Error) => void;
-export declare type HandlerFunction = (req?: Request, res?: Response, next?: NextFunction) => void | {} | Promise<{}>;
+export declare type HandlerFunction = (req: Request, res: Response, next?: NextFunction) => void | any | Promise<any>;
 export declare type LoggerFunction = (message: string) => void;
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
@@ -80,7 +80,7 @@ export declare interface LoggerOptions {
     rules?: SamplingOptions[];
   };
   serializers?: {
-    [name: string]: (req: Request) => {};
+    [name: string]: (prop: any) => any;
   };
   stack?: boolean;
 }
@@ -100,17 +100,21 @@ export declare class Request {
   app: API;
   version: string;
   id: string;
-  params: {};
+  params: {
+    [key: string]: string | undefined;
+  };
   method: string;
   path: string;
   query: {
-    [key: string]: string;
+    [key: string]: string | undefined;
   };
   headers: {
-    [key: string]: string;
+    [key: string]: string | undefined;
   };
-  rawHeaders?: {};
-  body: {} | string;
+  rawHeaders?: {
+    [key: string]: string | undefined;
+  };
+  body: any;
   rawBody: string;
   route: '';
   requestContext: APIGatewayEventRequestContext;
@@ -119,8 +123,8 @@ export declare class Request {
   stageVariables: { [name: string]: string } | null;
   auth: {
     [key: string]: any;
-    type: 'Bearer' | 'Basic' | 'OAuth' | 'Digest';
-    value: string;
+    type: 'Bearer' | 'Basic' | 'OAuth' | 'Digest' | 'none';
+    value: string | null;
   };
   cookies: {
     [key: string]: CookieOptions;
@@ -141,10 +145,13 @@ export declare class Request {
     error: LoggerFunction;
     fatal: LoggerFunction;
   };
+
+  [key: string]: any;
 }
 
 export declare class Response {
   status(code: number): this;
+  sendStatus(code: number): void;
   header(key: string, value: string): this;
   getHeader(key: string): string;
   hasHeader(key: string): boolean;
