@@ -311,7 +311,7 @@ class API {
 
     // Output logs
     response._request._logs.forEach(log => {
-      console.log(JSON.stringify(this._logger.detail ? // eslint-disable-line no-console
+      this._logger.logger(JSON.stringify(this._logger.detail ? // eslint-disable-line no-console
         this._logger.format(log,response._request,response) : log))
     })
 
@@ -321,7 +321,7 @@ class API {
         this._logger.log('access',undefined,response._request,response._request.context),
         { statusCode: res.statusCode, coldStart: response._request.coldStart, count: response._request.requestCount }
       )
-      console.log(JSON.stringify(this._logger.format(access,response._request,response))) // eslint-disable-line no-console
+      this._logger.logger(JSON.stringify(this._logger.format(access,response._request,response))) // eslint-disable-line no-console
     }
 
     // Reset global error code

@@ -17,6 +17,9 @@ const api_noAccessLogs = require('../index')({ version: 'v1.0', logger: { access
 const api_nested = require('../index')({ version: 'v1.0', logger: { nested: true, access: true } })
 const api_withDetail = require('../index')({ version: 'v1.0', logger: { detail: true } })
 const api_showStackTrace = require('../index')({ version: 'v1.0', logger: { stack: true } })
+const api_customLogger = require('../index')({ version: 'v1.0', logger: {
+  log: (x) => console.log(JSON.stringify(Object.assign(JSON.parse(x),{ LOGGER: true })))
+} })
 const api_customLevels = require('../index')({ version: 'v1.0', logger: {
   levels: {
     testDebug: 35,
@@ -183,6 +186,11 @@ api_customLevels.get('/', (req,res) => {
 
 api_customSerializers.get('/', (req,res) => {
   req.log.info('info message',{test:true})
+  res.send('done')
+})
+
+api_customLogger.get('/', (req,res) => {
+  req.log.info('info message','second param')
   res.send('done')
 })
 
@@ -1004,5 +1012,50 @@ describe('Logging Tests:', function() {
     expect(_log[1]).to.have.property('country')
   }) // end it
 
+
+  it('Custom Logger', async function() {
+    console.log = logger
+    let _event = Object.assign({},event,{ path: '/' })
+    let result = await new Promise(r => api_customLogger.run(_event,context,(e,res) => { r(res) }))
+    console.log = consoleLog
+
+    expect(result).to.deep.equal({
+      multiValueHeaders: { 'content-type': ['application/json'] },
+      statusCode: 200,
+      body: 'done',
+      isBase64Encoded: false
+    })
+
+    expect(_log).to.have.length(2)
+    expect(_log[0].level).to.equal('info')
+    expect(_log[1].level).to.equal('access')
+    // standard log
+    expect(_log[0]).to.have.property('LOGGER')
+    expect(_log[0]).to.have.property('time')
+    expect(_log[0]).to.have.property('id')
+    expect(_log[0]).to.have.property('route')
+    expect(_log[0]).to.have.property('msg')
+    expect(_log[0]).to.have.property('timer')
+    expect(_log[0]).to.have.property('remaining')
+    expect(_log[0]).to.have.property('function')
+    expect(_log[0]).to.have.property('memory')
+    expect(_log[0]).to.have.property('int')
+
+    expect(_log[1]).to.have.property('LOGGER')
+    expect(_log[1]).to.have.property('time')
+    expect(_log[1]).to.have.property('id')
+    expect(_log[1]).to.have.property('route')
+    expect(_log[1]).to.have.property('timer')
+    expect(_log[1]).to.have.property('remaining')
+    expect(_log[1]).to.have.property('function')
+    expect(_log[1]).to.have.property('memory')
+    expect(_log[1]).to.have.property('coldStart')
+    expect(_log[1]).to.have.property('path')
+    expect(_log[1]).to.have.property('ip')
+    expect(_log[1]).to.have.property('ua')
+    expect(_log[1]).to.have.property('version')
+    expect(_log[1]).to.have.property('device')
+    expect(_log[1]).to.have.property('country')
+  }) // end it
 
 })

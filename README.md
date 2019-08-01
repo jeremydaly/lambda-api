@@ -859,6 +859,7 @@ Logging can be enabled by setting the `logger` option to `true` when creating th
 | detail | `boolean` | Enables/disables adding `REQUEST` and `RESPONSE` data to all log entries. | `false` |
 | level | `string` | Minimum logging level to send logs for. See [Logging Levels](#logging-levels). | `info` |
 | levels | `object` | Key/value pairs of custom log levels and their priority. See [Custom Logging Levels](#custom-logging-levels). | |
+| log | `function` | Custom function for overriding standard `console.log`. | `console.log` |
 | messageKey | `string` | Sets the JSON property name of the log "message". | `msg` |
 | multiValue | `boolean` | Enables multi-value support for querystrings. If enabled, the `qs` parameter will return all values as `array`s and will include multiple values if they exist. | `false` |
 | nested | `boolean` | Enables/disables nesting of JSON logs for serializer data. See [Serializers](#serializers). | `false` |
