@@ -1,0 +1,44 @@
+{
+  "resource": "/{proxy+}",
+  "path": "/test/hello",
+  "httpMethod": "GET",
+  "headers": null,
+  "multiValueHeaders": null,
+  "queryStringParameters": null,
+  "multiValueQueryStringParameters": null,
+  "pathParameters": {
+    "proxy": "test/hello"
+  },
+  "stageVariables": null,
+  "requestContext": {
+    "path": "/{proxy+}",
+    "accountId": "012345678900",
+    "resourceId": "s1swyk",
+    "stage": "test-invoke-stage",
+    "domainPrefix": "testPrefix",
+    "requestId": "3b5b1ca9-80ba-11e9-b4af-a3ad35996092",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "cognitoIdentityId": null,
+      "apiKey": "test-invoke-api-key",
+      "principalOrgId": null,
+      "cognitoAuthenticationType": null,
+      "userArn": "arn:aws:iam::012345678900:root",
+      "apiKeyId": "test-invoke-api-key-id",
+      "userAgent": "aws-internal/3 aws-sdk-java/1.11.534 Linux/4.9.137-0.1.ac.218.74.329.metal1.x86_64 OpenJDK_64-Bit_Server_VM/25.202-b08 java/1.8.0_202 vendor/Oracle_Corporation",
+      "accountId": "012345678900",
+      "caller": "012345678900",
+      "sourceIp": "test-invoke-source-ip",
+      "accessKey": "AAAAAAAAAAAAAAAAAAAA",
+      "cognitoAuthenticationProvider": null,
+      "user": "012345678900"
+    },
+    "domainName": "testPrefix.testDomainName",
+    "resourcePath": "/{proxy+}",
+    "httpMethod": "GET",
+    "extendedRequestId": "aW9E_GA3PHcFX0A=",
+    "apiId": "8gd934em46"
+  },
+  "body": null,
+  "isBase64Encoded": false
+}
