@@ -165,8 +165,11 @@ describe('Request Tests:', function() {
       expect(body.request.multiValueHeaders['test-header']).to.deep.equal(['val1','val2'])
     })
 
+  })
+
+  describe('API Gateway Console Test', function() {
     // See: https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-test-method.html
-    it('API Gateway Console Test event', async function() {
+    it('Standard event w/o multiValueHeaders', async function() {
       let _event = require('./sample-event-consoletest1.json')
       let _context = require('./sample-context-apigateway1.json')
       let result = await new Promise(r => api.run(_event,_context,(e,res) => { r(res) }))
