@@ -165,6 +165,31 @@ describe('Request Tests:', function() {
       expect(body.request.multiValueHeaders['test-header']).to.deep.equal(['val1','val2'])
     })
 
+    // See: https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-test-method.html
+    it('API Gateway Console Test event', async function() {
+      let _event = require('./sample-event-consoletest1.json')
+      let _context = require('./sample-context-apigateway1.json')
+      let result = await new Promise(r => api.run(_event,_context,(e,res) => { r(res) }))
+      let body = JSON.parse(result.body)
+      // console.log(body);
+      // console.log(body.request.multiValueHeaders);
+      expect(body).to.have.property('request')
+      expect(body.request.id).is.not.null
+      expect(body.request.interface).to.equal('apigateway')
+      expect(body.request).to.have.property('requestContext')
+      expect(body.request.ip).to.equal('test-invoke-source-ip')
+      expect(body.request.pathParameters).to.deep.equal({ "proxy": "test/hello" })
+      expect(body.request.stageVariables).to.deep.equal({})
+      expect(body.request.isBase64Encoded).to.equal(false)
+      expect(body.request.clientType).to.equal('unknown')
+      expect(body.request.clientCountry).to.equal('unknown')
+      expect(body.request.route).to.equal('/test/hello')
+      expect(body.request.query).to.deep.equal({})
+      expect(body.request.multiValueQuery).to.deep.equal({})
+      expect(body.request.headers).to.deep.equal({})
+      // NOTE: body.request.multiValueHeaders is null in this case
+    })
+
   })
 
 }) // end Request tests
