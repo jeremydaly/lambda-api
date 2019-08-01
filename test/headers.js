@@ -172,6 +172,12 @@ describe('Header Tests:', function() {
       expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'test': ['testVal1','testVal2'] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
+    it('Multi-value Header: /testMulti (null header)', async function() {
+      let _event = Object.assign({},event,{ path: '/testMulti', multiValueHeaders: null })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'test': ['testVal1','testVal2'] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+    }) // end it
+
     it('HTML Convenience Method: /testHTML', async function() {
       let _event = Object.assign({},event,{ path: '/testHTML'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
