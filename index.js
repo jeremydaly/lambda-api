@@ -467,7 +467,7 @@ class API {
     fn(this,options)
 
     // Remove the last prefix
-    this._prefix = this._prefix.slice(0,-(prefix.length))
+    if(prefix.length) this._prefix = this._prefix.slice(0,-(prefix.length))
 
   } // end register
 
