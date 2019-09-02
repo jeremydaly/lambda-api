@@ -26,6 +26,7 @@ class API {
     this._callbackName = props && props.callback ? props.callback.trim() : 'callback'
     this._mimeTypes = props && props.mimeTypes && typeof props.mimeTypes === 'object' ? props.mimeTypes : {}
     this._serializer = props && props.serializer && typeof props.serializer === 'function' ? props.serializer : JSON.stringify
+    this._errorHeaderWhitelist = props && (props.errorHeaderWhitelist || []).map(header => header.toLowerCase())
 
     // Set sampling info
     this._sampleCounts = {}
@@ -253,8 +254,17 @@ class API {
     // Error messages should never be base64 encoded
     response._isBase64 = false
 
-    // Strip the headers (TODO: find a better way to handle this)
-    response._headers = {}
+    // Strip the headers, keep whitelist
+    const strippedHeaders = Object.entries(response._headers).reduce((acc, [headerName, value]) => {
+      if (!this._errorHeaderWhitelist.includes(headerName.toLowerCase())) return acc
+    
+      return {
+        ...acc,
+        [headerName]: value
+      }
+    }, {})
+
+    response._headers = strippedHeaders
 
     let message
 
