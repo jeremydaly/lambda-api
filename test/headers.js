@@ -3,7 +3,14 @@
 const expect = require('chai').expect // Assertion library
 
 // Init API instance
-const api = require('../index')({ version: 'v1.0' })
+
+const api = require('../index')({
+  version: 'v1.0',
+  errorHeaderWhitelist: [
+    'Access-Control-Allow-Origin',
+    'Access-Control-Allow-Methods',
+  ]
+})
 
 let event = {
   httpMethod: 'get',
@@ -91,6 +98,13 @@ api.get('/removeHeader', function(req,res) {
     removeHeader: res.hasHeader('testheader') ? false : true,
     hasHeader: res.hasHeader('NewHeader')
   })
+})
+
+api.get('/whitelistHeaders', function(req,res) {
+  res.status(200).header('TestStrippedHeader', 'RemoveMe')
+  res.status(200).header('access-control-allow-methods', ['GET, OPTIONS'])
+  res.status(200).header('access-control-allow-origin', ['example.com'])
+  throw new Error('TestError')
 })
 
 api.get('/cors', function(req,res) {
@@ -240,6 +254,20 @@ describe('Header Tests:', function() {
           'newheader': ['test']
         }, statusCode: 200,
         body: '{"removeHeader":true,"hasHeader":true}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Pass whitelisted headers on error', async function() {
+      let _event = Object.assign({},event,{ path: '/whitelistHeaders'})
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({
+        multiValueHeaders: {
+          'content-type': ['application/json'],
+          'access-control-allow-methods': ['GET, OPTIONS'],
+          'access-control-allow-origin': ['example.com'],
+        }, statusCode: 500,
+        body: '{"error":"TestError"}',
         isBase64Encoded: false
       })
     }) // end it
