@@ -26,7 +26,7 @@ class API {
     this._callbackName = props && props.callback ? props.callback.trim() : 'callback'
     this._mimeTypes = props && props.mimeTypes && typeof props.mimeTypes === 'object' ? props.mimeTypes : {}
     this._serializer = props && props.serializer && typeof props.serializer === 'function' ? props.serializer : JSON.stringify
-    this._errorHeaderWhitelist = props && (props.errorHeaderWhitelist || []).map(header => header.toLowerCase())
+    this._errorHeaderWhitelist = props && Array.isArray(props.errorHeaderWhitelist) ? props.errorHeaderWhitelist.map(header => header.toLowerCase()) : []
 
     // Set sampling info
     this._sampleCounts = {}

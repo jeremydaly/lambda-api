@@ -10,6 +10,7 @@ const api3 = require('../index')({ version: 'v1.0' })
 const api4 = require('../index')({ version: 'v1.0' })
 const api5 = require('../index')({ version: 'v1.0', logger: { access: 'never' }})
 const api_errors = require('../index')({ version: 'v1.0' })
+const api6 = require('../index')() // no props
 
 class CustomError extends Error {
   constructor(message,code) {
@@ -172,6 +173,10 @@ api_errors.get('/responseError', (req,res) => {
   res.redirect(310,'http://www.google.com')
 })
 
+api6.get('/testError', function(req,res) {
+  res.error('This is a test error message')
+})
+
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
@@ -318,6 +323,17 @@ describe('Error Handling Tests:', function() {
       expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 401, body: '{"error":"This is a custom error"}', isBase64Encoded: false })
       expect(_log.level).to.equal('fatal')
       expect(_log.msg).to.equal('This is a custom error')
+    }) // end it
+
+
+    it('Error, no props', async function() {
+      let _log
+      let _event = Object.assign({},event,{ path: '/testError'})
+      let logger = console.log
+      console.log = log => { try { _log = JSON.parse(log) } catch(e) { _log = log } }
+      let result = await new Promise(r => api6.run(_event,{},(e,res) => { r(res) }))
+      console.log = logger
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: '{"error":"This is a test error message"}', isBase64Encoded: false })
     }) // end it
 
   })
