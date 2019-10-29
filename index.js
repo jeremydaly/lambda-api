@@ -257,7 +257,7 @@ class API {
     // Strip the headers, keep whitelist
     const strippedHeaders = Object.entries(response._headers).reduce((acc, [headerName, value]) => {
       if (!this._errorHeaderWhitelist.includes(headerName.toLowerCase())) return acc
-    
+
       return {
         ...acc,
         [headerName]: value
@@ -476,8 +476,10 @@ class API {
     // Execute the routing function
     fn(this,options)
 
-    // Remove the last prefix
-    if(prefix.length) this._prefix = this._prefix.slice(0,-(prefix.length))
+    // Remove the last prefix (if a prefix exists)
+    if (prefix.length > 0) {
+      this._prefix = this._prefix.slice(0,-(prefix.length))
+    }
 
   } // end register
 
