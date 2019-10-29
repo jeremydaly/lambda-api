@@ -609,6 +609,12 @@ describe('Route Tests:', function() {
       expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"post","status":"ok","body":"Test file for sendFile\\n"}', isBase64Encoded: false })
     }) // end it
 
+    it('With base64 encoding flagged and no body', async function() {
+      let _event = Object.assign({},event,{ path: '/test/base64', httpMethod: 'post', body: undefined, isBase64Encoded: true })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"post","status":"ok","body":""}', isBase64Encoded: false })
+    }) // end it
+
     it('Missing path: /not_found', async function() {
       let _event = Object.assign({},event,{ path: '/not_found', httpMethod: 'post' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
