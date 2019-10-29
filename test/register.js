@@ -136,4 +136,14 @@ describe('Register Tests:', function() {
     expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"path":"/test-register-no-options","route":"/test-register-no-options","method":"GET"}', isBase64Encoded: false })
   }) // end it
 
+  it('Base path w/ multiple unprefixed registers', async function() {
+    const api = require('../index')({
+      base: 'base-path'
+    })
+    api.register((api) => { api.get('/foo', async () => {})}, { prefix: 'fuz'})
+    api.register((api) => { api.get('/bar', async () => {})})
+    api.register((api) => { api.get('/baz', async () => {})})
+    expect(api.routes()).to.deep.equal([["GET", "/base-path/fuz/foo"], ["GET", "/base-path/bar"], ["GET", "/base-path/baz"]])
+  }) // end it
+
 }) // end ROUTE tests
