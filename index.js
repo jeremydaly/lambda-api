@@ -256,12 +256,12 @@ class API {
 
     // Strip the headers, keep whitelist
     const strippedHeaders = Object.entries(response._headers).reduce((acc, [headerName, value]) => {
-      if (!this._errorHeaderWhitelist.includes(headerName.toLowerCase())) return acc
+      if (!this._errorHeaderWhitelist.includes(headerName.toLowerCase())) { return acc }
 
-      return {
-        ...acc,
-        [headerName]: value
-      }
+      return Object.assign(
+        acc,
+        { [headerName]: value }
+      )
     }, {})
 
     response._headers = strippedHeaders
