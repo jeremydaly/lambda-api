@@ -94,6 +94,7 @@ export declare interface Options {
   };
   serializer?: SerializerFunction;
   version?: string;
+  errorHeaderWhitelist?: string[];
 }
 
 export declare class Request {
