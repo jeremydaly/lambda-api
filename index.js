@@ -280,10 +280,14 @@ class API {
 
     if (e instanceof Error) {
       message = e.message
-      this.log.fatal(message,info)
+      if (this._logger.errorLogging) {
+        this.log.fatal(message, info)
+      }
     } else {
       message = e
-      this.log.error(message,info)
+      if (this._logger.errorLogging) {
+        this.log.error(message, info)
+      }
     }
 
     // If first time through, process error middleware

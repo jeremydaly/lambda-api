@@ -856,6 +856,7 @@ Logging can be enabled by setting the `logger` option to `true` when creating th
 | Property | Type | Description | Default |
 | -------- | ---- | ----------- | ------- |
 | access | `boolean` or `string` | Enables/disables automatic access log generation for each request. See [Access Logs](#access-logs). | `false` |
+| errorLogging | `boolean` | Enables/disables automatic error logging. | `true` |
 | customKey | `string` | Sets the JSON property name for custom data passed to logs. | `custom` |
 | detail | `boolean` | Enables/disables adding `REQUEST` and `RESPONSE` data to all log entries. | `false` |
 | level | `string` | Minimum logging level to send logs for. See [Logging Levels](#logging-levels). | `info` |
