@@ -65,6 +65,7 @@ export declare interface SamplingOptions {
 export declare interface LoggerOptions {
   access?: boolean | string;
   customKey?: string;
+  errorLogging?: boolean;
   detail?: boolean;
   level?: string;
   levels?: {
