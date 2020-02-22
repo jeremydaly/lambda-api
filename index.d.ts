@@ -129,7 +129,7 @@ export declare class Request {
     value: string | null;
   };
   cookies: {
-    [key: string]: CookieOptions;
+    [key: string]: string;
   };
   context: Context;
   coldStart: boolean;
