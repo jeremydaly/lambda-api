@@ -504,3 +504,5 @@ class API {
 
 // Export the API class as a new instance
 module.exports = opts => new API(opts)
+// Add createAPI as default export (to match index.d.ts)
+module.exports.default = module.exports
