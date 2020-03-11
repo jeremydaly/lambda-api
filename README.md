@@ -262,7 +262,7 @@ api.get('/users', (req,res) => {
 })
 ```
 
-### Async/Await  
+### Async/Await
 
 If you prefer to use `async/await`, you can easily apply this to your route functions.
 
@@ -1354,8 +1354,8 @@ If you are using persistent connections in your function routes (such as AWS RDS
 ## TypeScript Support
 An `index.d.ts` declaration file has been included for use with your TypeScript projects (thanks @hassankhan). Please feel free to make suggestions and contributions to keep this up-to-date with future releases.
 
-** TypeScript Example **
-```javascript
+**TypeScript Example**
+```typescript
 // import AWS Lambda types
 import { APIGatewayEvent, Context } from 'aws-lambda';
 // import Lambda API default function
