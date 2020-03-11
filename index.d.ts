@@ -32,8 +32,12 @@ export declare interface FileOptions {
   private?: boolean;
 }
 
+export declare interface RegisterOptions {
+  prefix?: string;
+}
+
 export declare interface App {
-  [namespace: string]: HandlerFunction;
+  [namespace: string]: any;
 }
 
 export declare type Middleware = (req: Request, res: Response, next: () => void) => void;
@@ -138,6 +142,7 @@ export declare class Request {
   userAgent: string;
   clientType: 'desktop' | 'mobile' | 'tv' | 'tablet' | 'unknown';
   clientCountry: string;
+  namespace: App;
 
   log: {
     trace: LoggerFunction;
@@ -202,7 +207,10 @@ export declare class API {
   any(...handler: HandlerFunction[]): void;
   METHOD(method: METHODS, path: string, ...handler: HandlerFunction[]): void;
   METHOD(method: METHODS, ...handler: HandlerFunction[]): void;
-
+  register(routes: (api: API, options?: RegisterOptions) => void, options?: RegisterOptions): void;
+  routes(format: true): void;
+  routes(format: false): string[][];
+  routes(): string[][];
 
 
 
