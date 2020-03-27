@@ -36,8 +36,10 @@ export declare interface RegisterOptions {
   prefix?: string;
 }
 
+export type Package = any;
+
 export declare interface App {
-  [namespace: string]: any;
+  [namespace: string]: Package;
 }
 
 export declare type Middleware = (req: Request, res: Response, next: () => void) => void;
@@ -186,8 +188,8 @@ export declare class Response {
 }
 
 export declare class API {
-  app(namespace: string, handler: HandlerFunction): App;
-  app(options: App): App;
+  app(namespace: string, package: Package): App;
+  app(packages: App): App;
 
   get(path: string, ...handler: HandlerFunction[]): void;
   get(...handler: HandlerFunction[]): void;
