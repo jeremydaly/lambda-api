@@ -43,7 +43,7 @@ export declare interface App {
 }
 
 export declare type Middleware = (req: Request, res: Response, next: () => void) => void;
-export declare type ErrorHandlingMiddleware = (error: Error, req: Request, res: Response, next: ErrorHandlingMiddleware) => void;
+export declare type ErrorHandlingMiddleware = (error: Error, req: Request, res: Response, next: () => void) => void;
 export declare type ErrorCallback = (error?: Error) => void;
 export declare type HandlerFunction = (req: Request, res: Response, next?: NextFunction) => void | any | Promise<any>;
 export declare type LoggerFunction = (message: string) => void;
