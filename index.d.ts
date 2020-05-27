@@ -207,8 +207,8 @@ export declare class API {
   head(...handler: HandlerFunction[]): void;
   any(path: string, ...handler: HandlerFunction[]): void;
   any(...handler: HandlerFunction[]): void;
-  METHOD(method: METHODS, path: string, ...handler: HandlerFunction[]): void;
-  METHOD(method: METHODS, ...handler: HandlerFunction[]): void;
+  METHOD(method: METHODS | METHODS[], path: string, ...handler: HandlerFunction[]): void;
+  METHOD(method: METHODS | METHODS[], ...handler: HandlerFunction[]): void;
   register(routes: (api: API, options?: RegisterOptions) => void, options?: RegisterOptions): void;
   routes(format: true): void;
   routes(format: false): string[][];
