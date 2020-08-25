@@ -116,6 +116,9 @@ export declare class Request {
   query: {
     [key: string]: string | undefined;
   };
+  multiValueQuery: {
+    [key: string]: string[] | undefined
+  };
   headers: {
     [key: string]: string | undefined;
   };
