@@ -99,6 +99,7 @@ export declare interface Options {
   mimeTypes?: {
     [key: string]: string;
   };
+  headerStyle: 'http1'|'http2';
   serializer?: SerializerFunction;
   version?: string;
   errorHeaderWhitelist?: string[];
