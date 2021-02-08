@@ -146,6 +146,7 @@ Require the `lambda-api` module into your Lambda handler script and instantiate 
 | mimeTypes | `Object` | Name/value pairs of additional MIME types to be supported by the `type()`. The key should be the file extension (without the `.`) and the value should be the expected MIME type, e.g. `application/json` |
 | serializer  | `Function` | Optional object serializer function. This function receives the `body` of a response and must return a string. Defaults to `JSON.stringify` |
 | version  | `String` | Version number accessible via the `REQUEST` object |
+| headerStyle  | `String` | Declares wether all headers are sent in lowercase, according to HTTP2 standard. Possible values: `http2`, `custom` |
 | errorHeaderWhitelist  | `Array` | Array of headers to maintain on errors |
 
 
