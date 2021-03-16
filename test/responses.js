@@ -27,12 +27,18 @@ const api4 = require('../index')({
     return gzipSync(json).toString('base64')
   }
 })
+// Init API with compression
+const api5 = require('../index')({
+  version: 'v1.0',
+  compression: true
+})
 
 let event = {
   httpMethod: 'get',
   path: '/test',
   body: {},
   multiValueHeaders: {
+    'Accept-Encoding': ['deflate, gzip'],
     'Content-Type': ['application/json']
   }
 }
@@ -120,6 +126,10 @@ api3.get('/testJSONP', function(req,res) {
 })
 
 api4.get('/testGZIP', function(req,res) {
+  res.json({ object: true })
+})
+
+api5.get('/testGZIP', function(req,res) {
   res.json({ object: true })
 })
 
@@ -276,6 +286,12 @@ describe('Response Tests:', function() {
     let _event = Object.assign({},event,{ path: '/testGZIP'})
     let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({ multiValueHeaders: { 'content-encoding': ['gzip'], 'content-type': ['application/json'] }, statusCode: 200, body: 'H4sIAAAAAAAAE6tWyk/KSk0uUbIqKSpN1VGKTy4tLsnPhXOTEotTzUwg3FoAan86iy0AAAA=', isBase64Encoded: true })
+  }) // end it
+
+  it('Compression (GZIP)', async function() {
+    let _event = Object.assign({},event,{ path: '/testGZIP'})
+    let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-encoding': ['gzip'], 'content-type': ['application/json'] }, statusCode: 200, body: 'H4sIAAAAAAAAE6tWyk/KSk0uUbIqKSpNrQUAAQd5Ug8AAAA=', isBase64Encoded: true })
   }) // end it
 
   after(function() {
