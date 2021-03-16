@@ -116,6 +116,7 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
   - [Error Logging](#error-logging)
 - [Namespaces](#namespaces)
 - [CORS Support](#cors-support)
+- [Compression](#compression)
 - [Execution Stacks](#execution-stacks)
 - [Lambda Proxy Integration](#lambda-proxy-integration)
 - [ALB Integration](#alb-integration)
@@ -1339,6 +1340,24 @@ api.options('/*', (req,res) => {
 You can also use the `cors()` ([see here](#corsoptions)) convenience method to add CORS headers.
 
 Conditional route support could be added via middleware or with conditional logic within the `OPTIONS` route.
+
+## Compression
+Currently, API Gateway HTTP APIs do not support automatic compression out of the box, but that doesn't mean the Lambda can't return a compressed response. In order to create a compressed response instantiate the API with `isBase64` set to true, and a custom serializer that returns a compressed response as a base64 encoded string. Also, don't forget to set the correct `content-encoding` header:
+
+```javascript
+const zlib = require('zlib')
+
+const api = require('lambda-api')({
+  isBase64: true,
+  headers: {
+    'content-encoding': ['gzip']
+  },
+  serializer: body => {
+    const json = JSON.stringify(body)
+    return zlib.gzipSync(json).toString('base64')
+  }
+})
+```
 
 ## Execution Stacks
 Lambda API v0.10 introduced execution stacks as a way to more efficiently process middleware. Execution stacks are automatically created for you when adding routes and middleware using the standard route convenience methods, as well as `METHOD()` and `use()`. This is a technical implementation that has made method-based middleware and additional wildcard functionality possible.

@@ -2,6 +2,7 @@
 
 const Promise = require('bluebird') // Promise library
 const expect = require('chai').expect // Assertion library
+const { gzipSync } = require('zlib')
 
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
@@ -13,6 +14,19 @@ const api_errors = require('../index')({ version: 'v1.0' })
 const api6 = require('../index')() // no props
 const api7 = require('../index')({ version: 'v1.0', logger: { errorLogging: false }})
 const api8 = require('../index')({ version: 'v1.0', logger: { access: 'never', errorLogging: true }})
+
+// Init API with custom gzip serializer and base64
+const api9 = require('../index')({
+  version: 'v1.0',
+  isBase64: true,
+  headers: {
+    'content-encoding': ['gzip']
+  },
+  serializer: body => {
+    const json = JSON.stringify(Object.assign(body,{ _custom: true, _base64: true }))
+    return gzipSync(json).toString('base64')
+  }
+})
 
 class CustomError extends Error {
   constructor(message,code) {
@@ -184,6 +198,10 @@ api7.get('/testErrorThrow', function(req,res) {
 })
 
 api8.get('/testErrorThrow', function(req,res) {
+  throw new Error('This is a test thrown error')
+})
+
+api9.get('/testErrorThrow', function(req,res) {
   throw new Error('This is a test thrown error')
 })
 
@@ -370,4 +388,15 @@ describe('Error Handling Tests:', function() {
 
   })
 
+  describe('base64 errors', function() {
+    it('Should return errors with base64 encoding', async function() {
+      let _log
+      let _event = Object.assign({},event,{ path: '/testErrorThrow'})
+      let logger = console.log
+      console.log = log => { try { _log = JSON.parse(log) } catch(e) { _log = log } }
+      let result = await new Promise(r => api9.run(_event,{},(e,res) => { r(res) }))
+      console.log = logger
+      expect(result).to.deep.equal({ multiValueHeaders: { 'content-encoding': ['gzip'], 'content-type': ['application/json'] }, statusCode: 500, body: 'H4sIAAAAAAAAE6tWSi0qyi9SslIKycgsVgCiRIWS1OIShZKMovzyPAWIrI5SfHJpcUl+rpJVSVFpKpCblFicamYC4dYCAL2BVyJFAAAA', isBase64Encoded: true })
+    })
+  })
 }) // end ERROR HANDLING tests
