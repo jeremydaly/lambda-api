@@ -15,7 +15,7 @@ const api3 = require('../index')({
   version: 'v1.0',
   serializer: body => JSON.stringify(Object.assign(body,{ _custom: true }))
 })
-// Init API with custom gzip serializer and base 64
+// Init API with custom gzip serializer and base64
 const api4 = require('../index')({
   version: 'v1.0',
   isBase64: true,

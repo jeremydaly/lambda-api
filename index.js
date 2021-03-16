@@ -253,8 +253,8 @@ class API {
   // Catch all async/sync errors
   async catchErrors(e,response,code,detail) {
 
-    // Error messages should never be base64 encoded
-    response._isBase64 = false
+    // Error messages should respect the app's base64 configuration
+    response._isBase64 = this._isBase64
 
     // Strip the headers, keep whitelist
     const strippedHeaders = Object.entries(response._headers).reduce((acc, [headerName, value]) => {
@@ -266,7 +266,7 @@ class API {
       )
     }, {})
 
-    response._headers = strippedHeaders
+    response._headers = Object.assign(strippedHeaders, this._headers)
 
     let message
 
