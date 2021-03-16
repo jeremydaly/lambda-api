@@ -27,7 +27,7 @@ class API {
     this._mimeTypes = props && props.mimeTypes && typeof props.mimeTypes === 'object' ? props.mimeTypes : {}
     this._serializer = props && props.serializer && typeof props.serializer === 'function' ? props.serializer : JSON.stringify
     this._errorHeaderWhitelist = props && Array.isArray(props.errorHeaderWhitelist) ? props.errorHeaderWhitelist.map(header => header.toLowerCase()) : []
-    this._isBase64 = props && !!props.isBase64
+    this._isBase64 = props && typeof props.isBase64 === 'boolean' ? props.isBase64 : false
     this._headers = props && props.headers && typeof props.headers === 'object' ? props.headers : {}
 
     // Set sampling info
