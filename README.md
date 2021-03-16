@@ -44,43 +44,56 @@ You may have heard that a serverless "best practice" is to keep your functions s
 Whatever you decide is best for your use case, **Lambda API** is there to support you. Whether your function has over a hundred routes, or just one, Lambda API's small size and lightning fast load time has virtually no impact on your function's performance. You can even define global wildcard routes that will process any incoming request, allowing you to use API Gateway or ALB to determine the routing. Yet despite its small footprint, it gives you the power of a full-featured web framework.
 
 ## Table of Contents
+- [Simple Example](#simple-example)
+- [Why Another Web Framework?](#why-another-web-framework)
+  - [Single Purpose Functions](#single-purpose-functions)
+- [Table of Contents](#table-of-contents)
 - [Installation](#installation)
 - [Requirements](#requirements)
 - [Configuration](#configuration)
 - [Recent Updates](#recent-updates)
+  - [v0.10: ALB support, method-based middleware, and multi-value headers and query string parameters](#v010-alb-support-method-based-middleware-and-multi-value-headers-and-query-string-parameters)
+  - [v0.9: New error types, custom serializers, and TypeScript support](#v09-new-error-types-custom-serializers-and-typescript-support)
+  - [v0.8: Logging support with sampling](#v08-logging-support-with-sampling)
+  - [v0.7: Restrict middleware execution to certain paths](#v07-restrict-middleware-execution-to-certain-paths)
+  - [v0.6: Support for both `callback-style` and `async-await`](#v06-support-for-both-callback-style-and-async-await)
+  - [v0.5: Remove Bluebird promises dependency](#v05-remove-bluebird-promises-dependency)
+  - [v0.4: Binary support](#v04-binary-support)
+  - [v0.3: New instantiation method](#v03-new-instantiation-method)
 - [Routes and HTTP Methods](#routes-and-http-methods)
 - [Returning Responses](#returning-responses)
   - [Async/Await](#asyncawait)
   - [Promises](#promises)
+  - [A Note About Flow Control](#a-note-about-flow-control)
 - [Route Prefixing](#route-prefixing)
 - [Debugging Routes](#debugging-routes)
 - [REQUEST](#request)
 - [RESPONSE](#response)
-  - [attachment()](#attachmentfilename)
-  - [cache()](#cacheage--private)
-  - [clearCookie()](#clearcookiename-options)
-  - [cookie()](#cookiename-value-options)
-  - [cors()](#corsoptions)
-  - [download()](#downloadfile--filename--options--callback)
-  - [error()](#errorcode-message-detail)
-  - [etag()](#etagboolean)
-  - [getHeader()](#getheaderkey-value--asarray)
+  - [status(code)](#statuscode)
+  - [sendStatus(code)](#sendstatuscode)
+  - [header(key, value [,append])](#headerkey-value-append)
+  - [getHeader(key [,asArray])](#getheaderkey-asarray)
   - [getHeaders()](#getheaders)
-  - [getLink()](#getlinks3path-expires-callback)
-  - [hasHeader()](#hasheaderkey)
-  - [header()](#headerkey-value--append)
-  - [html()](#htmlbody)
-  - [json()](#jsonbody)
-  - [jsonp()](#jsonpbody)
-  - [location](#locationpath)
-  - [modified()](#modifieddate)
-  - [redirect()](#redirectstatus-path)
-  - [removeHeader()](#removeheaderkey)
-  - [send()](#sendbody)
-  - [sendFile()](#sendfilefile--options--callback)
-  - [sendStatus()](#sendstatuscode)
-  - [status()](#statuscode)
-  - [type()](#typetype)
+  - [hasHeader(key)](#hasheaderkey)
+  - [removeHeader(key)](#removeheaderkey)
+  - [getLink(s3Path [, expires] [, callback])](#getlinks3path--expires--callback)
+  - [send(body)](#sendbody)
+  - [json(body)](#jsonbody)
+  - [jsonp(body)](#jsonpbody)
+  - [html(body)](#htmlbody)
+  - [type(type)](#typetype)
+  - [location(path)](#locationpath)
+  - [redirect([status,] path)](#redirectstatus-path)
+  - [cors([options])](#corsoptions)
+  - [error([code], message [,detail])](#errorcode-message-detail)
+  - [cookie(name, value [,options])](#cookiename-value-options)
+  - [clearCookie(name [,options])](#clearcookiename-options)
+  - [etag([boolean])](#etagboolean)
+  - [cache([age] [, private])](#cacheage--private)
+  - [modified(date)](#modifieddate)
+  - [attachment([filename])](#attachmentfilename)
+  - [download(file [, filename] [, options] [, callback])](#downloadfile--filename--options--callback)
+  - [sendFile(file [, options] [, callback])](#sendfilefile--options--callback)
 - [Enabling Binary Support](#enabling-binary-support)
 - [Path Parameters](#path-parameters)
 - [Wildcard Routes](#wildcard-routes)
@@ -94,6 +107,9 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
   - [Serializers](#serializers)
   - [Sampling](#sampling)
 - [Middleware](#middleware)
+  - [Restricting middleware execution to certain path(s)](#restricting-middleware-execution-to-certain-paths)
+  - [Specifying multiple middleware](#specifying-multiple-middleware)
+  - [Method-based middleware](#method-based-middleware)
 - [Clean Up](#clean-up)
 - [Error Handling](#error-handling)
   - [Error Types](#error-types)
@@ -104,9 +120,11 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
 - [Lambda Proxy Integration](#lambda-proxy-integration)
 - [ALB Integration](#alb-integration)
 - [Configuring Routes in API Gateway](#configuring-routes-in-api-gateway)
+- [Reusing Persistent Connections](#reusing-persistent-connections)
 - [TypeScript Support](#typescript-support)
 - [Sponsors](#sponsors)
 - [Contributions](#contributions)
+- [Are you using Lambda API?](#are-you-using-lambda-api)
 
 ## Installation
 ```
@@ -262,7 +280,7 @@ api.get('/users', (req,res) => {
 })
 ```
 
-### Async/Await  
+### Async/Await
 
 If you prefer to use `async/await`, you can easily apply this to your route functions.
 
@@ -856,6 +874,7 @@ Logging can be enabled by setting the `logger` option to `true` when creating th
 | Property | Type | Description | Default |
 | -------- | ---- | ----------- | ------- |
 | access | `boolean` or `string` | Enables/disables automatic access log generation for each request. See [Access Logs](#access-logs). | `false` |
+| errorLogging | `boolean` | Enables/disables automatic error logging. | `true` |
 | customKey | `string` | Sets the JSON property name for custom data passed to logs. | `custom` |
 | detail | `boolean` | Enables/disables adding `REQUEST` and `RESPONSE` data to all log entries. | `false` |
 | level | `string` | Minimum logging level to send logs for. See [Logging Levels](#logging-levels). | `info` |
@@ -1353,9 +1372,26 @@ If you are using persistent connections in your function routes (such as AWS RDS
 ## TypeScript Support
 An `index.d.ts` declaration file has been included for use with your TypeScript projects (thanks @hassankhan). Please feel free to make suggestions and contributions to keep this up-to-date with future releases.
 
-```javascript
-// import Lambda API and TypeScript declarations
-import API from 'lambda-api'
+**TypeScript Example**
+```typescript
+// import AWS Lambda types
+import { APIGatewayEvent, Context } from 'aws-lambda';
+// import Lambda API default function
+import createAPI from 'lambda-api'
+
+// instantiate framework
+const api = createAPI();
+
+// Define a route
+api.get('/status', async (req,res) => {
+  return { status: 'ok' }
+})
+
+// Declare your Lambda handler
+exports.run = async (event: APIGatewayEvent, context: Context) => {
+  // Run the request
+  return await api.run(event, context)
+}
 ```
 
 ## Contributions

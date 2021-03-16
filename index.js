@@ -3,7 +3,7 @@
 /**
  * Lightweight web framework for your serverless applications
  * @author Jeremy Daly <jeremy@jeremydaly.com>
- * @version 0.10.3
+ * @version 0.10.4
  * @license MIT
  */
 
@@ -26,7 +26,7 @@ class API {
     this._callbackName = props && props.callback ? props.callback.trim() : 'callback'
     this._mimeTypes = props && props.mimeTypes && typeof props.mimeTypes === 'object' ? props.mimeTypes : {}
     this._serializer = props && props.serializer && typeof props.serializer === 'function' ? props.serializer : JSON.stringify
-    this._errorHeaderWhitelist = props && (props.errorHeaderWhitelist || []).map(header => header.toLowerCase())
+    this._errorHeaderWhitelist = props && Array.isArray(props.errorHeaderWhitelist) ? props.errorHeaderWhitelist.map(header => header.toLowerCase()) : []
 
     // Set sampling info
     this._sampleCounts = {}
@@ -280,10 +280,14 @@ class API {
 
     if (e instanceof Error) {
       message = e.message
-      this.log.fatal(message,info)
+      if (this._logger.errorLogging) {
+        this.log.fatal(message, info)
+      }
     } else {
       message = e
-      this.log.error(message,info)
+      if (this._logger.errorLogging) {
+        this.log.error(message, info)
+      }
     }
 
     // If first time through, process error middleware
@@ -500,3 +504,5 @@ class API {
 
 // Export the API class as a new instance
 module.exports = opts => new API(opts)
+// Add createAPI as default export (to match index.d.ts)
+module.exports.default = module.exports

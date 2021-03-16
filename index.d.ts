@@ -32,12 +32,18 @@ export declare interface FileOptions {
   private?: boolean;
 }
 
+export declare interface RegisterOptions {
+  prefix?: string;
+}
+
+export type Package = any;
+
 export declare interface App {
-  [namespace: string]: HandlerFunction;
+  [namespace: string]: Package;
 }
 
 export declare type Middleware = (req: Request, res: Response, next: () => void) => void;
-export declare type ErrorHandlingMiddleware = (error: Error, req: Request, res: Response, next: ErrorHandlingMiddleware) => void;
+export declare type ErrorHandlingMiddleware = (error: Error, req: Request, res: Response, next: () => void) => void;
 export declare type ErrorCallback = (error?: Error) => void;
 export declare type HandlerFunction = (req: Request, res: Response, next?: NextFunction) => void | any | Promise<any>;
 export declare type LoggerFunction = (message: string) => void;
@@ -65,6 +71,7 @@ export declare interface SamplingOptions {
 export declare interface LoggerOptions {
   access?: boolean | string;
   customKey?: string;
+  errorLogging?: boolean;
   detail?: boolean;
   level?: string;
   levels?: {
@@ -109,6 +116,9 @@ export declare class Request {
   query: {
     [key: string]: string | undefined;
   };
+  multiValueQuery: {
+    [key: string]: string[] | undefined
+  };
   headers: {
     [key: string]: string | undefined;
   };
@@ -128,7 +138,7 @@ export declare class Request {
     value: string | null;
   };
   cookies: {
-    [key: string]: CookieOptions;
+    [key: string]: string;
   };
   context: Context;
   coldStart: boolean;
@@ -137,6 +147,7 @@ export declare class Request {
   userAgent: string;
   clientType: 'desktop' | 'mobile' | 'tv' | 'tablet' | 'unknown';
   clientCountry: string;
+  namespace: App;
 
   log: {
     trace: LoggerFunction;
@@ -180,8 +191,8 @@ export declare class Response {
 }
 
 export declare class API {
-  app(namespace: string, handler: HandlerFunction): App;
-  app(options: App): App;
+  app(namespace: string, package: Package): App;
+  app(packages: App): App;
 
   get(path: string, ...handler: HandlerFunction[]): void;
   get(...handler: HandlerFunction[]): void;
@@ -201,7 +212,10 @@ export declare class API {
   any(...handler: HandlerFunction[]): void;
   METHOD(method: METHODS, path: string, ...handler: HandlerFunction[]): void;
   METHOD(method: METHODS, ...handler: HandlerFunction[]): void;
-
+  register(routes: (api: API, options?: RegisterOptions) => void, options?: RegisterOptions): void;
+  routes(format: true): void;
+  routes(format: false): string[][];
+  routes(): string[][];
 
 
 
