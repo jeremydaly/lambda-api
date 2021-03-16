@@ -103,6 +103,7 @@ export declare interface Options {
   version?: string;
   errorHeaderWhitelist?: string[];
   isBase64?: boolean;
+  headers?: object;
 }
 
 export declare class Request {

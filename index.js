@@ -28,6 +28,7 @@ class API {
     this._serializer = props && props.serializer && typeof props.serializer === 'function' ? props.serializer : JSON.stringify
     this._errorHeaderWhitelist = props && Array.isArray(props.errorHeaderWhitelist) ? props.errorHeaderWhitelist.map(header => header.toLowerCase()) : []
     this._isBase64 = props && !!props.isBase64
+    this._headers = props && props.headers && typeof props.headers === 'object' ? props.headers : {}
 
     // Set sampling info
     this._sampleCounts = {}
