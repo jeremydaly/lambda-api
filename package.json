@@ -31,7 +31,6 @@
     "url": "https://github.com/jeremydaly/lambda-api/issues"
   },
   "homepage": "https://github.com/jeremydaly/lambda-api#readme",
-  "dependencies": {},
   "devDependencies": {
     "@types/aws-lambda": "^8.10.51",
     "@types/node": "^10.17.21",
