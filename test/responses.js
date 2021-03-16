@@ -4,6 +4,7 @@ const expect = require('chai').expect // Assertion library
 const sinon = require('sinon') // Require Sinon.js library
 const AWS = require('aws-sdk') // AWS SDK (automatically available in Lambda)
 const S3 = require('../lib/s3-service') // Init S3 Service
+const { gzipSync } = require('zlib')
 
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
@@ -13,6 +14,15 @@ const api2 = require('../index')({ version: 'v1.0', callback: 'cb' })
 const api3 = require('../index')({
   version: 'v1.0',
   serializer: body => JSON.stringify(Object.assign(body,{ _custom: true }))
+})
+// Init API with custom gzip serializer and base 64
+const api4 = require('../index')({
+  version: 'v1.0',
+  isBase64: true,
+  serializer: body => {
+    const json = JSON.stringify(Object.assign(body,{ _custom: true, _base64: true }))
+    return gzipSync(json).toString('base64')
+  }
 })
 
 let event = {
@@ -104,6 +114,10 @@ api3.get('/testJSON', function(req,res) {
 
 api3.get('/testJSONP', function(req,res) {
   res.jsonp({ object: true })
+})
+
+api4.get('/testGZIP', function(req,res) {
+  res.json({ object: true })
 })
 
 /******************************************************************************/
@@ -253,6 +267,12 @@ describe('Response Tests:', function() {
     let _event = Object.assign({},event,{ path: '/testJSONP'})
     let result = await new Promise(r => api3.run(_event,{},(e,res) => { r(res) }))
     expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: 'callback({"object":true,"_custom":true})', isBase64Encoded: false })
+  }) // end it
+
+  it('Custom serializer (GZIP)', async function() {
+    let _event = Object.assign({},event,{ path: '/testGZIP'})
+    let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
+    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: 'H4sIAAAAAAAAE6tWyk/KSk0uUbIqKSpN1VGKTy4tLsnPhXOTEotTzUwg3FoAan86iy0AAAA=', isBase64Encoded: true })
   }) // end it
 
   after(function() {

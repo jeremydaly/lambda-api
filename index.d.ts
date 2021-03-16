@@ -102,6 +102,7 @@ export declare interface Options {
   serializer?: SerializerFunction;
   version?: string;
   errorHeaderWhitelist?: string[];
+  isBase64?: boolean;
 }
 
 export declare class Request {
