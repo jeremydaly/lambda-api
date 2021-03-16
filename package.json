@@ -1,6 +1,6 @@
 {
   "name": "lambda-api",
-  "version": "0.10.6",
+  "version": "0.10.7",
   "description": "Lightweight web framework for your serverless applications",
   "main": "index.js",
   "types": "index.d.ts",
@@ -31,7 +31,6 @@
     "url": "https://github.com/jeremydaly/lambda-api/issues"
   },
   "homepage": "https://github.com/jeremydaly/lambda-api#readme",
-  "dependencies": {},
   "devDependencies": {
     "@types/aws-lambda": "^8.10.51",
     "@types/node": "^10.17.21",
