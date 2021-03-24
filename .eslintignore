@@ -1,3 +1,5 @@
 coverage
 node_modules
-test
+__tests__
+*.test.js
+dist

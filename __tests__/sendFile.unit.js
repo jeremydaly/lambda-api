@@ -1,7 +1,6 @@
-multiValueHeaders:'use strict';
+'use strict';
 
-const Promise = require('bluebird') // Promise library
-const expect = require('chai').expect // Assertion library
+const delay = ms => new Promise(res => setTimeout(res, ms))
 
 const fs = require('fs') // Require Node.js file system
 
@@ -9,10 +8,9 @@ const fs = require('fs') // Require Node.js file system
 const sinon = require('sinon')
 
 const AWS = require('aws-sdk') // AWS SDK (automatically available in Lambda)
-
 // AWS.config.credentials = new AWS.SharedIniFileCredentials({profile: 'madlucas'})
 
-const S3 = require('../lib/s3-service') // Init S3 Service
+const S3 = require('../lib/s3-service'); // Init S3 Service
 
 // Init API instance
 const api = require('../index')({ version: 'v1.0', mimeTypes: { test: 'text/test' } })
@@ -39,7 +37,7 @@ api.get('/sendfile', function(req,res) {
 })
 
 api.get('/sendfile/root', function(req,res) {
-  res.sendFile('test.txt', { root: './test/' })
+  res.sendFile('test.txt', { root: './__tests__/' })
 })
 
 api.get('/sendfile/err', function(req,res) {
@@ -51,12 +49,9 @@ api.get('/sendfile/err', function(req,res) {
 })
 
 api.get('/sendfile/test', function(req,res) {
-  res.sendFile('test/test.txt' + (req.query.test ? req.query.test : ''), err => {
+  res.sendFile('__tests__/test.txt' + (req.query.test ? req.query.test : ''), err => {
     // Return a promise
-    return Promise.try(() => {
-      for(let i = 0; i<40000000; i++) {}
-      return true
-    }).then((x) => {
+    return delay(100).then((x) => {
       if (err) {
         // set custom error code and message on error
         res.error(501,'Custom File Error')
@@ -70,13 +65,10 @@ api.get('/sendfile/test', function(req,res) {
 })
 
 api.get('/sendfile/error', function(req,res) {
-  res.sendFile('test/test.txtx', err => {
+  res.sendFile('__tests__/test.txtx', err => {
 
     // Return a promise
-    return Promise.try(() => {
-      for(let i = 0; i<40000000; i++) {}
-      return true
-    }).then((x) => {
+    return delay(100).then((x) => {
       if (err) {
         // log error
         return true
@@ -87,49 +79,49 @@ api.get('/sendfile/error', function(req,res) {
 })
 
 api.get('/sendfile/buffer', function(req,res) {
-  res.sendFile(fs.readFileSync('test/test.txt'))
+  res.sendFile(fs.readFileSync('__tests__/test.txt'))
 })
 
 api.get('/sendfile/multiValueHeaders', function(req,res) {
-  res.sendFile('test/test.txt', {
+  res.sendFile('__tests__/test.txt', {
     headers: { 'x-test': 'test', 'x-timestamp': 1 }
   })
 })
 
 api.get('/sendfile/headers', function(req,res) {
-  res.sendFile('test/test.txt', {
+  res.sendFile('__tests__/test.txt', {
     headers: { 'x-test': 'test', 'x-timestamp': 1 },
     private: false
   })
 })
 
 api.get('/sendfile/headers-private', function(req,res) {
-  res.sendFile('test/test.txt', {
+  res.sendFile('__tests__/test.txt', {
     headers: { 'x-test': 'test', 'x-timestamp': 1 },
     private: true
   })
 })
 
 api.get('/sendfile/last-modified', function(req,res) {
-  res.sendFile('test/test.txt', {
+  res.sendFile('__tests__/test.txt', {
     lastModified: new Date('Fri, 1 Jan 2018 00:00:00 GMT')
   })
 })
 
 api.get('/sendfile/no-last-modified', function(req,res) {
-  res.sendFile('test/test.txt', {
+  res.sendFile('__tests__/test.txt', {
     lastModified: false
   })
 })
 
 api.get('/sendfile/no-cache-control', function(req,res) {
-  res.sendFile('test/test.txt', {
+  res.sendFile('__tests__/test.txt', {
     cacheControl: false
   })
 })
 
 api.get('/sendfile/custom-cache-control', function(req,res) {
-  res.sendFile('test/test.txt', {
+  res.sendFile('__tests__/test.txt', {
     cacheControl: 'no-cache, no-store'
   })
 })
@@ -196,7 +188,7 @@ let stub
 
 describe('SendFile Tests:', function() {
 
-  before(function() {
+  beforeEach(function() {
      // Stub getObjectAsync
     stub = sinon.stub(S3,'getObject')
   })
@@ -204,25 +196,25 @@ describe('SendFile Tests:', function() {
   it('Bad path', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/badpath' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 500, body: '{"error":"Invalid file"}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 500, body: '{"error":"Invalid file"}', isBase64Encoded: false })
   }) // end it
 
   it('Missing file', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 500, body: '{"error":"No such file"}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 500, body: '{"error":"No such file"}', isBase64Encoded: false })
   }) // end it
 
   it('Missing file with custom catch', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/err' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 404, body: '{"error":"There was an error accessing the requested file"}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 404, body: '{"error":"There was an error accessing the requested file"}', isBase64Encoded: false })
   }) // end it
 
   it('Text file w/ callback override (promise)', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/test' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'cache-control': ['max-age=0'],
@@ -236,19 +228,19 @@ describe('SendFile Tests:', function() {
   it('Text file error w/ callback override (promise)', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/test', queryStringParameters: { test: 'x' } })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 501, body: '{"error":"Custom File Error"}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 501, body: '{"error":"Custom File Error"}', isBase64Encoded: false })
   }) // end it
 
   it('Text file error w/ callback override (promise - no end)', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/error', queryStringParameters: { test: 'x' } })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 500, body: result.body, isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 500, body: result.body, isBase64Encoded: false })
   }) // end it
 
   it('Buffer Input', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/buffer' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'cache-control': ['max-age=0'],
@@ -261,7 +253,7 @@ describe('SendFile Tests:', function() {
   it('Text file w/ headers', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/headers' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'x-test': ['test'],
@@ -276,7 +268,7 @@ describe('SendFile Tests:', function() {
   it('Text file w/ root path', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/root' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'cache-control': ['max-age=0'],
@@ -289,7 +281,7 @@ describe('SendFile Tests:', function() {
   it('Text file w/ headers (private cache)', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/headers-private' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'x-test': ['test'],
@@ -304,7 +296,7 @@ describe('SendFile Tests:', function() {
   it('Text file custom Last-Modified', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/last-modified' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'cache-control': ['max-age=0'],
@@ -318,7 +310,7 @@ describe('SendFile Tests:', function() {
   it('Text file no Last-Modified', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/no-last-modified' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'cache-control': ['max-age=0'],
@@ -331,7 +323,7 @@ describe('SendFile Tests:', function() {
   it('Text file no Cache-Control', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/no-cache-control' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'last-modified': result.multiValueHeaders['last-modified']
@@ -343,7 +335,7 @@ describe('SendFile Tests:', function() {
   it('Text file custom Cache-Control', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/custom-cache-control' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'cache-control': ['no-cache, no-store'],
@@ -356,7 +348,7 @@ describe('SendFile Tests:', function() {
   it('S3 file', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/s3' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'cache-control': ['max-age=0'],
@@ -370,7 +362,7 @@ describe('SendFile Tests:', function() {
   it('S3 file w/ nested path', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/s3path' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'cache-control': ['max-age=0'],
@@ -384,7 +376,7 @@ describe('SendFile Tests:', function() {
   it('S3 file error',async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/s3missing' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'x-error': ['true']
@@ -396,7 +388,7 @@ describe('SendFile Tests:', function() {
   it('S3 bad path error',async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/s3-bad-path' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'x-error': ['true']
@@ -404,7 +396,7 @@ describe('SendFile Tests:', function() {
     })
   }) // end it
 
-  after(function() {
+  afterEach(function() {
     stub.restore()
   })
 

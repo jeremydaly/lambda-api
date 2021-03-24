@@ -1,7 +1,5 @@
 'use strict';
 
-const expect = require('chai').expect // Assertion library
-
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
 
@@ -48,23 +46,23 @@ api.get('/testAppData', require('./_testApp').dataTest)
 describe('Namespace Tests:', function() {
 
   it('Check namespace loading', function() {
-      expect(Object.keys(api._app).length).to.equal(3)
-      expect(api._app).to.have.property('data')
-      expect(api._app).to.have.property('data2')
-      expect(api._app).to.have.property('data3')
-      expect(api._app.data).to.have.property('dataCall')
+      expect(Object.keys(api._app).length).toBe(3)
+      expect(api._app).toHaveProperty('data')
+      expect(api._app).toHaveProperty('data2')
+      expect(api._app).toHaveProperty('data3')
+      expect(api._app.data).toHaveProperty('dataCall')
   }) // end it
 
   it('Invoke namespace', async function() {
     let _event = Object.assign({},event,{ path:'/testData' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","data":{"foo":"sample data","bar":"additional sample data"}}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","data":{"foo":"sample data","bar":"additional sample data"}}', isBase64Encoded: false })
   }) // end it
 
   it('Invoke namespace via required module', async function() {
     let _event = Object.assign({},event,{ path:'/testAppData' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","data":{"foo":"sample data","bar":"additional sample data"}}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","data":{"foo":"sample data","bar":"additional sample data"}}', isBase64Encoded: false })
   }) // end it
 
 }) // end MODULE tests

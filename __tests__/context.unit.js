@@ -1,7 +1,5 @@
 'use strict';
 
-const expect = require('chai').expect // Assertion library
-
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
 
@@ -44,7 +42,7 @@ describe('Context Tests:', function() {
       clientContext: {},
       identity: { cognitoIdentityId: 321 }
     },(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: { 'content-type': ['application/json'] },
       statusCode: 200,
       body: '{"id":"1234","context":{"functionName":"testFunction","awsRequestId":"1234","log_group_name":"testLogGroup","log_stream_name":"testLogStream","clientContext":{},"identity":{"cognitoIdentityId":321}}}',

@@ -1,7 +1,5 @@
 'use strict';
 
-const expect = require('chai').expect // Assertion library
-
 // Init API instance
 
 const api = require('../index')({
@@ -156,7 +154,7 @@ describe('Header Tests:', function() {
     it('New Header: /test -- test: testVal', async function() {
       let _event = Object.assign({},event,{})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: {
+      expect(result).toEqual({ multiValueHeaders: {
         'content-type': ['application/json'],
         'test': ['testVal']
       }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
@@ -165,50 +163,50 @@ describe('Header Tests:', function() {
     it('Empty Header - Default', async function() {
       let _event = Object.assign({},event,{ path: '/testEmpty' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'test': [''] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'], 'test': [''] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
     it('Override Header: /testOveride -- Content-Type: text/html', async function() {
       let _event = Object.assign({},event,{ path: '/testOverride'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['text/html'] }, statusCode: 200, body: '<div>testHTML</div>', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['text/html'] }, statusCode: 200, body: '<div>testHTML</div>', isBase64Encoded: false })
     }) // end it
 
     it('Append to Header: /testAppend (multi-header)', async function() {
       let _event = Object.assign({},event,{ path: '/testAppend'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'test': ['testVal1','testVal2'] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'], 'test': ['testVal1','testVal2'] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
     it('Multi-value Header: /testMulti (multi-header)', async function() {
       let _event = Object.assign({},event,{ path: '/testMulti'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'test': ['testVal1','testVal2'] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'], 'test': ['testVal1','testVal2'] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
     it('Multi-value Header: /testMulti (null header)', async function() {
       let _event = Object.assign({},event,{ path: '/testMulti', multiValueHeaders: null })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'test': ['testVal1','testVal2'] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'], 'test': ['testVal1','testVal2'] }, statusCode: 200, body: '{"method":"get","status":"ok"}', isBase64Encoded: false })
     }) // end it
 
     it('HTML Convenience Method: /testHTML', async function() {
       let _event = Object.assign({},event,{ path: '/testHTML'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['text/html'] }, statusCode: 200, body: '<div>testHTML</div>', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['text/html'] }, statusCode: 200, body: '<div>testHTML</div>', isBase64Encoded: false })
     }) // end it
 
     it('JSONP Convenience Method: /testJSONP', async function() {
       let _event = Object.assign({},event,{ path: '/testJSONP'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: 'callback({"method":"get","status":"ok"})', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: 'callback({"method":"get","status":"ok"})', isBase64Encoded: false })
     }) // end it
 
 
     it('Get Header (as string)', async function() {
       let _event = Object.assign({},event,{ path: '/getHeader'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'testheader': ['test']
@@ -222,7 +220,7 @@ describe('Header Tests:', function() {
     it('Get Header (as array)', async function() {
       let _event = Object.assign({},event,{ path: '/getHeaderArray'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'testheader': ['test','test2']
@@ -235,7 +233,7 @@ describe('Header Tests:', function() {
     it('Has Header', async function() {
       let _event = Object.assign({},event,{ path: '/hasHeader'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'testheader': ['test']
@@ -248,7 +246,7 @@ describe('Header Tests:', function() {
     it('Remove Header', async function() {
       let _event = Object.assign({},event,{ path: '/removeHeader'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'newheader': ['test']
@@ -261,7 +259,7 @@ describe('Header Tests:', function() {
     it('Pass whitelisted headers on error', async function() {
       let _event = Object.assign({},event,{ path: '/whitelistHeaders'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'access-control-allow-methods': ['GET, OPTIONS'],
@@ -279,7 +277,7 @@ describe('Header Tests:', function() {
     it('Add Default CORS Headers', async function() {
       let _event = Object.assign({},event,{ path: '/cors'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'access-control-allow-headers': ['Content-Type, Authorization, Content-Length, X-Requested-With'],
@@ -294,7 +292,7 @@ describe('Header Tests:', function() {
     it('Add Custom CORS Headers', async function() {
       let _event = Object.assign({},event,{ path: '/corsCustom'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'access-control-allow-headers': ['Content-Type, Authorization'],
@@ -312,7 +310,7 @@ describe('Header Tests:', function() {
     it('Override CORS Headers #1', async function() {
       let _event = Object.assign({},event,{ path: '/corsOverride'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'access-control-allow-headers': ['Content-Type, Authorization, Content-Length, X-Requested-With'],
@@ -328,7 +326,7 @@ describe('Header Tests:', function() {
     it('Override CORS Headers #2', async function() {
       let _event = Object.assign({},event,{ path: '/corsOverride2'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'access-control-allow-headers': ['Content-Type, Authorization, Content-Length, X-Requested-With'],
@@ -347,44 +345,44 @@ describe('Header Tests:', function() {
     it('Bearer (OAuth2/JWT)', async function() {
       let _event = Object.assign({},event,{ path: '/auth', multiValueHeaders: { authorization: ["Bearer XYZ"] } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"auth":{"type":"Bearer","value":"XYZ"}}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"auth":{"type":"Bearer","value":"XYZ"}}', isBase64Encoded: false })
     }) // end it
 
     it('Digest', async function() {
       let _event = Object.assign({},event,{ path: '/auth', multiValueHeaders: { authorization: ["Digest XYZ"] } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"auth":{"type":"Digest","value":"XYZ"}}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"auth":{"type":"Digest","value":"XYZ"}}', isBase64Encoded: false })
     }) // end it
 
     it('Basic Auth', async function() {
-      let creds = new Buffer('test:testing').toString('base64')
+      let creds = Buffer.from('test:testing').toString('base64')
       let _event = Object.assign({},event,{ path: '/auth', multiValueHeaders: { authorization: ["Basic " + creds] } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"auth":{"type":"Basic","value":"dGVzdDp0ZXN0aW5n","username":"test","password":"testing"}}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"auth":{"type":"Basic","value":"dGVzdDp0ZXN0aW5n","username":"test","password":"testing"}}', isBase64Encoded: false })
     }) // end it
 
     it('OAuth 1.0', async function() {
       let _event = Object.assign({},event,{ path: '/auth', multiValueHeaders: { authorization: ['OAuth realm="Example", oauth_consumer_key="xyz", oauth_token="abc", oauth_version="1.0"'] } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{\"auth\":{\"type\":\"OAuth\",\"value\":\"realm=\\\"Example\\\", oauth_consumer_key=\\\"xyz\\\", oauth_token=\\\"abc\\\", oauth_version=\\\"1.0\\\"\",\"realm\":\"Example\",\"oauth_consumer_key\":\"xyz\",\"oauth_token\":\"abc\",\"oauth_version\":\"1.0\"}}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{\"auth\":{\"type\":\"OAuth\",\"value\":\"realm=\\\"Example\\\", oauth_consumer_key=\\\"xyz\\\", oauth_token=\\\"abc\\\", oauth_version=\\\"1.0\\\"\",\"realm\":\"Example\",\"oauth_consumer_key\":\"xyz\",\"oauth_token\":\"abc\",\"oauth_version\":\"1.0\"}}', isBase64Encoded: false })
     }) // end it
 
     it('Missing Authorization Header', async function() {
       let _event = Object.assign({},event,{ path: '/auth', multiValueHeaders: { } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"auth":{"type":"none","value":null}}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"auth":{"type":"none","value":null}}', isBase64Encoded: false })
     }) // end it
 
     it('Invalid Schema', async function() {
       let _event = Object.assign({},event,{ path: '/auth', multiValueHeaders: { authorization: ["Test XYZ"] } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"auth":{"type":"none","value":null}}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"auth":{"type":"none","value":null}}', isBase64Encoded: false })
     }) // end it
 
     it('Incomplete Header', async function() {
       let _event = Object.assign({},event,{ path: '/auth', multiValueHeaders: { authorization: ["Bearer"] } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"auth":{"type":"none","value":null}}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"auth":{"type":"none","value":null}}', isBase64Encoded: false })
     }) // end it
 
   }) // end Auth tests
@@ -401,7 +399,7 @@ describe('Header Tests:', function() {
       } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
 
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: { 'content-type': ['application/json'] },
         statusCode: 200,
         body: '{"clientType":"desktop","clientCountry":"US"}',
@@ -418,7 +416,7 @@ describe('Header Tests:', function() {
       } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
 
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: { 'content-type': ['application/json'] },
         statusCode: 200,
         body: '{"clientType":"mobile","clientCountry":"US"}',
@@ -435,7 +433,7 @@ describe('Header Tests:', function() {
       } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
 
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: { 'content-type': ['application/json'] },
         statusCode: 200,
         body: '{"clientType":"tv","clientCountry":"US"}',
@@ -452,7 +450,7 @@ describe('Header Tests:', function() {
       } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
 
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: { 'content-type': ['application/json'] },
         statusCode: 200,
         body: '{"clientType":"tablet","clientCountry":"US"}',
@@ -469,7 +467,7 @@ describe('Header Tests:', function() {
       } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
 
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: { 'content-type': ['application/json'] },
         statusCode: 200,
         body: '{"clientType":"unknown","clientCountry":"US"}',
@@ -480,7 +478,7 @@ describe('Header Tests:', function() {
       let _event = Object.assign({},event,{ path: '/cloudfront', multiValueHeaders: {} })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
 
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: { 'content-type': ['application/json'] },
         statusCode: 200,
         body: '{"clientType":"unknown","clientCountry":"unknown"}',
@@ -497,7 +495,7 @@ describe('Header Tests:', function() {
       } })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
 
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: { 'content-type': ['application/json'] },
         statusCode: 200,
         body: '{"clientType":"unknown","clientCountry":"UK"}',

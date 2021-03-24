@@ -1,8 +1,5 @@
 'use strict';
 
-const Promise = require('bluebird') // Promise library
-const expect = require('chai').expect // Assertion library
-
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
 
@@ -29,7 +26,7 @@ describe('Unit Tests:', function() {
     let routes = {}
     api.setRoute(routes,'GET', { route: '/testPath' }, ['testPath'])
     api.setRoute(routes,'GET', { route: '/testPath/testx' }, ['testPath','testx'])
-    expect(routes).to.deep.equal({
+    expect(routes).toEqual({
       ROUTES: {
         testPath: {
           METHODS: {
@@ -51,13 +48,13 @@ describe('Unit Tests:', function() {
   // it('setRoute - null path', async function() {
   //   let routes = { testPath: null }
   //   api.setRoute(routes,{['_GET']: { route: '/testPath/testx' } },'testPath.testx')
-  //   expect(routes).to.deep.equal({ testPath: { testx: { _GET: { route: '/testPath/testx' } } } })
+  //   expect(routes).toEqual({ testPath: { testx: { _GET: { route: '/testPath/testx' } } } })
   // }) // end it
   //
   // it('setRoute - null single path', async function() {
   //   let routes = { testPath: null }
   //   api.setRoute(routes,{['_GET']: { route: '/testPath' } },['testPath'])
-  //   expect(routes).to.deep.equal({ testPath: { _GET: { route: '/testPath' } } })
+  //   expect(routes).toEqual({ testPath: { _GET: { route: '/testPath' } } })
   // }) // end it
 
 

@@ -227,7 +227,7 @@ class API {
         // Only run if in processing state
         if (response._state !== 'processing') break
 
-        await new Promise(async r => {
+        await new Promise(async r => { // eslint-disable-line
           try {
             let rtn = await fn(request,response,() => { r() })
             if (rtn) response.send(rtn)

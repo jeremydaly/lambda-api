@@ -1,7 +1,5 @@
 'use strict';
 
-const expect = require('chai').expect // Assertion library
-
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
 
@@ -127,7 +125,7 @@ describe('Cookie Tests:', function() {
     it('Basic Session Cookie', async function() {
       let _event = Object.assign({},event,{ path: '/cookie' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=value; Path=/']
@@ -138,7 +136,7 @@ describe('Cookie Tests:', function() {
     it('Basic Session Cookie (multi-header)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieMultiple' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=value; Path=/','test2=value2; Path=/']
@@ -149,7 +147,7 @@ describe('Cookie Tests:', function() {
     it('Basic Session Cookie (encoded value)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieEncoded' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=http%3A%2F%2F%20%5B%5D%20foo%3Bbar; Path=/']
@@ -161,7 +159,7 @@ describe('Cookie Tests:', function() {
     it('Basic Session Cookie (object value)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieObject' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=%7B%22foo%22%3A%22bar%22%7D; Path=/']
@@ -173,7 +171,7 @@ describe('Cookie Tests:', function() {
     it('Basic Session Cookie (non-string name)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieNonString' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['123=value; Path=/']
@@ -185,7 +183,7 @@ describe('Cookie Tests:', function() {
     it('Permanent Cookie (set expires)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieExpire' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=value; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/']
@@ -196,7 +194,7 @@ describe('Cookie Tests:', function() {
     it('Permanent Cookie (set maxAge)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieMaxAge' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=value; MaxAge=3600; Expires='+ new Date(Date.now()+3600000).toUTCString() + '; Path=/']
@@ -207,7 +205,7 @@ describe('Cookie Tests:', function() {
     it('Permanent Cookie (set domain)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieDomain' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/']
@@ -218,7 +216,7 @@ describe('Cookie Tests:', function() {
     it('Permanent Cookie (set httpOnly)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieHttpOnly' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; HttpOnly; Path=/']
@@ -229,7 +227,7 @@ describe('Cookie Tests:', function() {
     it('Permanent Cookie (set secure)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieSecure' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; Secure']
@@ -240,7 +238,7 @@ describe('Cookie Tests:', function() {
     it('Permanent Cookie (set path)', async function() {
       let _event = Object.assign({},event,{ path: '/cookiePath' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/test; Secure']
@@ -251,7 +249,7 @@ describe('Cookie Tests:', function() {
     it('Permanent Cookie (set sameSite - true)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieSameSiteTrue' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Strict']
@@ -262,7 +260,7 @@ describe('Cookie Tests:', function() {
     it('Permanent Cookie (set sameSite - false)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieSameSiteFalse' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Lax']
@@ -273,7 +271,7 @@ describe('Cookie Tests:', function() {
     it('Permanent Cookie (set sameSite - string)', async function() {
       let _event = Object.assign({},event,{ path: '/cookieSameSiteString' })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=value; Domain=test.com; Expires=Tue, 01 Jan 2019 00:00:00 GMT; Path=/; SameSite=Test']
@@ -294,7 +292,7 @@ describe('Cookie Tests:', function() {
         }
       })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
         }, statusCode: 200, body: '{"cookies":{"test":"some value"}}', isBase64Encoded: false
@@ -309,7 +307,7 @@ describe('Cookie Tests:', function() {
         }
       })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
         }, statusCode: 200, body: '{\"cookies\":{\"test\":\"some value\",\"test2\":{\"foo\":\"bar\"}}}', isBase64Encoded: false
@@ -325,7 +323,7 @@ describe('Cookie Tests:', function() {
         }
       })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
         }, statusCode: 200, body: '{\"cookies\":{\"test\":\"some value\",\"test2\":{\"foo\":\"bar\"},\"test3\":\"domain\"}}', isBase64Encoded: false
@@ -334,14 +332,14 @@ describe('Cookie Tests:', function() {
 
   }) // end parse tests
 
-  describe("Clear", async function() {
+  describe("Clear", function() {
 
     it('Clear cookie (no options)', async function() {
       let _event = Object.assign({},event,{
         path: '/cookieClear'
       })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; MaxAge=-1; Path=/']
@@ -354,7 +352,7 @@ describe('Cookie Tests:', function() {
         path: '/cookieClearOptions'
       })
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).to.deep.equal({
+      expect(result).toEqual({
         multiValueHeaders: {
           'content-type': ['application/json'],
           'set-cookie': ['test=; Domain=test.com; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; MaxAge=-1; Path=/; Secure']

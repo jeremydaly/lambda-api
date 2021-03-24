@@ -1,7 +1,6 @@
 'use strict';
 
-const Promise = require('bluebird') // Promise library
-const expect = require('chai').expect // Assertion library
+const delay = ms => new Promise(res => setTimeout(res, ms))
 
 const fs = require('fs') // Require Node.js file system
 
@@ -44,10 +43,10 @@ api.get('/download/err', function(req,res) {
 })
 
 api.get('/download/test', function(req,res) {
-  res.download('test/test.txt' + (req.query.test ? req.query.test : ''), err => {
+  res.download('__tests__/test.txt' + (req.query.test ? req.query.test : ''), err => {
 
     // Return a promise
-    return Promise.delay(100).then((x) => {
+    return delay(100).then((x) => {
       if (err) {
         // set custom error code and message on error
         res.error(501,'Custom File Error')
@@ -61,28 +60,28 @@ api.get('/download/test', function(req,res) {
 })
 
 api.get('/download/buffer', function(req,res) {
-  res.download(fs.readFileSync('test/test.txt'), req.query.filename ? req.query.filename : undefined)
+  res.download(fs.readFileSync('__tests__/test.txt'), req.query.filename ? req.query.filename : undefined)
 })
 
 api.get('/download/headers', function(req,res) {
-  res.download('test/test.txt', {
+  res.download('__tests__/test.txt', {
     headers: { 'x-test': 'test', 'x-timestamp': 1 }
   })
 })
 
 api.get('/download/headers-private', function(req,res) {
-  res.download('test/test.txt', {
+  res.download('__tests__/test.txt', {
     headers: { 'x-test': 'test', 'x-timestamp': 1 },
     private: true
   })
 })
 
 api.get('/download/all', function(req,res) {
-  res.download('test/test.txt', 'test-file.txt', { private: true, maxAge: 3600000 }, err => { res.header('x-callback','true') })
+  res.download('__tests__/test.txt', 'test-file.txt', { private: true, maxAge: 3600000 }, err => { res.header('x-callback','true') })
 })
 
 api.get('/download/no-options', function(req,res) {
-  res.download('test/test.txt', 'test-file.txt', err => { res.header('x-callback','true') })
+  res.download('__tests__/test.txt', 'test-file.txt', err => { res.header('x-callback','true') })
 })
 
 // S3 file
@@ -143,7 +142,7 @@ let stub
 
 describe('Download Tests:', function() {
 
-  before(function() {
+  beforeEach(function() {
      // Stub getObjectAsync
     stub = sinon.stub(S3,'getObject')
   })
@@ -151,25 +150,25 @@ describe('Download Tests:', function() {
   it('Bad path', async function() {
     let _event = Object.assign({},event,{ path: '/download/badpath' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 500, body: '{"error":"Invalid file"}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 500, body: '{"error":"Invalid file"}', isBase64Encoded: false })
   }) // end it
 
   it('Missing file', async function() {
     let _event = Object.assign({},event,{ path: '/download' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 500, body: '{"error":"No such file"}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 500, body: '{"error":"No such file"}', isBase64Encoded: false })
   }) // end it
 
   it('Missing file with custom catch', async function() {
     let _event = Object.assign({},event,{ path: '/download/err' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 404, body: '{"error":"There was an error accessing the requested file"}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 404, body: '{"error":"There was an error accessing the requested file"}', isBase64Encoded: false })
   }) // end it
 
   it('Text file w/ callback override (promise)', async function() {
     let _event = Object.assign({},event,{ path: '/download/test' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'cache-control': ['max-age=0'],
@@ -184,13 +183,13 @@ describe('Download Tests:', function() {
   it('Text file error w/ callback override (promise)', async function() {
     let _event = Object.assign({},event,{ path: '/download/test', queryStringParameters: { test: 'x' } })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 501, body: '{"error":"Custom File Error"}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 501, body: '{"error":"Custom File Error"}', isBase64Encoded: false })
   }) // end it
 
   it('Buffer Input (no filename)', async function() {
     let _event = Object.assign({},event,{ path: '/download/buffer' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'cache-control': ['max-age=0'],
@@ -204,7 +203,7 @@ describe('Download Tests:', function() {
   it('Buffer Input (w/ filename)', async function() {
     let _event = Object.assign({},event,{ path: '/download/buffer', queryStringParameters: { filename: 'test.txt' } })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'cache-control': ['max-age=0'],
@@ -219,7 +218,7 @@ describe('Download Tests:', function() {
   it('Text file w/ headers', async function() {
     let _event = Object.assign({},event,{ path: '/download/headers' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'x-test': ['test'],
@@ -236,7 +235,7 @@ describe('Download Tests:', function() {
   it('Text file w/ filename, options, and callback', async function() {
     let _event = Object.assign({},event,{ path: '/download/all' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'x-callback': ['true'],
@@ -252,7 +251,7 @@ describe('Download Tests:', function() {
   it('Text file w/ filename and callback (no options)', async function() {
     let _event = Object.assign({},event,{ path: '/download/no-options' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'x-callback': ['true'],
@@ -268,7 +267,7 @@ describe('Download Tests:', function() {
   it('S3 file', async function() {
     let _event = Object.assign({},event,{ path: '/download/s3' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'cache-control': ['max-age=0'],
@@ -283,7 +282,7 @@ describe('Download Tests:', function() {
   it('S3 file w/ nested path', async function() {
     let _event = Object.assign({},event,{ path: '/download/s3path' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
         'cache-control': ['max-age=0'],
@@ -298,7 +297,7 @@ describe('Download Tests:', function() {
   it('S3 file error', async function() {
     let _event = Object.assign({},event,{ path: '/download/s3missing' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'x-error': ['true']
@@ -306,7 +305,7 @@ describe('Download Tests:', function() {
     })
   }) // end it
 
-  after(function() {
+  afterEach(function() {
     stub.restore()
   })
 

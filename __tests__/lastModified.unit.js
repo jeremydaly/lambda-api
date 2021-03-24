@@ -1,8 +1,5 @@
 'use strict';
 
-const Promise = require('bluebird') // Promise library
-const expect = require('chai').expect // Assertion library
-
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
 
@@ -57,7 +54,7 @@ describe('modified Tests:', function() {
   it('modified (no options)', async function() {
     let _event = Object.assign({},event,{ path: '/modified' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'last-modified': result.multiValueHeaders['last-modified']
@@ -66,14 +63,14 @@ describe('modified Tests:', function() {
       body: 'cache',
       isBase64Encoded: false
     })
-    expect(typeof result.multiValueHeaders['last-modified']).to.not.be.null
-    expect(typeof result.multiValueHeaders['last-modified']).to.not.be.empty
+    expect(typeof result.multiValueHeaders['last-modified']).toBe('object')
+    // expect(typeof result.multiValueHeaders['last-modified']).to.not.be.empty
   }) // end it
 
   it('modified (true)', async function() {
     let _event = Object.assign({},event,{ path: '/modifiedTrue' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'last-modified': result.multiValueHeaders['last-modified']
@@ -82,14 +79,14 @@ describe('modified Tests:', function() {
       body: 'cache',
       isBase64Encoded: false
     })
-    expect(typeof result.multiValueHeaders['last-modified']).to.not.be.null
-    expect(typeof result.multiValueHeaders['last-modified']).to.not.be.empty
+    expect(typeof result.multiValueHeaders['last-modified']).toBe('object')
+    // expect(typeof result.multiValueHeaders['last-modified']).to.not.be.empty
   }) // end it
 
   it('modified (false)', async function() {
     let _event = Object.assign({},event,{ path: '/modifiedFalse' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json']
       },
@@ -102,7 +99,7 @@ describe('modified Tests:', function() {
   it('modified (date)', async function() {
     let _event = Object.assign({},event,{ path: '/modifiedDate' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'last-modified': ['Wed, 01 Aug 2018 00:00:00 GMT']
@@ -116,7 +113,7 @@ describe('modified Tests:', function() {
   it('modified (string)', async function() {
     let _event = Object.assign({},event,{ path: '/modifiedString' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'last-modified': ['Wed, 01 Aug 2018 00:00:00 GMT']
@@ -131,7 +128,7 @@ describe('modified Tests:', function() {
   it('modified (invalid date)', async function() {
     let _event = Object.assign({},event,{ path: '/modifiedBadString' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'last-modified': result.multiValueHeaders['last-modified']
@@ -140,7 +137,7 @@ describe('modified Tests:', function() {
       body: 'cache',
       isBase64Encoded: false
     })
-    expect(new Date(result.multiValueHeaders['last-modified'])).to.be.above(new Date('2018-08-02'))
+    expect(new Date(result.multiValueHeaders['last-modified']).getTime()).toBeGreaterThan(new Date('2018-08-02').getTime())
 
   }) // end it
 

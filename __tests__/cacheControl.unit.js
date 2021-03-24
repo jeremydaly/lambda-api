@@ -1,11 +1,7 @@
 'use strict';
 
-const Promise = require('bluebird') // Promise library
-const expect = require('chai').expect // Assertion library
-
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
-
 
 // NOTE: Set test to true
 api._test = true;
@@ -74,7 +70,7 @@ describe('cacheControl Tests:', function() {
   it('Basic cacheControl (no options)', async function() {
     let _event = Object.assign({},event,{ path: '/cache' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'cache-control': ['max-age=0'],
@@ -89,7 +85,7 @@ describe('cacheControl Tests:', function() {
   it('Basic cacheControl (true)', async function() {
     let _event = Object.assign({},event,{ path: '/cacheTrue' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'cache-control': ['max-age=0'],
@@ -104,7 +100,7 @@ describe('cacheControl Tests:', function() {
   it('Basic cacheControl (false)', async function() {
     let _event = Object.assign({},event,{ path: '/cacheFalse' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'cache-control': ['no-cache, no-store, must-revalidate']
@@ -118,7 +114,7 @@ describe('cacheControl Tests:', function() {
   it('Basic cacheControl (maxAge)', async function() {
     let _event = Object.assign({},event,{ path: '/cacheMaxAge' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'cache-control': ['max-age=1'],
@@ -133,7 +129,7 @@ describe('cacheControl Tests:', function() {
   it('Basic cacheControl (private)', async function() {
     let _event = Object.assign({},event,{ path: '/cachePrivate' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'cache-control': ['private, max-age=1'],
@@ -148,7 +144,7 @@ describe('cacheControl Tests:', function() {
   it('Basic cacheControl (disable private)', async function() {
     let _event = Object.assign({},event,{ path: '/cachePrivateFalse' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'cache-control': ['max-age=1'],
@@ -163,7 +159,7 @@ describe('cacheControl Tests:', function() {
   it('Basic cacheControl (invalid private value)', async function() {
     let _event = Object.assign({},event,{ path: '/cachePrivateInvalid' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'cache-control': ['max-age=1'],
@@ -178,7 +174,7 @@ describe('cacheControl Tests:', function() {
   it('Basic cacheControl (undefined)', async function() {
     let _event = Object.assign({},event,{ path: '/cacheCustomUndefined' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'cache-control': ['max-age=0'],
@@ -193,7 +189,7 @@ describe('cacheControl Tests:', function() {
   it('Basic cacheControl (null)', async function() {
     let _event = Object.assign({},event,{ path: '/cacheCustomNull' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'cache-control': ['max-age=0'],
@@ -208,7 +204,7 @@ describe('cacheControl Tests:', function() {
   it('Custom cacheControl (string)', async function() {
     let _event = Object.assign({},event,{ path: '/cacheCustom' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({
+    expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['application/json'],
         'cache-control': ['custom value']

@@ -1,6 +1,6 @@
 'use strict'
 
-const Promise = require('bluebird');
+const delay = ms => new Promise(res => setTimeout(res, ms))
 
 module.exports = {
 
@@ -11,10 +11,7 @@ module.exports = {
 
   promise: function(req,res) {
     let start = Date.now()
-    Promise.try(() => {
-      for(let i = 0; i<40000000; i++) {}
-      return true
-    }).then((x) => {
+    delay(100).then((x) => {
       res.json({ method:'get', status:'ok', app:'app2'})
     })
   },

@@ -1,7 +1,6 @@
 'use strict'
 
-const expect = require('chai').expect // Assertion library
-const Promise = require('bluebird');
+const delay = ms => new Promise(res => setTimeout(res, ms))
 
 let request = 1
 
@@ -141,7 +140,7 @@ describe('Sampling Tests:', function() {
       } catch(e) {
         error_message = e.message
       }
-      expect(error_message).to.equal('Invalid sampler configuration')
+      expect(error_message).toBe('Invalid sampler configuration')
     }) // end it
 
 
@@ -159,7 +158,7 @@ describe('Sampling Tests:', function() {
       } catch(e) {
         error_message = e.message
       }
-      expect(error_message).to.equal('Invalid route specified in rule')
+      expect(error_message).toBe('Invalid route specified in rule')
     }) // end it
 
 
@@ -177,7 +176,7 @@ describe('Sampling Tests:', function() {
       } catch(e) {
         error_message = e.message
       }
-      expect(error_message).to.equal('Invalid route specified in rule')
+      expect(error_message).toBe('Invalid route specified in rule')
     }) // end it
 
   })
@@ -189,11 +188,11 @@ describe('Sampling Tests:', function() {
       let result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
       let data = JSON.parse(result.body)
 
-      expect(data.method).to.equal('GET')
-      expect(data.rule.target).to.equal(1)
-      expect(data.rule.rate).to.equal(0.2)
-      expect(data.rule.period).to.equal(1)
-      expect(data.rule.level).to.equal('trace')
+      expect(data.method).toBe('GET')
+      expect(data.rule.target).toBe(1)
+      expect(data.rule.rate).toBe(0.2)
+      expect(data.rule.period).toBe(1)
+      expect(data.rule.level).toBe('trace')
     })
 
     it('Match based on method (POST)', async function() {
@@ -201,11 +200,11 @@ describe('Sampling Tests:', function() {
       let result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
       let data = JSON.parse(result.body)
 
-      expect(data.method).to.equal('POST')
-      expect(data.rule.target).to.equal(2)
-      expect(data.rule.rate).to.equal(0.1)
-      expect(data.rule.period).to.equal(2)
-      expect(data.rule.level).to.equal('info')
+      expect(data.method).toBe('POST')
+      expect(data.rule.target).toBe(2)
+      expect(data.rule.rate).toBe(0.1)
+      expect(data.rule.period).toBe(2)
+      expect(data.rule.level).toBe('info')
     })
 
     it('Match parameterized path', async function() {
@@ -213,11 +212,11 @@ describe('Sampling Tests:', function() {
       let result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
       let data = JSON.parse(result.body)
 
-      expect(data.method).to.equal('GET')
-      expect(data.rule.target).to.equal(10)
-      expect(data.rule.rate).to.equal(0.1)
-      expect(data.rule.period).to.equal(60)
-      expect(data.rule.level).to.equal('debug')
+      expect(data.method).toBe('GET')
+      expect(data.rule.target).toBe(10)
+      expect(data.rule.rate).toBe(0.1)
+      expect(data.rule.period).toBe(60)
+      expect(data.rule.level).toBe('debug')
     })
 
     it('Match deep parameterized path', async function() {
@@ -225,11 +224,11 @@ describe('Sampling Tests:', function() {
       let result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
       let data = JSON.parse(result.body)
 
-      expect(data.method).to.equal('GET')
-      expect(data.rule.target).to.equal(20)
-      expect(data.rule.rate).to.equal(0.1)
-      expect(data.rule.period).to.equal(60)
-      expect(data.rule.level).to.equal('info')
+      expect(data.method).toBe('GET')
+      expect(data.rule.target).toBe(20)
+      expect(data.rule.rate).toBe(0.1)
+      expect(data.rule.period).toBe(60)
+      expect(data.rule.level).toBe('info')
     })
 
     it('Match wildcard route', async function() {
@@ -237,11 +236,11 @@ describe('Sampling Tests:', function() {
       let result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
       let data = JSON.parse(result.body)
 
-      expect(data.method).to.equal('GET')
-      expect(data.rule.target).to.equal(30)
-      expect(data.rule.rate).to.equal(0.1)
-      expect(data.rule.period).to.equal(60)
-      expect(data.rule.level).to.equal('debug')
+      expect(data.method).toBe('GET')
+      expect(data.rule.target).toBe(30)
+      expect(data.rule.rate).toBe(0.1)
+      expect(data.rule.period).toBe(60)
+      expect(data.rule.level).toBe('debug')
     })
 
     it('Match static route (w/ wildcard at the same level)', async function() {
@@ -249,11 +248,11 @@ describe('Sampling Tests:', function() {
       let result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
       let data = JSON.parse(result.body)
 
-      expect(data.method).to.equal('GET')
-      expect(data.rule.target).to.equal(40)
-      expect(data.rule.rate).to.equal(0.1)
-      expect(data.rule.period).to.equal(60)
-      expect(data.rule.level).to.equal('debug')
+      expect(data.method).toBe('GET')
+      expect(data.rule.target).toBe(40)
+      expect(data.rule.rate).toBe(0.1)
+      expect(data.rule.period).toBe(60)
+      expect(data.rule.level).toBe('debug')
     })
 
     it('Match deep wildcard route', async function() {
@@ -261,11 +260,11 @@ describe('Sampling Tests:', function() {
       let result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
       let data = JSON.parse(result.body)
 
-      expect(data.method).to.equal('GET')
-      expect(data.rule.target).to.equal(30)
-      expect(data.rule.rate).to.equal(0.1)
-      expect(data.rule.period).to.equal(60)
-      expect(data.rule.level).to.equal('debug')
+      expect(data.method).toBe('GET')
+      expect(data.rule.target).toBe(30)
+      expect(data.rule.rate).toBe(0.1)
+      expect(data.rule.period).toBe(60)
+      expect(data.rule.level).toBe('debug')
     })
 
     it('Match wildcard route (by method)', async function() {
@@ -273,11 +272,11 @@ describe('Sampling Tests:', function() {
       let result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
       let data = JSON.parse(result.body)
 
-      expect(data.method).to.equal('GET')
-      expect(data.rule.target).to.equal(50)
-      expect(data.rule.rate).to.equal(0.1)
-      expect(data.rule.period).to.equal(60)
-      expect(data.rule.level).to.equal('debug')
+      expect(data.method).toBe('GET')
+      expect(data.rule.target).toBe(50)
+      expect(data.rule.rate).toBe(0.1)
+      expect(data.rule.period).toBe(60)
+      expect(data.rule.level).toBe('debug')
     })
   })
 
@@ -295,8 +294,8 @@ describe('Sampling Tests:', function() {
     }
 
     it('Default route', async function() {
-      this.timeout(10000);
-      this.slow(10000);
+      // this.timeout(10000);
+      // this.slow(10000);
       _log = [] // clear log
       request = 1 // reset requests
       api_rules._initTime = Date.now() // reset _initTime for the API
@@ -312,7 +311,7 @@ describe('Sampling Tests:', function() {
 
       for(let x = 0; x<requests;x++) {
         result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
-        await Promise.delay(20)
+        await delay(20)
       } // end for loop
 
       // End the timer and restore console.log
@@ -327,14 +326,14 @@ describe('Sampling Tests:', function() {
       let totalRate = Math.ceil(requests*rules.rate)
       let deviation = Math.abs(((totalFixed+totalRate)/_log.length-1).toFixed(2))
 
-      expect(deviation).to.be.below(0.12)
+      expect(deviation).toBeLessThan(0.12)
     }) // end it
 
 
 
     it('Fixed target only route', async function() {
-      this.timeout(10000);
-      this.slow(10000);
+      // this.timeout(10000);
+      // this.slow(10000);
       _log = [] // clear log
       request = 1 // reset requests
       api_rules._initTime = Date.now() // reset _initTime for the API
@@ -350,7 +349,7 @@ describe('Sampling Tests:', function() {
 
       for(let x = 0; x<requests;x++) {
         result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
-        await Promise.delay(20)
+        await delay(20)
       } // end for loop
 
       // End the timer and restore console.log
@@ -366,14 +365,14 @@ describe('Sampling Tests:', function() {
       let deviation = Math.abs(((totalFixed+totalRate)/_log.length-1).toFixed(2))
 
       // console.log(_log.length,totalFixed,totalRate,deviation)
-      expect(deviation).to.be.below(0.15)
+      expect(deviation).toBeLessThan(0.15)
     }) // end it
 
 
 
     it('Fixed rate only route', async function() {
-      this.timeout(10000);
-      this.slow(10000);
+      // this.timeout(10000);
+      // this.slow(10000);
       _log = [] // clear log
       request = 1 // reset requests
       api_rules._initTime = Date.now() // reset _initTime for the API
@@ -389,7 +388,7 @@ describe('Sampling Tests:', function() {
 
       for(let x = 0; x<requests;x++) {
         result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
-        await Promise.delay(20)
+        await delay(20)
         // await Promise.delay(20)
       } // end for loop
 
@@ -407,7 +406,7 @@ describe('Sampling Tests:', function() {
 
       // console.log(_log);
       // console.log(totalTime,_log.length,totalFixed,totalRate,deviation)
-      expect(deviation).to.be.below(0.12)
+      expect(deviation).toBeLessThan(0.12)
     }) // end it
 
 

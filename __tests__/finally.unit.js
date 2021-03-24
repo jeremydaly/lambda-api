@@ -1,7 +1,5 @@
 'use strict';
 
-const expect = require('chai').expect // Assertion library
-
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
 
@@ -47,13 +45,13 @@ describe('Finally Tests:', function() {
   it('Connected on first execution and after callback', async function() {
     let _event = Object.assign({},event,{})
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","connected":"true"}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","connected":"true"}', isBase64Encoded: false })
   }) // end it
 
   it('Disconnected on second execution', async function() {
     let _event = Object.assign({},event,{})
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","connected":"false"}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","connected":"false"}', isBase64Encoded: false })
   }) // end it
 
 }) // end FINALLY tests

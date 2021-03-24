@@ -1,6 +1,6 @@
 'use strict';
 
-const expect = require('chai').expect // Assertion library
+
 
 // Init API instance
 const api = require('../index')({ version: 'v1.0', mimeTypes: { test: 'text/test' } })
@@ -59,43 +59,43 @@ describe('Attachment Tests:', function() {
   it('Simple attachment', async function() {
     let _event = Object.assign({},event,{ path: '/attachment' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-disposition': ['attachment'], 'content-type': ['application/json'] }, statusCode: 200, body: '{"status":"ok"}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-disposition': ['attachment'], 'content-type': ['application/json'] }, statusCode: 200, body: '{"status":"ok"}', isBase64Encoded: false })
   }) // end it
 
   it('PDF attachment w/ path', async function() {
     let _event = Object.assign({},event,{ path: '/attachment/pdf' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-disposition': ['attachment; filename=\"foo.pdf\"'], 'content-type': ['application/pdf'] }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-disposition': ['attachment; filename=\"foo.pdf\"'], 'content-type': ['application/pdf'] }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
   }) // end it
 
   it('PNG attachment w/ path', async function() {
     let _event = Object.assign({},event,{ path: '/attachment/png' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-disposition': ['attachment; filename=\"foo.png\"'], 'content-type': ['image/png'] }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-disposition': ['attachment; filename=\"foo.png\"'], 'content-type': ['image/png'] }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
   }) // end it
 
   it('CSV attachment w/ path', async function() {
     let _event = Object.assign({},event,{ path: '/attachment/csv' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-disposition': ['attachment; filename=\"foo.csv\"'], 'content-type': ['text/csv'] }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-disposition': ['attachment; filename=\"foo.csv\"'], 'content-type': ['text/csv'] }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
   }) // end it
 
   it('Custom MIME type attachment w/ path', async function() {
     let _event = Object.assign({},event,{ path: '/attachment/custom' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-disposition': ['attachment; filename=\"foo.test\"'], 'content-type': ['text/test'] }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-disposition': ['attachment; filename=\"foo.test\"'], 'content-type': ['text/test'] }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
   }) // end it
 
   it('Empty string', async function() {
     let _event = Object.assign({},event,{ path: '/attachment/empty-string' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-disposition': ['attachment'], 'content-type': ['application/json'] }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-disposition': ['attachment'], 'content-type': ['application/json'] }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
   }) // end it
 
   it('Null string', async function() {
     let _event = Object.assign({},event,{ path: '/attachment/empty-string' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).to.deep.equal({ multiValueHeaders: { 'content-disposition': ['attachment'], 'content-type': ['application/json'] }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-disposition': ['attachment'], 'content-type': ['application/json'] }, statusCode: 200, body: 'filedata', isBase64Encoded: false })
   }) // end it
 
 }) // end HEADER tests
