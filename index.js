@@ -29,6 +29,7 @@ class API {
     this._errorHeaderWhitelist = props && Array.isArray(props.errorHeaderWhitelist) ? props.errorHeaderWhitelist.map(header => header.toLowerCase()) : []
     this._isBase64 = props && typeof props.isBase64 === 'boolean' ? props.isBase64 : false
     this._headers = props && props.headers && typeof props.headers === 'object' ? props.headers : {}
+    this._compression = props && typeof props.compression === 'boolean' ? props.compression : false
 
     // Set sampling info
     this._sampleCounts = {}

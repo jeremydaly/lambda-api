@@ -1342,7 +1342,17 @@ You can also use the `cors()` ([see here](#corsoptions)) convenience method to a
 Conditional route support could be added via middleware or with conditional logic within the `OPTIONS` route.
 
 ## Compression
-Currently, API Gateway HTTP APIs do not support automatic compression out of the box, but that doesn't mean the Lambda can't return a compressed response. In order to create a compressed response instantiate the API with `isBase64` set to true, and a custom serializer that returns a compressed response as a base64 encoded string. Also, don't forget to set the correct `content-encoding` header:
+Currently, API Gateway HTTP APIs do not support automatic compression, but that doesn't mean the Lambda can't return a compressed response. Lambda API supports compression out of the box:
+
+```javascript
+const api = require('lambda-api')({
+  compression: true
+})
+```
+
+The response will automatically be compressed based on the `Accept-Encoding` header in the request. Supported compressions are Brotli, Gzip and Deflate - in that priority order.
+
+For full control over the response compression, instantiate the API with `isBase64` set to true, and a custom serializer that returns a compressed response as a base64 encoded string. Also, don't forget to set the correct `content-encoding` header:
 
 ```javascript
 const zlib = require('zlib')
