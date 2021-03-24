@@ -24,6 +24,9 @@ const api9 = require('../index')({
   },
   serializer: body => {
     const json = JSON.stringify(Object.assign(body,{ _custom: true, _base64: true }))
+    console.log(`JSON: '${json}'`)
+    console.log('GZIP:',gzipSync(json))
+    console.log('Base64:',gzipSync(json).toString('base64'))
     return gzipSync(json).toString('base64')
   }
 })
@@ -393,9 +396,9 @@ describe('Error Handling Tests:', function() {
       let _log
       let _event = Object.assign({},event,{ path: '/testErrorThrow'})
       let logger = console.log
-      console.log = log => { try { _log = JSON.parse(log) } catch(e) { _log = log } }
+      // console.log = log => { try { _log = JSON.parse(log) } catch(e) { _log = log } }
       let result = await new Promise(r => api9.run(_event,{},(e,res) => { r(res) }))
-      console.log = logger
+      // console.log = logger
       // console.log(result);
       expect(result).toEqual({ multiValueHeaders: { 'content-encoding': ['gzip'], 'content-type': ['application/json'] }, statusCode: 500, body: 'H4sIAAAAAAAAE6tWSi0qyi9SslIKycgsVgCiRIWS1OIShZKMovzyPAWIrI5SfHJpcUl+rpJVSVFpKpCblFicamYC4dYCAL2BVyJFAAAA', isBase64Encoded: true })
     })

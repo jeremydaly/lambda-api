@@ -36,7 +36,6 @@
     "@types/aws-lambda": "^8.10.51",
     "@types/node": "^10.17.21",
     "aws-sdk": "^2.664.0",
-    "bluebird": "^3.7.2",
     "coveralls": "^3.1.0",
     "eslint": "^7.22.0",
     "jest": "^26.6.3",
