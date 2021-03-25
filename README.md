@@ -1,9 +1,9 @@
 [![Lambda API](https://www.jeremydaly.com/wp-content/uploads/2018/03/lambda-api-logo.svg)](https://serverless-api.com/)
 
-[![Build Status](https://travis-ci.org/jeremydaly/lambda-api.svg?branch=master)](https://travis-ci.org/jeremydaly/lambda-api)
+[![Build Status](https://github.com/jeremydaly/lambda-api/actions/workflows/build.yml/badge.svg)](https://github.com/jeremydaly/lambda-api/actions/workflows/build.yml)
 [![npm](https://img.shields.io/npm/v/lambda-api.svg)](https://www.npmjs.com/package/lambda-api)
 [![npm](https://img.shields.io/npm/l/lambda-api.svg)](https://www.npmjs.com/package/lambda-api)
-[![Coverage Status](https://coveralls.io/repos/github/jeremydaly/lambda-api/badge.svg?branch=master)](https://coveralls.io/github/jeremydaly/lambda-api?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/jeremydaly/lambda-api/badge.svg?branch=main)](https://coveralls.io/github/jeremydaly/lambda-api?branch=main)
 
 ### Lightweight web framework for your serverless applications
 
@@ -160,39 +160,6 @@ For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-a
 
 ### v0.10: ALB support, method-based middleware, and multi-value headers and query string parameters
 Lambda API now allows you to seamlessly switch between API Gateway and Application Load Balancers. New [execution stacks](execution-stacks) enables method-based middleware and more wildcard functionality. Plus full support for multi-value headers and query string parameters.
-
-### v0.9: New error types, custom serializers, and TypeScript support
-Lambda API now generates typed errors for easier parsing in middleware. You can also supply your own custom serializer for formatting output rather than using the default `JSON.stringify`. And thanks to @hassankhan, a TypeScript declaration file is now available.
-
-### v0.8: Logging support with sampling
-Lambda API has added a powerful (and customizable) logging engine that utilizes native JSON support for CloudWatch Logs. Log entries can be manually added using standard severities like `info` and `warn`. In addition, "access logs" can be automatically generated with detailed information about each requests. See [Logging](#logging) for more information about logging and auto sampling for request tracing.
-
-### v0.7: Restrict middleware execution to certain paths
-Middleware now supports an optional path parameter that supports multiple paths, wildcards, and parameter matching to better control middleware execution. See [middleware](#middleware) for more information.
-
-### v0.6: Support for both `callback-style` and `async-await`
-In additional to `res.send()`, you can now simply `return` the body from your route and middleware functions. See [Returning Responses](#returning-responses) for more information.
-
-### v0.5: Remove Bluebird promises dependency
-Now that AWS Lambda supports Node v8.10, asynchronous operations can be handled more efficiently with `async/await` rather than with promises. The core Lambda API execution engine has been rewritten to take advantage of `async/await`, which means we no longer need to depend on Bluebird. We now have **ZERO** dependencies.
-
-### v0.4: Binary support
-Binary support has been added! This allows you to both send and receive binary files from API Gateway. For more information, see [Enabling Binary Support](#enabling-binary-support).
-
-### v0.3: New instantiation method
-Please note that the invocation method has been changed. You no longer need to use the `new` keyword to instantiate Lambda API. It can now be instantiated in one line:
-
- ```javascript
- const api = require('lambda-api')()
- ```
-
-`lambda-api` returns a `function` now instead of a `class`, so options can be passed in as its only argument:
-
-```javascript
-const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
-```
-
-**IMPORTANT:** Upgrading from <v0.3.0 requires either removing the `new` keyword or switching to the one-line format. This provides more flexibility for instantiating Lambda API in future releases.
 
 ## Routes and HTTP Methods
 
