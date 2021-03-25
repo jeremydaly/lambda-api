@@ -1,10 +1,9 @@
 'use strict';
 
-
 const sinon = require('sinon') // Require Sinon.js library
 const AWS = require('aws-sdk') // AWS SDK (automatically available in Lambda)
 const S3 = require('../lib/s3-service') // Init S3 Service
-const { gzipSync } = require('zlib')
+const { gzipSync, brotliCompressSync, deflateSync } = require('zlib')
 
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
@@ -129,7 +128,7 @@ api4.get('/testGZIP', function(req,res) {
   res.json({ object: true })
 })
 
-api5.get('/testGZIP', function(req,res) {
+api5.get('/testCompression', function(req,res) {
   res.json({ object: true })
 })
 
@@ -285,13 +284,32 @@ describe('Response Tests:', function() {
   it('Custom serializer (GZIP)', async function() {
     let _event = Object.assign({},event,{ path: '/testGZIP'})
     let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
-    expect(result).toEqual({ multiValueHeaders: { 'content-encoding': ['gzip'], 'content-type': ['application/json'] }, statusCode: 200, body: 'H4sIAAAAAAAAE6tWyk/KSk0uUbIqKSpN1VGKTy4tLsnPhXOTEotTzUwg3FoAan86iy0AAAA=', isBase64Encoded: true })
+
+    let body = gzipSync(`{"object":true,"_custom":true,"_base64":true}`).toString('base64')
+    expect(result).toEqual({ multiValueHeaders: { 'content-encoding': ['gzip'], 'content-type': ['application/json'] }, statusCode: 200, body, isBase64Encoded: true })
   }) // end it
 
   it('Compression (GZIP)', async function() {
-    let _event = Object.assign({},event,{ path: '/testGZIP'})
+    let _event = Object.assign({},event,{ path: '/testCompression'})
     let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
-    expect(result).toEqual({ multiValueHeaders: { 'content-encoding': ['gzip'], 'content-type': ['application/json'] }, statusCode: 200, body: 'H4sIAAAAAAAAE6tWyk/KSk0uUbIqKSpNrQUAAQd5Ug8AAAA=', isBase64Encoded: true })
+    let body = gzipSync(`{"object":true}`).toString('base64')
+    expect(result).toEqual({ multiValueHeaders: { 'content-encoding': ['gzip'], 'content-type': ['application/json'] }, statusCode: 200, body, isBase64Encoded: true })
+  }) // end it
+
+  it('Compression (Brotli)', async function() {
+    let _event = Object.assign({},event,{ path: '/testCompression'})
+    _event.multiValueHeaders['Accept-Encoding'] = ['br','deflate','gzip']
+    let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
+    let body = brotliCompressSync(`{"object":true}`).toString('base64')
+    expect(result).toEqual({ multiValueHeaders: { 'content-encoding': ['br'], 'content-type': ['application/json'] }, statusCode: 200, body, isBase64Encoded: true })
+  }) // end it
+
+  it('Compression (Deflate)', async function() {
+    let _event = Object.assign({},event,{ path: '/testCompression'})
+    _event.multiValueHeaders['Accept-Encoding'] = ['deflate']
+    let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
+    let body = deflateSync(`{"object":true}`).toString('base64')
+    expect(result).toEqual({ multiValueHeaders: { 'content-encoding': ['deflate'], 'content-type': ['application/json'] }, statusCode: 200, body, isBase64Encoded: true })
   }) // end it
 
   afterEach(function() {

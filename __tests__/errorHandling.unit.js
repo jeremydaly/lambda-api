@@ -396,8 +396,8 @@ describe('Error Handling Tests:', function() {
       console.log = log => { try { _log = JSON.parse(log) } catch(e) { _log = log } }
       let result = await new Promise(r => api9.run(_event,{},(e,res) => { r(res) }))
       console.log = logger
-      // console.log(result);
-      expect(result).toEqual({ multiValueHeaders: { 'content-encoding': ['gzip'], 'content-type': ['application/json'] }, statusCode: 500, body: 'H4sIAAAAAAAAE6tWSi0qyi9SslIKycgsVgCiRIWS1OIShZKMovzyPAWIrI5SfHJpcUl+rpJVSVFpKpCblFicamYC4dYCAL2BVyJFAAAA', isBase64Encoded: true })
+      let body = gzipSync(`{"error":"This is a test thrown error","_custom":true,"_base64":true}`).toString('base64')
+      expect(result).toEqual({ multiValueHeaders: { 'content-encoding': ['gzip'], 'content-type': ['application/json'] }, statusCode: 500, body, isBase64Encoded: true })
     })
   })
 }) // end ERROR HANDLING tests
