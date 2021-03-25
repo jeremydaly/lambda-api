@@ -16,18 +16,15 @@ jobs:
         node-version: [14.x]
 
     steps:
-      # extract branch name
-      - name: Extract branch name
+      - name: Get branch name (merge)
         if: github.event_name != 'pull_request'
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
 
-      # extract branch name on pull request
-      - name: Extract branch name on pull request
+      - name: Get branch name (pull request)
         if: github.event_name == 'pull_request'
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_HEAD_REF})"
-        id: extract_branch
+        shell: bash
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
 
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
@@ -39,6 +36,6 @@ jobs:
         env:
           COVERALLS_SERVICE_NAME: ${{ github.repository }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          COVERALLS_GIT_BRANCH: ${{ steps.extract_branch.outputs.branch }}
+          COVERALLS_GIT_BRANCH: ${{ env.BRANCH_NAME }}}
 
     
