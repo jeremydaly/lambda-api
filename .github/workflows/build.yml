@@ -29,6 +29,6 @@ jobs:
       env:
         COVERALLS_SERVICE_NAME: ${{ github.repository }}
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        COVERALLS_GIT_BRANCH: $GITHUB_REF
+        COVERALLS_GIT_BRANCH: ${{ github.ref }}
 
     
