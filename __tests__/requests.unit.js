@@ -8,7 +8,6 @@ const api = require('../index')({ version: 'v1.0' })
 /******************************************************************************/
 api.get('/test/hello', function(req,res) {
   let request = Object.assign(req,{app:null})
-  // console.log(JSON.stringify(request,null,2));
   res.cookie('test','value')
   res.cookie('test2','value2')
   res.status(200).json({ request })
@@ -27,9 +26,9 @@ api.get('/test/201', function(req,res) {
 
 describe('Request Tests:', function() {
 
-  describe('API Gateway Proxy Event', function() {
+  describe('API Gateway Proxy Event v1', function() {
     it('Standard event', async function() {
-      let _event = require('./sample-event-apigateway1.json')
+      let _event = require('./sample-event-apigateway-v1.json')
       let _context = require('./sample-context-apigateway1.json')
       let result = await new Promise(r => api.run(_event,_context,(e,res) => { r(res) }))
       let body = JSON.parse(result.body)
@@ -57,7 +56,7 @@ describe('Request Tests:', function() {
     })
 
     it('Missing X-Forwarded-For (sourceIp fallback)', async function() {
-      let _event = require('./sample-event-apigateway1.json')
+      let _event = require('./sample-event-apigateway-v1.json')
       let _context = require('./sample-context-apigateway1.json')
       delete _event.headers['X-Forwarded-For'] // remove the header
       delete _event.multiValueHeaders['x-forwarded-for'] // remove the header
@@ -83,6 +82,37 @@ describe('Request Tests:', function() {
       expect(body.request.headers['test-header']).toBe('val1,val2')
       expect(body.request.multiValueHeaders['test-header']).toEqual(['val1','val2'])
       // console.log(body);
+    })
+  })
+
+  describe('API Gateway Proxy Event v2', function() {
+    it('Standard event', async function() {
+      let _event = require('./sample-event-apigateway-v2.json')
+      let _context = require('./sample-context-apigateway1.json')
+      let result = await new Promise(r => api.run(_event,_context,(e,res) => { r(res) }))
+      let body = JSON.parse(result.body)
+      // console.log(result);
+      // console.log(body.request.multiValueHeaders);
+      expect(result.cookies).toEqual(['test=value; Path=/','test2=value2; Path=/'])
+      expect(body).toHaveProperty('request')
+      expect(body.request.id).toBeDefined()
+      expect(body.request.interface).toBe('apigateway')
+      expect(body.request.userAgent).toBe('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36 OPR/39.0.2256.48')
+      expect(body.request).toHaveProperty('requestContext')
+      expect(body.request.ip).toBe('192.168.100.1')
+      expect(body.request.pathParameters).toEqual({ "proxy": "hello" })
+      expect(body.request.stageVariables).toEqual({ "stageVarName": "stageVarValue" })
+      expect(body.request.isBase64Encoded).toBe(false)
+      expect(body.request.clientType).toBe('desktop')
+      expect(body.request.clientCountry).toBe('US')
+      expect(body.request.route).toBe('/test/hello')
+      expect(body.request.query.qs1).toBe('foo')
+      expect(body.request.query.qs2).toBe('foo,bar')
+      expect(body.request.multiValueQuery.qs2).toEqual(['foo','bar'])
+      expect(body.request.multiValueQuery.qs3).toEqual(['bat','baz'])
+      expect(body.request.headers['test-header']).toBe('val1,val2')
+      expect(body.request.multiValueHeaders['test-header']).toEqual(['val1','val2'])
+      expect(body.request.cookies).toEqual({ cookie1: 'test', cookie2: 123 })
     })
   })
 
