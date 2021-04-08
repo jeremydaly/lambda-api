@@ -100,8 +100,9 @@ class API {
     if (stack.length === 0)
       throw new ConfigurationError(`No handler or middleware specified for ${method} method on ${path} route.`)
 
-    // Ensure method is an array
-    let methods = Array.isArray(method) ? method : method.split(',')
+    // Ensure methods is an array and upper case
+    let methods = (Array.isArray(method) ? method : method.split(','))
+      .map(x => typeof x === 'string' ? x.trim().toUpperCase() : null)
 
     // Parse the path
     let parsedPath = this.parseRoute(path)
@@ -121,12 +122,13 @@ class API {
     // Create a local stack for inheritance
     let _stack = {}
 
-    // Loop through the paths
+    // Loop through the path levels
     for (let i=0; i<route.length; i++) {
 
+      // Flag as end of the path
       let end = i === route.length-1
 
-      // If this is a variable
+      // If this is a parameter variable
       if (/^:(.*)$/.test(route[i])) {
         // Assign it to the pathVars (trim off the : at the beginning)
         pathVars[i] = [route[i].substr(1)]
@@ -134,74 +136,85 @@ class API {
         route[i] = '__VAR__'
       } // end if variable
 
-      // Add methods to routess
+      // Create routes and add path if they don't exist
+      if (!routes['ROUTES']) { routes['ROUTES'] = {} }
+      if (!routes['ROUTES'][route[i]]) { routes['ROUTES'][route[i]] = {} }
+
+      // Loop through methods for the route
       methods.forEach(_method => {
+
+        // Method must be a string
         if (typeof _method === 'string') {
 
-          if (routes['ROUTES']) {
-
-            // Wildcard routes
-            if (routes['ROUTES']['*']) {
-
-              // Inherit middleware
-              if (routes['ROUTES']['*']['MIDDLEWARE']) {
-                _stack[method] = routes['ROUTES']['*']['MIDDLEWARE'].stack
-                //_stack[method] ?
-                // _stack[method].concat(routes['ROUTES']['*']['MIDDLEWARE'].stack)
-                // : routes['ROUTES']['*']['MIDDLEWARE'].stack
-              }
-
-              // Inherit methods and ANY
-              if (routes['ROUTES']['*']['METHODS'] && routes['ROUTES']['*']['METHODS']) {
-                ['ANY',method].forEach(m => {
-                  if (routes['ROUTES']['*']['METHODS'][m]) {
-                    _stack[method] = _stack[method] ?
-                      _stack[method].concat(routes['ROUTES']['*']['METHODS'][m].stack)
-                      : routes['ROUTES']['*']['METHODS'][m].stack
-                  }
-                }) // end for
-              }
+          // Check for wild card at this level
+          if (routes['ROUTES']['*']) {
+            if (routes['ROUTES']['*']['MIDDLEWARE'] && (route[i] !== '*' || _method !== '__MW__')) {
+              _stack[method] = (_stack[method] || []).concat(routes['ROUTES']['*']['MIDDLEWARE'].stack)
             }
-
-            // Matching routes
-            if (routes['ROUTES'][route[i]]) {
-
-              // Inherit middleware
-              if (end && routes['ROUTES'][route[i]]['MIDDLEWARE']) {
-                _stack[method] = _stack[method] ?
-                  _stack[method].concat(routes['ROUTES'][route[i]]['MIDDLEWARE'].stack)
-                  : routes['ROUTES'][route[i]]['MIDDLEWARE'].stack
-              }
-
-              // Inherit ANY methods (DISABLED)
-              // if (end && routes['ROUTES'][route[i]]['METHODS'] && routes['ROUTES'][route[i]]['METHODS']['ANY']) {
-              //   _stack[method] = _stack[method] ?
-              //     _stack[method].concat(routes['ROUTES'][route[i]]['METHODS']['ANY'].stack)
-              //       : routes['ROUTES'][route[i]]['METHODS']['ANY'].stack
-              // }
+            if (routes['ROUTES']['*']['METHODS'] && routes['ROUTES']['*']['METHODS'][method]) {
+              _stack[method] = (_stack[method] || []).concat(routes['ROUTES']['*']['METHODS'][method].stack)
             }
-          }
+          } // end if wild card
 
-          // Add the route to the global _routes
-          this.setRoute(
-            this._routes,
-            _method.trim().toUpperCase(),
-            (end ? {
+          // If this is the end of the path
+          if (end) {
+
+            // Check for matching middleware
+            if (route[i] !== '*' && routes['ROUTES'][route[i]] && routes['ROUTES'][route[i]]['MIDDLEWARE']) {
+              _stack[method] = (_stack[method] || []).concat(routes['ROUTES'][route[i]]['MIDDLEWARE'].stack)
+            } // end if
+
+
+            // Generate the route/method meta data
+            let meta = {
               vars: pathVars,
               stack,
               inherited: _stack[method] ? _stack[method] : [],
               route: '/'+parsedPath.join('/'),
               path: '/'+this._prefix.concat(parsedPath).join('/')
-            } : null),
-            route.slice(0,i+1)
-          )
+            }
 
-        }
+            // If mounting middleware
+            if (method === '__MW__') {
+              // Merge stacks if middleware exists
+              if (routes['ROUTES'][route[i]]['MIDDLEWARE']) {
+                meta.stack = routes['ROUTES'][route[i]]['MIDDLEWARE'].stack.concat(stack)
+                meta.vars = UTILS.mergeObjects(routes['ROUTES'][route[i]]['MIDDLEWARE'].vars,pathVars)
+              }
+              // Add/update middleware
+              routes['ROUTES'][route[i]]['MIDDLEWARE'] = meta
+            } else {
+
+              // Create the methods section if it doesn't exist
+              if (!routes['ROUTES'][route[i]]['METHODS']) routes['ROUTES'][route[i]]['METHODS'] = {}
+
+              // Merge stacks if method already exists for this route
+              if (routes['ROUTES'][route[i]]['METHODS'][_method]) {
+                meta.stack = routes['ROUTES'][route[i]]['METHODS'][_method].stack.concat(stack)
+                meta.vars = UTILS.mergeObjects(routes['ROUTES'][route[i]]['METHODS'][_method].vars,pathVars)
+              }
+
+              // Add method and meta data
+              routes['ROUTES'][route[i]]['METHODS'][_method] = meta
+            
+            } // end else
+
+            // console.log('STACK:',meta);
+
+          // If there's a wild card that's not at the end
+          } else if (route[i] === '*') { 
+            throw new ConfigurationError('Wildcards can only be at the end of a route definition') 
+          } // end if end of path
+        } // end if method is string
+
       }) // end methods loop
 
+      // Update the current routes pointer
       routes = routes['ROUTES'][route[i]]
 
-    } // end for loop
+    } // end path traversal loop
+
+    // console.log(JSON.stringify(this._routes,null,2));
 
   } // end main METHOD function
 
@@ -373,7 +386,7 @@ class API {
       }
     }
 
-    // Add middleware to path
+    // Add middleware for all methods
     if (middleware.length > 0) {
       routes.forEach(route => {
         this.METHOD('__MW__',route,...middleware)
@@ -397,54 +410,6 @@ class API {
   parseRoute(path) {
     return path.trim().replace(/^\/(.*?)(\/)*$/,'$1').split('/').filter(x => x.trim() !== '')
   }
-
-  // Recursive function to create/merge routes object
-  setRoute(obj, method, value, path) {
-    if (path.length > 1) {
-      let p = path.shift()
-      if (p === '*') { throw new ConfigurationError('Wildcards can only be at the end of a route definition') }
-      this.setRoute(obj['ROUTES'][p], method, value, path)
-    } else {
-      // Create routes and add path if they don't exist
-      if (!obj['ROUTES']) obj['ROUTES'] = {}
-      if (!obj['ROUTES'][path[0]]) obj['ROUTES'][path[0]] = {}
-
-      // If a value exists in this iteration
-      if (value !== null) {
-
-        // If mounting middleware
-        if (method === '__MW__') {
-          // Merge stacks if middleware exists
-          if (obj['ROUTES'][path[0]]['MIDDLEWARE']) {
-            value.stack = obj['ROUTES'][path[0]]['MIDDLEWARE'].stack.concat(value.stack)
-            value.vars = UTILS.mergeObjects(obj['ROUTES'][path[0]]['MIDDLEWARE'].vars,value.vars)
-          }
-
-          // Add/Update the middleware
-          obj['ROUTES'][path[0]]['MIDDLEWARE'] = value
-
-        // Else if mounting a regular route
-        } else {
-
-          // Create the methods section if it doesn't exist
-          if (!obj['ROUTES'][path[0]]['METHODS']) obj['ROUTES'][path[0]]['METHODS'] = {}
-
-          // Merge stacks if method exists
-          if (obj['ROUTES'][path[0]]['METHODS'][method]) {
-            value.stack = obj['ROUTES'][path[0]]['METHODS'][method].stack.concat(value.stack)
-            value.vars = UTILS.mergeObjects(obj['ROUTES'][path[0]]['METHODS'][method].vars,value.vars)
-          }
-
-          // Add/Update the method
-          obj['ROUTES'][path[0]]['METHODS'] = Object.assign(
-            {},obj['ROUTES'][path[0]]['METHODS'],{ [method]: value }
-          )
-
-        }
-      }
-
-    }
-  } // end setRoute
 
   // Load app packages
   app(packages) {

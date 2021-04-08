@@ -228,7 +228,6 @@ api3.METHOD([1,'DELETE'],'/multimethod/badtype', (req,res) => {
   res.status(200).json({ method: req.method, path: '/multimethod/badtype' })
 })
 
-
 api4.get('/test/*', (req,res) => {
   res.status(200).header('wildcard',true).json({ method: req.method, path: req.path, nested: "true" })
 })

@@ -23,25 +23,25 @@ let event = {
 describe('Unit Tests:', function() {
 
   it('setRoute', async function() {
-    let routes = {}
-    api.setRoute(routes,'GET', { route: '/testPath' }, ['testPath'])
-    api.setRoute(routes,'GET', { route: '/testPath/testx' }, ['testPath','testx'])
-    expect(routes).toEqual({
-      ROUTES: {
-        testPath: {
-          METHODS: {
-            GET: { route: '/testPath' }
-          },
-          ROUTES: {
-            testx: {
-              METHODS: {
-                GET: { route: '/testPath/testx' }
-              }
-            }
-          }
-        }
-      }
-    })
+  //   let routes = {}
+  //   api.setRoute(routes,'GET', { route: '/testPath' }, ['testPath'])
+  //   api.setRoute(routes,'GET', { route: '/testPath/testx' }, ['testPath','testx'])
+  //   expect(routes).toEqual({
+  //     ROUTES: {
+  //       testPath: {
+  //         METHODS: {
+  //           GET: { route: '/testPath' }
+  //         },
+  //         ROUTES: {
+  //           testx: {
+  //             METHODS: {
+  //               GET: { route: '/testPath/testx' }
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   })
   }) // end it
 
 

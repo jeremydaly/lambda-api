@@ -11,6 +11,7 @@ const api5 = require('../index')({ version: 'v1.0' })
 const api6 = require('../index')({ version: 'v1.0' })
 const api7 = require('../index')({ version: 'v1.0' })
 const api8 = require('../index')({ version: 'v1.0' })
+const api9 = require('../index')({ version: 'v1.0' })
 
 let event = {
   httpMethod: 'get',
@@ -102,6 +103,11 @@ const middleware2 = (req,res,next) => {
   next()
 }
 
+const middleware3 = (req,res,next) => {
+  req.middleware3 = true
+  next()
+}
+
 api4.use(middleware1,middleware2);
 api5.use('/test/x',middleware1,middleware2);
 api5.use('/test/y',middleware1);
@@ -133,6 +139,10 @@ api7.use((req,res,next) => {
   next()
 })
 
+
+api9.use(middleware1)
+api9.use(['/data/*'],middleware2)
+api9.use(middleware3)
 
 /******************************************************************************/
 /***  DEFINE TEST ROUTES                                                    ***/
@@ -243,6 +253,33 @@ api8.get('/test/two', middleware1, middleware2, (req,res) => {
     method: 'get',
     middleware1: req.middleware1 ? true : false,
     middleware2: req.middleware2 ? true : false
+  })
+})
+
+api9.get('/test',(req,res) => {
+  res.status(200).json({
+    method: 'get',
+    middleware1: req.middleware1 ? true : false,
+    middleware2: req.middleware2 ? true : false,
+    middleware3: req.middleware3 ? true : false
+  })
+})
+
+api9.get('/data',(req,res) => {
+  res.status(200).json({
+    method: 'get',
+    middleware1: req.middleware1 ? true : false,
+    middleware2: req.middleware2 ? true : false,
+    middleware3: req.middleware3 ? true : false
+  })
+})
+
+api9.get('/data/test',(req,res) => {
+  res.status(200).json({
+    method: 'get',
+    middleware1: req.middleware1 ? true : false,
+    middleware2: req.middleware2 ? true : false,
+    middleware3: req.middleware3 ? true : false
   })
 })
 
@@ -405,6 +442,28 @@ describe('Middleware Tests:', function() {
       statusCode: 200,
       body: '{"method":"get","middleware1":true,"middleware2":true}',
       isBase64Encoded: false })
+  }) // end it
+
+
+
+  it('Wildcard match - issue #112', async function() {
+    let _event = Object.assign({},event,{ path: '/test/' })
+    let result = await new Promise(r => api9.run(_event,{},(e,res) => { r(res) }))
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware1":true,"middleware2":false,"middleware3":true}', isBase64Encoded: false })
+  }) // end it
+
+
+  it('Wildcard match - issue #112', async function() {
+    let _event = Object.assign({},event,{ path: '/data' })
+    let result = await new Promise(r => api9.run(_event,{},(e,res) => { r(res) }))
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware1":true,"middleware2":false,"middleware3":true}', isBase64Encoded: false })
+  }) // end it
+
+  it.only('Wildcard match - issue #112', async function() {
+    let _event = Object.assign({},event,{ path: '/data/test' })
+    let result = await new Promise(r => api9.run(_event,{},(e,res) => { r(res) }))
+    console.log(result);
+    //expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","middleware":false,"middlewareWildcard":true,"middlewareParam":false,"middlewarePath":false}', isBase64Encoded: false })
   }) // end it
 
 
