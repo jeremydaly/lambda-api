@@ -176,7 +176,7 @@ export declare class Response {
   json(body: any): void;
   jsonp(body: any): void;
   html(body: any): void;
-  type(type: string): void;
+  type(type: string): this;
   location(path: string): this;
   redirect(status: number, path: string): void;
   redirect(path: string): void;
