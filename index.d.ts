@@ -224,8 +224,7 @@ export declare class API {
 
   use(path: string, ...middleware: Middleware[]): void;
   use(paths: string[], ...middleware: Middleware[]): void;
-  use(...middleware: Middleware[]): void;
-  use(...errorHandlingMiddleware: ErrorHandlingMiddleware[]): void;
+  use(...middleware: (Middleware | ErrorHandlingMiddleware)[]): void;
 
   finally(callback: FinallyFunction): void;
 
