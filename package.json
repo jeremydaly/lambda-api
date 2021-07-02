@@ -10,7 +10,8 @@
     "test-cov": "jest unit --coverage",
     "test-ci": "eslint . && prettier --check . && jest unit --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "lint": "eslint .",
-    "prepublishOnly": "npm test && npm run lint"
+    "prepublishOnly": "npm test && npm run lint",
+    "changelog": "git log $(git describe --tags --abbrev=0)..HEAD --oneline"
   },
   "repository": {
     "type": "git",
