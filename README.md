@@ -55,6 +55,7 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
 - [Requirements](#requirements)
 - [Configuration](#configuration)
 - [Recent Updates](#recent-updates)
+  - [v0.11: API Gateway v2 payload support and automatic compression](#v011-api-gateway-v2-payload-support-and-automatic-compression)
   - [v0.10: ALB support, method-based middleware, and multi-value headers and query string parameters](#v010-alb-support-method-based-middleware-and-multi-value-headers-and-query-string-parameters)
 - [Routes and HTTP Methods](#routes-and-http-methods)
 - [Returning Responses](#returning-responses)
@@ -155,6 +156,10 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ## Recent Updates
 
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
+
+### v0.11: API Gateway v2 payload support and automatic compression
+
+Lambda API now supports API Gateway v2 payloads for use with HTTP APIs. The library automatically detects the payload, so no extra configuration is needed. Automatic [compression](#compression) has also been added and supports Brotli, Gzip and Deflate.
 
 ### v0.10: ALB support, method-based middleware, and multi-value headers and query string parameters
 
