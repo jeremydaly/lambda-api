@@ -5,10 +5,8 @@ name: build
 
 on: [pull_request, push]
 
-
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
@@ -37,5 +35,3 @@ jobs:
           COVERALLS_SERVICE_NAME: GithubActions
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           COVERALLS_GIT_BRANCH: ${{ env.BRANCH_NAME }}
-
-    
