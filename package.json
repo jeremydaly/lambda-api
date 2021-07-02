@@ -6,8 +6,9 @@
   "types": "index.d.ts",
   "scripts": {
     "test": "jest unit",
+    "prettier": "prettier --check .",
     "test-cov": "jest unit --coverage",
-    "test-ci": "eslint . && jest unit --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "test-ci": "eslint . && prettier --check . && jest unit --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "lint": "eslint .",
     "prepublishOnly": "npm test && npm run lint"
   },
@@ -39,7 +40,9 @@
     "bluebird": "^3.7.2",
     "coveralls": "^3.1.0",
     "eslint": "^7.22.0",
+    "eslint-config-prettier": "^8.3.0",
     "jest": "^26.6.3",
+    "prettier": "^2.3.2",
     "sinon": "^4.5.0"
   },
   "files": [

@@ -1,7 +1,7 @@
 import {
   APIGatewayEvent,
   APIGatewayEventRequestContext,
-  Context
+  Context,
 } from 'aws-lambda';
 
 export declare interface CookieOptions {
@@ -42,28 +42,42 @@ export declare interface App {
   [namespace: string]: Package;
 }
 
-export declare type Middleware = (req: Request, res: Response, next: () => void) => void;
-export declare type ErrorHandlingMiddleware = (error: Error, req: Request, res: Response, next: () => void) => void;
+export declare type Middleware = (
+  req: Request,
+  res: Response,
+  next: () => void
+) => void;
+export declare type ErrorHandlingMiddleware = (
+  error: Error,
+  req: Request,
+  res: Response,
+  next: () => void
+) => void;
 export declare type ErrorCallback = (error?: Error) => void;
-export declare type HandlerFunction = (req: Request, res: Response, next?: NextFunction) => void | any | Promise<any>;
+export declare type HandlerFunction = (
+  req: Request,
+  res: Response,
+  next?: NextFunction
+) => void | any | Promise<any>;
 export declare type LoggerFunction = (message: string) => void;
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
 export declare type SerializerFunction = (body: object) => string;
 export declare type FinallyFunction = (req: Request, res: Response) => void;
-export declare type METHODS = 'GET'
-    | 'POST'
-    | 'PUT'
-    | 'PATCH'
-    | 'DELETE'
-    | 'OPTIONS'
-    | 'HEAD'
-    | 'ANY';
+export declare type METHODS =
+  | 'GET'
+  | 'POST'
+  | 'PUT'
+  | 'PATCH'
+  | 'DELETE'
+  | 'OPTIONS'
+  | 'HEAD'
+  | 'ANY';
 
 export declare interface SamplingOptions {
   route?: string;
   target?: number;
-  rate?: number
+  rate?: number;
   period?: number;
   method?: string | string[];
 }
@@ -120,7 +134,7 @@ export declare class Request {
     [key: string]: string | undefined;
   };
   multiValueQuery: {
-    [key: string]: string[] | undefined
+    [key: string]: string[] | undefined;
   };
   headers: {
     [key: string]: string | undefined;
@@ -171,7 +185,11 @@ export declare class Response {
   getHeader(key: string): string;
   hasHeader(key: string): boolean;
   removeHeader(key: string): this;
-  getLink(s3Path: string, expires?: number, callback?: ErrorCallback): Promise<string>;
+  getLink(
+    s3Path: string,
+    expires?: number,
+    callback?: ErrorCallback
+  ): Promise<string>;
   send(body: any): void;
   json(body: any): void;
   jsonp(body: any): void;
@@ -189,8 +207,17 @@ export declare class Response {
   cache(age?: boolean | number | string, private?: boolean): this;
   modified(date: boolean | string | Date): this;
   attachment(fileName?: string): this;
-  download(file: string | Buffer, fileName?: string, options?: FileOptions, callback?: ErrorCallback): void;
-  sendFile(file: string | Buffer, options?: FileOptions, callback?: ErrorCallback): Promise<void>;
+  download(
+    file: string | Buffer,
+    fileName?: string,
+    options?: FileOptions,
+    callback?: ErrorCallback
+  ): void;
+  sendFile(
+    file: string | Buffer,
+    options?: FileOptions,
+    callback?: ErrorCallback
+  ): Promise<void>;
 }
 
 export declare class API {
@@ -215,12 +242,13 @@ export declare class API {
   any(...handler: HandlerFunction[]): void;
   METHOD(method: METHODS, path: string, ...handler: HandlerFunction[]): void;
   METHOD(method: METHODS, ...handler: HandlerFunction[]): void;
-  register(routes: (api: API, options?: RegisterOptions) => void, options?: RegisterOptions): void;
+  register(
+    routes: (api: API, options?: RegisterOptions) => void,
+    options?: RegisterOptions
+  ): void;
   routes(format: true): void;
   routes(format: false): string[][];
   routes(): string[][];
-
-
 
   use(path: string, ...middleware: Middleware[]): void;
   use(paths: string[], ...middleware: Middleware[]): void;
@@ -229,7 +257,11 @@ export declare class API {
 
   finally(callback: FinallyFunction): void;
 
-  run(event: APIGatewayEvent, context: Context, cb: (err: Error, result: any) => void): void;
+  run(
+    event: APIGatewayEvent,
+    context: Context,
+    cb: (err: Error, result: any) => void
+  ): void;
   run(event: APIGatewayEvent, context: Context): Promise<any>;
 }
 

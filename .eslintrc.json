@@ -1,36 +1,17 @@
 {
   "env": {
-      "es6": true,
-      "node": true,
-      "jest": true
+    "es6": true,
+    "node": true,
+    "jest": true
   },
-  "extends": "eslint:recommended",
+  "extends": ["eslint:recommended", "prettier"],
   "parserOptions": {
-      "ecmaVersion": 2018,
-      "sourceType": "module"
+    "ecmaVersion": 2018,
+    "sourceType": "module"
   },
-  "rules": {
-      "linebreak-style": [
-          "error",
-          "unix"
-      ],
-      "quotes": [
-          "error",
-          "single",
-          { "allowTemplateLiterals": true }
-      ],
-      "semi": [
-          "error",
-          "never"
-      ],
-      "indent": [
-        "error",
-        2,
-        { "SwitchCase": 1, "flatTernaryExpressions": true }
-      ]
-  },
+  "rules": {},
   "globals": {
-      "expect": true,
-      "it": true
+    "expect": true,
+    "it": true
   }
 }
