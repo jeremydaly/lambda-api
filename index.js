@@ -45,7 +45,7 @@ class API {
         ? props.headers
         : {};
     this._compression =
-      props && typeof props.compression === 'boolean'
+      props && (typeof props.compression === 'boolean' || Array.isArray(props.compression))
         ? props.compression
         : false;
 

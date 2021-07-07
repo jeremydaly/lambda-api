@@ -29,7 +29,7 @@ const api4 = require('../index')({
 // Init API with compression
 const api5 = require('../index')({
   version: 'v1.0',
-  compression: true
+  compression: ['br', 'gzip', 'deflate']
 })
 
 let event = {

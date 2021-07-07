@@ -1411,7 +1411,15 @@ const api = require('lambda-api')({
 });
 ```
 
-The response will automatically be compressed based on the `Accept-Encoding` header in the request. Supported compressions are Brotli, Gzip and Deflate - in that priority order.
+The response will automatically be compressed based on the `Accept-Encoding` header in the request. Supported compressions are Gzip and Deflate, with opt-in support for Brotli:
+
+```javascript
+const api = require('lambda-api')({
+  compression: ['br', 'gzip'],
+});
+```
+
+> Note: Brotli compression is significantly slower than Gzip due to its CPU intensive algorithm. Please test extensively before enabling on a production environment.
 
 For full control over the response compression, instantiate the API with `isBase64` set to true, and a custom serializer that returns a compressed response as a base64 encoded string. Also, don't forget to set the correct `content-encoding` header:
 
