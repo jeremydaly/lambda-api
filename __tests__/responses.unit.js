@@ -312,6 +312,14 @@ describe('Response Tests:', function() {
     expect(result).toEqual({ multiValueHeaders: { 'content-encoding': ['deflate'], 'content-type': ['application/json'] }, statusCode: 200, body, isBase64Encoded: true })
   }) // end it
 
+  it('Compression (Unknown)', async function() {
+    let _event = Object.assign({},event,{ path: '/testCompression'})
+    _event.multiValueHeaders['Accept-Encoding'] = ['xxx']
+    let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
+    let body = `{"object":true}`
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body, isBase64Encoded: false })
+  }) // end it
+
   afterEach(function() {
     stub.restore()
   })
