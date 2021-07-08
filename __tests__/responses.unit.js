@@ -29,7 +29,7 @@ const api4 = require('../index')({
 // Init API with compression
 const api5 = require('../index')({
   version: 'v1.0',
-  compression: true
+  compression: ['br', 'gzip', 'deflate']
 })
 
 let event = {
@@ -310,6 +310,14 @@ describe('Response Tests:', function() {
     let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
     let body = deflateSync(`{"object":true}`).toString('base64')
     expect(result).toEqual({ multiValueHeaders: { 'content-encoding': ['deflate'], 'content-type': ['application/json'] }, statusCode: 200, body, isBase64Encoded: true })
+  }) // end it
+
+  it('Compression (Unknown)', async function() {
+    let _event = Object.assign({},event,{ path: '/testCompression'})
+    _event.multiValueHeaders['Accept-Encoding'] = ['xxx']
+    let result = await new Promise(r => api5.run(_event,{},(e,res) => { r(res) }))
+    let body = `{"object":true}`
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body, isBase64Encoded: false })
   }) // end it
 
   afterEach(function() {
