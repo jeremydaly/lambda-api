@@ -11,7 +11,7 @@ export declare interface CookieOptions {
   maxAge?: number;
   path?: string;
   secure?: boolean;
-  sameSite?: boolean | 'Strict' | 'Lax';
+  sameSite?: boolean | 'Strict' | 'Lax' | 'None';
 }
 
 export declare interface CorsOptions {
