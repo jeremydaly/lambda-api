@@ -450,4 +450,44 @@ describe("Utility Function Tests:", function () {
       });
     });
   }); // end parseS3 tests
+
+
+	describe("deepMerge", function () {
+
+		it("Should deep merge objects", function () {
+			let obj1 = {
+				"a": {
+					"b": {
+						"c": "test"
+					}
+				}
+			};
+			let obj2 = {
+				"a": {
+					"b": {
+						"c": "test2"
+					}
+				}
+			};
+
+			expect(utils.deepMerge(obj1, obj2)).toEqual({
+				"a": {
+					"b": {
+						"c": "test2"
+					}
+				}
+			});
+		})
+
+		it("Prevents prototype pollution", function () {
+			let payload = '{"__proto__":{"polluted":true}}';
+			expect({}.polluted).toBeUndefined();
+			utils.deepMerge({},JSON.parse(payload));
+			expect({}.polluted).toBeUndefined();
+		})
+
+
+	}); // end deepMerge tests
+
+
 }); // end UTILITY tests
