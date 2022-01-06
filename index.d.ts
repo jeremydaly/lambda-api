@@ -59,7 +59,7 @@ export declare type HandlerFunction = (
   res: Response,
   next?: NextFunction
 ) => void | any | Promise<any>;
-export declare type LoggerFunction = (message: string) => void;
+export declare type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
 export declare type SerializerFunction = (body: object) => string;
