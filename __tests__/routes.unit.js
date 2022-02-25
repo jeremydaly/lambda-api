@@ -1182,6 +1182,9 @@ describe("Route Tests:", function () {
         httpMethod: "post",
         body: "VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=",
         isBase64Encoded: true,
+        multiValueHeaders: {
+          "content-type": ["text/plain"],
+        },
       });
       let result = await new Promise((r) =>
         api.run(_event, {}, (e, res) => {

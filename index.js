@@ -30,10 +30,25 @@ class API {
       props && props.mimeTypes && typeof props.mimeTypes === 'object'
         ? props.mimeTypes
         : {};
-    this._serializer =
-      props && props.serializer && typeof props.serializer === 'function'
-        ? props.serializer
-        : JSON.stringify;
+
+    this._deserializer = undefined;
+    if (props && props.deserializer && typeof props.deserializer === 'object') {
+      if (props.deserializer.delegate && typeof props.deserializer.delegate === 'function') {
+        this._deserializer = props.deserializer.delegate;
+      }
+    }
+
+    this._serializer = UTILS.stringifyBody;
+    this._serializerPreferences = []
+    if (props && props.serializer && typeof props.serializer === 'object') {
+      if (props.serializer.delegate && typeof props.serializer.delegate === 'function') {
+        this._serializer = props.serializer.delegate;
+      }
+      if (Array.isArray(props.serializer.preferences)) {
+        this._serializerPreferences = props.serializer.preferences;
+      }
+    }
+    
     this._errorHeaderWhitelist =
       props && Array.isArray(props.errorHeaderWhitelist)
         ? props.errorHeaderWhitelist.map((header) => header.toLowerCase())
@@ -50,6 +65,13 @@ class API {
         Array.isArray(props.compression))
         ? props.compression
         : false;
+
+    this._compression =
+        props &&
+        (typeof props.compression === 'boolean' ||
+          Array.isArray(props.compression))
+          ? props.compression
+          : false;
 
     // Set sampling info
     this._sampleCounts = {};

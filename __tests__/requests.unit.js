@@ -1,7 +1,41 @@
 'use strict';
 
+const { Buffer } = require('buffer');
+
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
+
+// Init API with custom deserializer
+const api2 = require('../index')({
+  version: 'v1.0',
+  deserializer: {
+    delegate: (body, contentType) => {
+      if (typeof body === "object" && !Buffer.isBuffer(body)) {
+        return body;
+      }
+      switch (contentType) {
+        case 'application/json':
+          return JSON.parse(body, (key, value) => {
+            if (typeof value === "string" && /^\d+n$/.test(value)) {
+              return BigInt(value.substring(0, value.length - 1));
+            }
+            return value;
+          })
+      }
+    }
+  },
+  serializer: {
+    delegate: (body, acceptableMedia) => {
+      return {
+        value: JSON.stringify(body, (key, value) => {
+          return typeof value === "bigint" ? value.toString() + "n" : value;
+        }),
+        contentType: 'application/json',
+      }
+    },
+    preferences: ['application/json']
+  }
+})
 
 /******************************************************************************/
 /***  DEFINE TEST ROUTES                                                    ***/
@@ -19,12 +53,90 @@ api.get('/test/201', function(req,res) {
 })
 
 
+api2.get('/test', function(req,res) {
+  let request = Object.assign(req,{app:null})
+  res.cookie('test','value')
+  res.cookie('test2','value2')
+  res.status(200).json({ request })
+})
+
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
 /******************************************************************************/
 
 describe('Request Tests:', function() {
+
+  describe('Deserializer Tests:', function() {
+
+    it('Custom JSON Deserializer (Stringify)', async function() {
+      let _event = {
+        httpMethod: 'get',
+        path: '/test',
+        body: api2._serializer({
+          a: "b",
+          c: 9007199254740991n
+        }).value,
+        multiValueHeaders: {
+          'Content-Type': ['application/json']
+        }
+      };
+      
+      let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
+      expect(result.multiValueHeaders).toEqual({ 'content-type': ['application/json'], 'set-cookie': ['test=value; Path=/','test2=value2; Path=/'] })
+      let body = api2._deserializer(result.body, 'application/json')
+      expect(body).toHaveProperty('request')
+      expect(body.request.body).toHaveProperty('c')
+      expect(body.request.body.c).toBe(9007199254740991n)
+    })
+
+    it('Custom JSON Deserializer (Object)', async function() {
+      let _event = {
+        httpMethod: 'get',
+        path: '/test',
+        body: {
+          a: "b",
+          c: 9007199254740991n
+        },
+        multiValueHeaders: {
+          'Content-Type': ['application/json']
+        }
+      };
+      
+      let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
+      expect(result.multiValueHeaders).toEqual({ 'content-type': ['application/json'], 'set-cookie': ['test=value; Path=/','test2=value2; Path=/'] })
+      let body = api2._deserializer(result.body, 'application/json')
+      expect(body).toHaveProperty('request')
+      expect(body.request.body).toHaveProperty('c')
+      expect(body.request.body.c).toBe(9007199254740991n)
+    })
+
+    it('Custom JSON Deserializer (Buffer)', async function() {
+      let _event = {
+        httpMethod: 'get',
+        path: '/test',
+        body: Buffer.from(api2._serializer({
+          a: "b",
+          c: 9007199254740991n
+        }).value).toString("base64"),
+        isBase64Encoded: true,
+        multiValueHeaders: {
+          'Content-Type': ['application/json']
+        }
+      };
+      
+      let result = await new Promise(r => api2.run(_event,{},(e,res) => { r(res) }))
+      expect(result.multiValueHeaders).toEqual({ 'content-type': ['application/json'], 'set-cookie': ['test=value; Path=/','test2=value2; Path=/'] })
+      let body = api2._deserializer(result.body, 'application/json')
+      expect(body).toHaveProperty('request')
+      expect(body.request.body).toHaveProperty('c')
+      expect(body.request.body.c).toBe(9007199254740991n)
+      
+    })
+
+  })
+
+  
 
   describe('API Gateway Proxy Event v1', function() {
     it('Standard event', async function() {

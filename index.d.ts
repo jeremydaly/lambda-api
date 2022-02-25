@@ -62,7 +62,8 @@ export declare type HandlerFunction = (
 export declare type LoggerFunction = (message: string) => void;
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
-export declare type SerializerFunction = (body: object) => string;
+export declare type DeserializerFunction = (body: Buffer | string | object, contentType: string) => object | string;
+export declare type SerializerFunction = (body: object, acceptableMedia: string[]) => SerializerResult;
 export declare type FinallyFunction = (req: Request, res: Response) => void;
 export declare type METHODS =
   | 'GET'
@@ -106,6 +107,22 @@ export declare interface LoggerOptions {
   stack?: boolean;
 }
 
+export declare interface DeserializerOptions {
+  delegate?: DeserializerFunction;
+}
+
+export declare interface SerializerOptions {
+  delegate?: SerializerFunction;
+  preferences?: string[];
+}
+
+export declare interface SerializerResult {
+  value?: Buffer | string,
+  contentType?: string,
+  isBase64Encoded?: boolean,
+  contentEncoding?: 'gzip' | 'compress' | 'deflate' | 'br'
+} 
+
 export declare interface Options {
   base?: string;
   callbackName?: string;
@@ -113,7 +130,8 @@ export declare interface Options {
   mimeTypes?: {
     [key: string]: string;
   };
-  serializer?: SerializerFunction;
+  deserializer?: DeserializerFunction;
+  serializer?: SerializerOptions;
   version?: string;
   errorHeaderWhitelist?: string[];
   isBase64?: boolean;
@@ -142,8 +160,8 @@ export declare class Request {
   rawHeaders?: {
     [key: string]: string | undefined;
   };
-  body: any;
-  rawBody: string;
+  body: Buffer | string | object | undefined;
+  rawBody: string | undefined;
   route: '';
   requestContext: APIGatewayEventRequestContext;
   isBase64Encoded: boolean;

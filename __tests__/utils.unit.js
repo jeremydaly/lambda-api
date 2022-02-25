@@ -43,19 +43,19 @@ describe("Utility Function Tests:", function () {
 
   describe("encodeBody:", function () {
     it("String", function () {
-      expect(utils.encodeBody("test string")).toBe("test string");
+      expect(utils.encodeBody("test string").value).toBe("test string");
     }); // end it
 
     it("Number", function () {
-      expect(utils.encodeBody(123)).toBe("123");
+      expect(utils.encodeBody(123).value).toBe("123");
     }); // end it
 
     it("Array", function () {
-      expect(utils.encodeBody([1, 2, 3])).toBe("[1,2,3]");
+      expect(utils.encodeBody([1, 2, 3]).value).toBe("[1,2,3]");
     }); // end it
 
     it("Object", function () {
-      expect(utils.encodeBody({ foo: "bar" })).toBe('{"foo":"bar"}');
+      expect(utils.encodeBody({ foo: "bar" }).value).toBe('{"foo":"bar"}');
     }); // end it
   }); // end encodeBody tests
 
