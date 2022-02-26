@@ -160,8 +160,8 @@ export declare class Request {
   rawHeaders?: {
     [key: string]: string | undefined;
   };
-  body: any | undefined;
-  rawBody: string | undefined;
+  body?: any;
+  rawBody?: string;
   route: '';
   requestContext: APIGatewayEventRequestContext;
   isBase64Encoded: boolean;
