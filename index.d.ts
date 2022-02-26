@@ -130,7 +130,7 @@ export declare interface Options {
   mimeTypes?: {
     [key: string]: string;
   };
-  deserializer?: DeserializerFunction;
+  deserializer?: DeserializerOptions;
   serializer?: SerializerOptions;
   version?: string;
   errorHeaderWhitelist?: string[];
