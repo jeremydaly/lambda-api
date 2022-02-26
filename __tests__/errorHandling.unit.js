@@ -19,9 +19,6 @@ const api8 = require('../index')({ version: 'v1.0', logger: { access: 'never', e
 const api9 = require('../index')({
   version: 'v1.0',
   isBase64: true,
-  headers: {
-   // 'content-encoding': ['gzip']
-  },
   serializer: {
     delegate: (body, acceptableMedia) => {
       const json = JSON.stringify(Object.assign(body, { _custom: true, _base64: true }))
