@@ -306,14 +306,14 @@ export declare class ResponseError extends Error {
 }
 
 export declare class FileError extends Error {
-  constructor(message: string, err: object);
+  constructor(message: string, err?: object);
 }
 
 export declare class DeserializationError extends Error {
-  constructor(message: string, contentType: string, err: object);
+  constructor(message: string, contentType: string, err?: object);
 }
 export declare class SerializationError extends Error {
-  constructor(message: string, contentType: string, err: object);
+  constructor(message: string, contentType: string, err?: object);
 }
 
 export declare class RequestError extends Error {
