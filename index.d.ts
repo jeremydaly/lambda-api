@@ -160,7 +160,7 @@ export declare class Request {
   rawHeaders?: {
     [key: string]: string | undefined;
   };
-  body: Buffer | string | object | undefined;
+  body: any | undefined;
   rawBody: string | undefined;
   route: '';
   requestContext: APIGatewayEventRequestContext;
