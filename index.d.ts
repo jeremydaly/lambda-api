@@ -62,8 +62,14 @@ export declare type HandlerFunction = (
 export declare type LoggerFunction = (message: string) => void;
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
-export declare type DeserializerFunction = (body: Buffer | string | object, contentType: string) => object | string;
-export declare type SerializerFunction = (body: object, acceptableMedia: string[]) => SerializerResult;
+export declare type DeserializerFunction = (
+  body: Buffer | string | object,
+  contentType: string
+) => object | string;
+export declare type SerializerFunction = (
+  body: object,
+  acceptableMedia: string[]
+) => SerializerResult;
 export declare type FinallyFunction = (req: Request, res: Response) => void;
 export declare type METHODS =
   | 'GET'
@@ -117,11 +123,11 @@ export declare interface SerializerOptions {
 }
 
 export declare interface SerializerResult {
-  value?: Buffer | string,
-  contentType?: string,
-  isBase64Encoded?: boolean,
-  contentEncoding?: 'gzip' | 'compress' | 'deflate' | 'br'
-} 
+  value?: Buffer | string;
+  contentType?: string;
+  isBase64Encoded?: boolean;
+  contentEncoding?: 'gzip' | 'compress' | 'deflate' | 'br';
+}
 
 export declare interface Options {
   base?: string;
