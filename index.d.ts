@@ -108,11 +108,11 @@ export declare interface LoggerOptions {
 }
 
 export declare interface DeserializerOptions {
-  delegate?: DeserializerFunction;
+  callback?: DeserializerFunction;
 }
 
 export declare interface SerializerOptions {
-  delegate?: SerializerFunction;
+  callback?: SerializerFunction;
   preferences?: string[];
 }
 

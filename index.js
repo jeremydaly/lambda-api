@@ -33,16 +33,16 @@ class API {
 
     this._deserializer = undefined;
     if (props && props.deserializer && typeof props.deserializer === 'object') {
-      if (props.deserializer.delegate && typeof props.deserializer.delegate === 'function') {
-        this._deserializer = props.deserializer.delegate;
+      if (props.deserializer.callback && typeof props.deserializer.callback === 'function') {
+        this._deserializer = props.deserializer.callback;
       }
     }
 
     this._serializer = UTILS.stringifyBody;
     this._serializerPreferences = []
     if (props && props.serializer && typeof props.serializer === 'object') {
-      if (props.serializer.delegate && typeof props.serializer.delegate === 'function') {
-        this._serializer = props.serializer.delegate;
+      if (props.serializer.callback && typeof props.serializer.callback === 'function') {
+        this._serializer = props.serializer.callback;
       }
       if (Array.isArray(props.serializer.preferences)) {
         this._serializerPreferences = props.serializer.preferences;
