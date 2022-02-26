@@ -303,6 +303,17 @@ export declare class FileError extends Error {
   constructor(message: string, err: object);
 }
 
+export declare class DeserializationError extends Error {
+  constructor(message: string, contentType: string, err: object);
+}
+export declare class SerializationError extends Error {
+  constructor(message: string, contentType: string, err: object);
+}
+
+export declare class RequestError extends Error {
+  constructor(message: string, code: number);
+}
+
 declare function createAPI(options?: Options): API;
 
 export default createAPI;
