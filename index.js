@@ -12,7 +12,7 @@ const RESPONSE = require('./lib/response'); // Response object
 const UTILS = require('./lib/utils'); // Require utils library
 const LOGGER = require('./lib/logger'); // Require logger library
 const prettyPrint = require('./lib/prettyPrint'); // Pretty print for debugging
-const { ConfigurationError } = require('./lib/errors'); // Require custom errors
+const ERRORS = require('./lib/errors'); // Require custom errors
 
 // Create the API class
 class API {
@@ -30,10 +30,31 @@ class API {
       props && props.mimeTypes && typeof props.mimeTypes === 'object'
         ? props.mimeTypes
         : {};
-    this._serializer =
-      props && props.serializer && typeof props.serializer === 'function'
-        ? props.serializer
-        : JSON.stringify;
+
+    this._deserializer = undefined;
+    if (props && props.deserializer && typeof props.deserializer === 'object') {
+      if (
+        props.deserializer.callback &&
+        typeof props.deserializer.callback === 'function'
+      ) {
+        this._deserializer = props.deserializer.callback;
+      }
+    }
+
+    this._serializer = UTILS.stringifyBody;
+    this._serializerPreferences = [];
+    if (props && props.serializer && typeof props.serializer === 'object') {
+      if (
+        props.serializer.callback &&
+        typeof props.serializer.callback === 'function'
+      ) {
+        this._serializer = props.serializer.callback;
+      }
+      if (Array.isArray(props.serializer.preferences)) {
+        this._serializerPreferences = props.serializer.preferences;
+      }
+    }
+
     this._errorHeaderWhitelist =
       props && Array.isArray(props.errorHeaderWhitelist)
         ? props.errorHeaderWhitelist.map((header) => header.toLowerCase())
@@ -44,6 +65,13 @@ class API {
       props && props.headers && typeof props.headers === 'object'
         ? props.headers
         : {};
+    this._compression =
+      props &&
+      (typeof props.compression === 'boolean' ||
+        Array.isArray(props.compression))
+        ? props.compression
+        : false;
+
     this._compression =
       props &&
       (typeof props.compression === 'boolean' ||
@@ -124,13 +152,13 @@ class API {
         (fn.length === 3 || i === args.length - 1)
       )
         return fn;
-      throw new ConfigurationError(
+      throw new ERRORS.ConfigurationError(
         'Route-based middleware must have 3 parameters'
       );
     });
 
     if (stack.length === 0)
-      throw new ConfigurationError(
+      throw new ERRORS.ConfigurationError(
         `No handler or middleware specified for ${method} method on ${path} route.`
       );
 
@@ -275,7 +303,7 @@ class API {
 
             // If there's a wild card that's not at the end
           } else if (route[i] === '*') {
-            throw new ConfigurationError(
+            throw new ERRORS.ConfigurationError(
               'Wildcards can only be at the end of a route definition'
             );
           } // end if end of path
@@ -467,7 +495,7 @@ class API {
         } else if (args[arg].length === 4) {
           this._errors.push(args[arg]);
         } else {
-          throw new ConfigurationError(
+          throw new ERRORS.ConfigurationError(
             'Middleware must have 3 or 4 parameters'
           );
         }
@@ -556,5 +584,11 @@ class API {
 
 // Export the API class as a new instance
 module.exports = (opts) => new API(opts);
+
+// export all the error types too
+for (const key in ERRORS) {
+  module.exports[key] = ERRORS[key];
+}
+
 // Add createAPI as default export (to match index.d.ts)
 module.exports.default = module.exports;

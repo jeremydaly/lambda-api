@@ -12,18 +12,31 @@ const api2 = require('../index')({ version: 'v1.0', callback: 'cb' })
 // Init API with custom serializer
 const api3 = require('../index')({
   version: 'v1.0',
-  serializer: body => JSON.stringify(Object.assign(body,{ _custom: true }))
+  serializer: {
+    delegate:  (body, acceptableMedia) => {
+      return {
+        value: JSON.stringify(Object.assign(body, { _custom: true })),
+        contentType: 'application/json'
+      };
+    },
+    preferences: ['application/json']
+  }
 })
 // Init API with custom gzip serializer and base64
 const api4 = require('../index')({
   version: 'v1.0',
   isBase64: true,
-  headers: {
-    'content-encoding': ['gzip']
-  },
-  serializer: body => {
-    const json = JSON.stringify(Object.assign(body,{ _custom: true, _base64: true }))
-    return gzipSync(json).toString('base64')
+  serializer: {
+    delegate:  (body, acceptableMedia) => {
+      const json = JSON.stringify(Object.assign(body,{ _custom: true, _base64: true }))
+      return {
+        value: gzipSync(json).toString("base64"),
+        isBase64Encoded: true,
+        contentType: 'application/json',
+        contentEncoding: "gzip"
+      }
+    },
+    preferences: ['application/json']
   }
 })
 // Init API with compression
@@ -284,7 +297,7 @@ describe('Response Tests:', function() {
   it('Custom serializer (GZIP)', async function() {
     let _event = Object.assign({},event,{ path: '/testGZIP'})
     let result = await new Promise(r => api4.run(_event,{},(e,res) => { r(res) }))
-
+   
     let body = gzipSync(`{"object":true,"_custom":true,"_base64":true}`).toString('base64')
     expect(result).toEqual({ multiValueHeaders: { 'content-encoding': ['gzip'], 'content-type': ['application/json'] }, statusCode: 200, body, isBase64Encoded: true })
   }) // end it

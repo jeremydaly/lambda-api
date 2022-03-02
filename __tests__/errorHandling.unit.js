@@ -19,12 +19,15 @@ const api8 = require('../index')({ version: 'v1.0', logger: { access: 'never', e
 const api9 = require('../index')({
   version: 'v1.0',
   isBase64: true,
-  headers: {
-    'content-encoding': ['gzip']
-  },
-  serializer: body => {
-    const json = JSON.stringify(Object.assign(body,{ _custom: true, _base64: true }))
-    return gzipSync(json).toString('base64')
+  serializer: {
+    delegate: (body, acceptableMedia) => {
+      const json = JSON.stringify(Object.assign(body, { _custom: true, _base64: true }))
+      return {
+        value: gzipSync(json),
+        contentType: 'application/json',
+        contentEncoding: 'gzip'
+      }
+    }
   }
 })
 
@@ -271,31 +274,31 @@ describe('Error Handling Tests:', function() {
     it('RouteError', async function() {
       let _event = Object.assign({},event,{ path: '/testx'})
       let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
-      expect(result).toEqual({ multiValueHeaders: { }, statusCode: 404, body: '{"errorType":"RouteError"}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 404, body: '{"errorType":"RouteError"}', isBase64Encoded: false })
     }) // end it
 
     it('MethodError', async function() {
       let _event = Object.assign({},event,{ path: '/fileError', httpMethod: 'put' })
       let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
-      expect(result).toEqual({ multiValueHeaders: { }, statusCode: 405, body: '{"errorType":"MethodError"}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 405, body: '{"errorType":"MethodError"}', isBase64Encoded: false })
     }) // end it
 
     it('FileError (s3)', async function() {
       let _event = Object.assign({},event,{ path: '/fileError' })
       let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
-      expect(result).toEqual({ multiValueHeaders: { }, statusCode: 500, body: '{"errorType":"FileError"}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: '{"errorType":"FileError"}', isBase64Encoded: false })
     }) // end it
 
     it('FileError (local)', async function() {
       let _event = Object.assign({},event,{ path: '/fileErrorLocal' })
       let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
-      expect(result).toEqual({ multiValueHeaders: { }, statusCode: 500, body: '{"errorType":"FileError"}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: '{"errorType":"FileError"}', isBase64Encoded: false })
     }) // end it
 
     it('ResponseError', async function() {
       let _event = Object.assign({},event,{ path: '/responseError' })
       let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
-      expect(result).toEqual({ multiValueHeaders: { }, statusCode: 500, body: '{"errorType":"ResponseError"}', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: '{"errorType":"ResponseError"}', isBase64Encoded: false })
     }) // end it
   })
 
