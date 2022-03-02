@@ -11,7 +11,7 @@ export declare interface CookieOptions {
   maxAge?: number;
   path?: string;
   secure?: boolean;
-  sameSite?: boolean | 'Strict' | 'Lax';
+  sameSite?: boolean | 'Strict' | 'Lax' | 'None';
 }
 
 export declare interface CorsOptions {
@@ -59,7 +59,7 @@ export declare type HandlerFunction = (
   res: Response,
   next?: NextFunction
 ) => void | any | Promise<any>;
-export declare type LoggerFunction = (message: string) => void;
+export declare type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
 export declare type DeserializerFunction = (
@@ -218,7 +218,7 @@ export declare class Response {
   json(body: any): void;
   jsonp(body: any): void;
   html(body: any): void;
-  type(type: string): void;
+  type(type: string): this;
   location(path: string): this;
   redirect(status: number, path: string): void;
   redirect(path: string): void;
@@ -276,8 +276,7 @@ export declare class API {
 
   use(path: string, ...middleware: Middleware[]): void;
   use(paths: string[], ...middleware: Middleware[]): void;
-  use(...middleware: Middleware[]): void;
-  use(...errorHandlingMiddleware: ErrorHandlingMiddleware[]): void;
+  use(...middleware: (Middleware | ErrorHandlingMiddleware)[]): void;
 
   finally(callback: FinallyFunction): void;
 

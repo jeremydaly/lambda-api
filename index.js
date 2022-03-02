@@ -412,11 +412,12 @@ class API {
       for (const err of this._errors) {
         if (response._state === 'done') break;
         // Promisify error middleware
-        await new Promise((r) => {
-          let rtn = err(e, response._request, response, () => {
+        await new Promise(async (r) => {
+          let rtn = await err(e, response._request, response, () => {
             r();
           });
           if (rtn) response.send(rtn);
+          r();
         });
       } // end for
     }
