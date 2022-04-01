@@ -14,6 +14,7 @@ const api_errors = require('../index')({ version: 'v1.0' })
 const api6 = require('../index')() // no props
 const api7 = require('../index')({ version: 'v1.0', logger: { errorLogging: false }})
 const api8 = require('../index')({ version: 'v1.0', logger: { access: 'never', errorLogging: true }})
+const errors = require('../lib/errors');
 
 // Init API with custom gzip serializer and base64
 const api9 = require('../index')({
@@ -274,10 +275,22 @@ describe('Error Handling Tests:', function() {
       expect(result).toEqual({ multiValueHeaders: { }, statusCode: 404, body: '{"errorType":"RouteError"}', isBase64Encoded: false })
     }) // end it
 
+    it('RouteError.name', async function() {
+      let Error$1 = errors.RouteError
+      let error = new Error$1('This is a test error')
+      expect(error.name).toEqual('RouteError')
+    }) // end it
+
     it('MethodError', async function() {
       let _event = Object.assign({},event,{ path: '/fileError', httpMethod: 'put' })
       let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
       expect(result).toEqual({ multiValueHeaders: { }, statusCode: 405, body: '{"errorType":"MethodError"}', isBase64Encoded: false })
+    }) // end it
+
+    it('MethodError.name', async function() {
+      let Error$1 = errors.MethodError
+      let error = new Error$1('This is a test error')
+      expect(error.name).toEqual('MethodError')
     }) // end it
 
     it('FileError (s3)', async function() {
@@ -292,10 +305,28 @@ describe('Error Handling Tests:', function() {
       expect(result).toEqual({ multiValueHeaders: { }, statusCode: 500, body: '{"errorType":"FileError"}', isBase64Encoded: false })
     }) // end it
 
+    it('FileError.name', async function() {
+      let Error$1 = errors.FileError
+      let error = new Error$1('This is a test error')
+      expect(error.name).toEqual('FileError')
+    }) // end it
+
     it('ResponseError', async function() {
       let _event = Object.assign({},event,{ path: '/responseError' })
       let result = await new Promise(r => api_errors.run(_event,{},(e,res) => { r(res) }))
       expect(result).toEqual({ multiValueHeaders: { }, statusCode: 500, body: '{"errorType":"ResponseError"}', isBase64Encoded: false })
+    }) // end it
+
+    it('ResponseError.name', async function() {
+      let Error$1 = errors.ResponseError
+      let error = new Error$1('This is a test error')
+      expect(error.name).toEqual('ResponseError')
+    }) // end it
+
+    it('ConfigurationError.name', async function() {
+      let Error$1 = errors.ConfigurationError
+      let error = new Error$1('This is a test error')
+      expect(error.name).toEqual('ConfigurationError')
     }) // end it
   })
 
