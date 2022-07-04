@@ -225,6 +225,7 @@ export declare class API {
   app(packages: App): App;
 
   get(path: string, ...handler: HandlerFunction[]): void;
+  get(path: string, middleware: Middleware, ...handler: HandlerFunction[]): void;
   get(...handler: HandlerFunction[]): void;
   post(path: string, ...handler: HandlerFunction[]): void;
   post(...handler: HandlerFunction[]): void;
