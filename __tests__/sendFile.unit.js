@@ -7,9 +7,6 @@ const fs = require('fs') // Require Node.js file system
 // Require Sinon.js library
 const sinon = require('sinon')
 
-const AWS = require('aws-sdk') // AWS SDK (automatically available in Lambda)
-// AWS.config.credentials = new AWS.SharedIniFileCredentials({profile: 'madlucas'})
-
 const S3 = require('../lib/s3-service'); // Init S3 Service
 
 // Init API instance

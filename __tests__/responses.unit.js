@@ -1,7 +1,6 @@
 'use strict';
 
 const sinon = require('sinon') // Require Sinon.js library
-const AWS = require('aws-sdk') // AWS SDK (automatically available in Lambda)
 const S3 = require('../lib/s3-service') // Init S3 Service
 const { gzipSync, brotliCompressSync, deflateSync } = require('zlib')
 
