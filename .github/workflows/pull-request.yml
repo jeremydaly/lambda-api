@@ -39,7 +39,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run ESLint
-        run: npm run lint
+        run: npm run lint:check
 
   prettier:
     name: 'Prettier'
@@ -56,4 +56,4 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run Prettier
-        run: npm run prettier
+        run: npm run prettier:check
