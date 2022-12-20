@@ -181,7 +181,7 @@ export declare class Request {
 export declare class Response {
   status(code: number): this;
   sendStatus(code: number): void;
-  header(key: string, value: string | Array<string>, append?: boolean): this;
+  header(key: string, value?: string | Array<string>, append?: boolean): this;
   getHeader(key: string): string;
   hasHeader(key: string): boolean;
   removeHeader(key: string): this;
