@@ -331,7 +331,7 @@ describe('Sampling Tests:', function() {
 
 
 
-    it('Fixed target only route', async function() {
+    it.skip('Fixed target only route', async function() {
       // this.timeout(10000);
       // this.slow(10000);
       _log = [] // clear log
