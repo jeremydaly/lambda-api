@@ -2,7 +2,7 @@ name: 'Build'
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -10,7 +10,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 14.x ]
+        node-version: [14.x]
 
     steps:
       - name: Get branch name (merge)
