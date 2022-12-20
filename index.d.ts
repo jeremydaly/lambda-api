@@ -1,6 +1,7 @@
 import {
-  APIGatewayEvent,
   APIGatewayEventRequestContext,
+  APIGatewayProxyEvent,
+  APIGatewayProxyEventV2,
   Context,
 } from 'aws-lambda';
 
@@ -258,11 +259,14 @@ export declare class API {
   finally(callback: FinallyFunction): void;
 
   run(
-    event: APIGatewayEvent,
+    event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
     context: Context,
     cb: (err: Error, result: any) => void
   ): void;
-  run(event: APIGatewayEvent, context: Context): Promise<any>;
+  run(
+    event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
+    context: Context
+  ): Promise<any>;
 }
 
 export declare class RouteError extends Error {
