@@ -1,6 +1,7 @@
 import {
-  APIGatewayEvent,
   APIGatewayEventRequestContext,
+  APIGatewayProxyEvent,
+  APIGatewayProxyEventV2,
   Context,
 } from 'aws-lambda';
 
@@ -59,7 +60,7 @@ export declare type HandlerFunction = (
   res: Response,
   next?: NextFunction
 ) => void | any | Promise<any>;
-export declare type LoggerFunction = (message: string) => void;
+export declare type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
 export declare type SerializerFunction = (body: object) => string;
@@ -181,7 +182,7 @@ export declare class Request {
 export declare class Response {
   status(code: number): this;
   sendStatus(code: number): void;
-  header(key: string, value: string): this;
+  header(key: string, value?: string | Array<string>, append?: boolean): this;
   getHeader(key: string): string;
   hasHeader(key: string): boolean;
   removeHeader(key: string): this;
@@ -240,8 +241,8 @@ export declare class API {
   head(...handler: HandlerFunction[]): void;
   any(path: string, ...handler: HandlerFunction[]): void;
   any(...handler: HandlerFunction[]): void;
-  METHOD(method: METHODS, path: string, ...handler: HandlerFunction[]): void;
-  METHOD(method: METHODS, ...handler: HandlerFunction[]): void;
+  METHOD(method: METHODS | METHODS[], path: string, ...handler: HandlerFunction[]): void;
+  METHOD(method: METHODS | METHODS[], ...handler: HandlerFunction[]): void;
   register(
     routes: (api: API, options?: RegisterOptions) => void,
     options?: RegisterOptions
@@ -258,11 +259,14 @@ export declare class API {
   finally(callback: FinallyFunction): void;
 
   run(
-    event: APIGatewayEvent,
+    event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
     context: Context,
     cb: (err: Error, result: any) => void
   ): void;
-  run(event: APIGatewayEvent, context: Context): Promise<any>;
+  run(
+    event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
+    context: Context
+  ): Promise<any>;
 }
 
 export declare class RouteError extends Error {
