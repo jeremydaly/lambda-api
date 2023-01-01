@@ -384,13 +384,14 @@ class API {
       for (const err of this._errors) {
         if (response._state === 'done') break;
         // Promisify error middleware
-        await new Promise((r) => {
-          err(e, response._request, response, () => {
-            r();
-          }).then((rtn) => {
-            if (rtn) response.send(rtn);
+        // TODO: using async within a promise is an antipattern, therefore we need to refactor this asap
+        // eslint-disable-next-line no-async-promise-executor
+        await new Promise(async (r) => {
+          let rtn = await err(e, response._request, response, () => {
             r();
           });
+          if (rtn) response.send(rtn);
+          r();
         });
       } // end for
     }
