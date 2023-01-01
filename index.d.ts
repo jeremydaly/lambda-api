@@ -60,7 +60,10 @@ export declare type HandlerFunction = (
   res: Response,
   next?: NextFunction
 ) => void | any | Promise<any>;
-export declare type LoggerFunction = (message?: any, ...optionalParams: any[]) => void;
+export declare type LoggerFunction = (
+  message?: any,
+  ...optionalParams: any[]
+) => void;
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
 export declare type SerializerFunction = (body: object) => string;
@@ -241,7 +244,11 @@ export declare class API {
   head(...handler: HandlerFunction[]): void;
   any(path: string, ...handler: HandlerFunction[]): void;
   any(...handler: HandlerFunction[]): void;
-  METHOD(method: METHODS | METHODS[], path: string, ...handler: HandlerFunction[]): void;
+  METHOD(
+    method: METHODS | METHODS[],
+    path: string,
+    ...handler: HandlerFunction[]
+  ): void;
   METHOD(method: METHODS | METHODS[], ...handler: HandlerFunction[]): void;
   register(
     routes: (api: API, options?: RegisterOptions) => void,
