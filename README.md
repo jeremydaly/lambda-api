@@ -607,7 +607,7 @@ res.type('.doc'); // => 'application/msword'
 res.type('text/css'); // => 'text/css'
 ```
 
-For a complete list of auto supported types, see [mimemap.js](lib/mindmap.js). Custom MIME types can be added by using the `mimeTypes` option when instantiating Lambda API
+For a complete list of auto supported types, see [mimemap.js](lib/mimemap.js). Custom MIME types can be added by using the `mimeTypes` option when instantiating Lambda API
 
 ### location(path)
 
