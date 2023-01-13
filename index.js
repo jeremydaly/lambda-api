@@ -1,4 +1,9 @@
 'use strict';
+/**
+ * Lightweight web framework for your serverless applications
+ * @author Jeremy Daly <jeremy@jeremydaly.com>
+ * @license MIT
+ */
 
 const REQUEST = require('./lib/request');
 const RESPONSE = require('./lib/response');
