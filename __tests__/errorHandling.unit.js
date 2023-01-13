@@ -72,13 +72,12 @@ api.use(function(err,req,res,next) {
 });
 
 // Add error with promise/delay
-api.use(function(err,req,res,next) {
+api.use(async function(err,req,res,next) {
   if (req.route === '/testErrorPromise') {
-    let start = Date.now()
-    delay(100).then((x) => {
-      res.header('Content-Type','text/plain')
-      res.send('This is a test error message: ' + req.testError1 + '/' + req.testError2)
-    })
+    await delay(100);
+
+    res.header('Content-Type','text/plain')
+    res.send('This is a test error message: ' + req.testError1 + '/' + req.testError2)
   } else {
     next()
   }
@@ -246,7 +245,7 @@ describe('Error Handling Tests:', function() {
     it('Error Middleware w/ Promise', async function() {
       let _event = Object.assign({},event,{ path: '/testErrorPromise'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: JSON.stringify({error: 'This is a test error message'}), isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['text/plain'] }, statusCode: 500, body: 'This is a test error message: 123/456', isBase64Encoded: false })
     }) // end it
 
     it('Multiple error middlewares', async function() {
