@@ -65,7 +65,13 @@ export declare type LoggerFunction = (
   message?: any,
   additionalInfo?: LoggerFunctionAdditionalInfo
 ) => void;
-export declare type LoggerFunctionAdditionalInfo = string | number | boolean | null | LoggerFunctionAdditionalInfo[] | { [key: string]: LoggerFunctionAdditionalInfo };
+export declare type LoggerFunctionAdditionalInfo =
+  | string
+  | number
+  | boolean
+  | null
+  | LoggerFunctionAdditionalInfo[]
+  | { [key: string]: LoggerFunctionAdditionalInfo };
 
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
