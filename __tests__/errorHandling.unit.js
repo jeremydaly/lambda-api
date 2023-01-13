@@ -246,7 +246,7 @@ describe('Error Handling Tests:', function() {
     it('Error Middleware w/ Promise', async function() {
       let _event = Object.assign({},event,{ path: '/testErrorPromise'})
       let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['text/plain'] }, statusCode: 500, body: 'This is a test error message: 123/456', isBase64Encoded: false })
+      expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 500, body: JSON.stringify({error: 'This is a test error message'}), isBase64Encoded: false })
     }) // end it
 
     it('Multiple error middlewares', async function() {
