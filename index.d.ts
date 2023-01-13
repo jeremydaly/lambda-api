@@ -60,10 +60,13 @@ export declare type HandlerFunction = (
   res: Response,
   next?: NextFunction
 ) => void | any | Promise<any>;
+
 export declare type LoggerFunction = (
   message?: any,
-  ...optionalParams: any[]
+  additionalInfo?: LoggerFunctionAdditionalInfo
 ) => void;
+export declare type LoggerFunctionAdditionalInfo = string | number | boolean | null | LoggerFunctionAdditionalInfo[] | { [key: string]: LoggerFunctionAdditionalInfo };
+
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
 export declare type SerializerFunction = (body: object) => string;
