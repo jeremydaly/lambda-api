@@ -144,13 +144,19 @@ api9.use(middleware3);
 /***  DEFINE TEST ROUTES                                                    ***/
 /******************************************************************************/
 
-api.get('/', function(req, res) {
+api.get("/", function(req, res) {
   res.status(200).json({
     testMiddleware: req.testMiddleware,
   })
 });
-api.post('/', function(req, res) {
+api.post("/", function(req, res) {
   res.status(200).json({
+    testMiddleware2: req.testMiddleware2,
+  })
+});
+api.any("/", function(req, res) {
+  res.status(200).json({
+    testMiddleware: req.testMiddleware,
     testMiddleware2: req.testMiddleware2,
   })
 });
@@ -364,6 +370,21 @@ describe("Middleware Tests:", function () {
       multiValueHeaders: { "content-type": ["application/json"] },
       statusCode: 200,
       body: '{"testMiddleware2":"456"}',
+      isBase64Encoded: false,
+    });
+  })
+
+  it('should return testMiddleware: 123 when calling the root route with PATCH', async function () {
+    let _event = Object.assign({}, event, {path: "/", httpMethod: "PATCH"});
+    let result = await new Promise((r) =>
+      api.run(_event, {}, (e, res) => {
+        r(res);
+      })
+    );
+    expect(result).toEqual({
+      multiValueHeaders: { "content-type": ["application/json"] },
+      statusCode: 200,
+      body: '{"testMiddleware":"123","testMiddleware2":"456"}',
       isBase64Encoded: false,
     });
   })
