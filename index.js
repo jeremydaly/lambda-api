@@ -149,6 +149,7 @@ class API {
 
     // Make a local copy of routes
     let routes = this._routes;
+    // console.log('routes', JSON.stringify(routes));
 
     // Create a local stack for inheritance
     let _stack = { '*': [], m: [] };
@@ -477,6 +478,7 @@ class API {
         this.METHOD('__MW__', route, ...middleware);
       });
     }
+
   } // end use
 
   // Finally handler
