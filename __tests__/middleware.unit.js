@@ -144,6 +144,17 @@ api9.use(middleware3);
 /***  DEFINE TEST ROUTES                                                    ***/
 /******************************************************************************/
 
+api.get('/', function(req, res) {
+  res.status(200).json({
+    testMiddleware: req.testMiddleware,
+  })
+});
+api.post('/', function(req, res) {
+  res.status(200).json({
+    testMiddleware2: req.testMiddleware2,
+  })
+});
+
 api.get("/test", function (req, res) {
   res.status(200).json({
     method: "get",
@@ -326,6 +337,36 @@ api9.get("/data/test", (req, res) => {
 
 describe("Middleware Tests:", function () {
   // this.slow(300);
+
+  it('should return testMiddleware: 123 when calling the root route with GET', async function () {
+    let _event = Object.assign({}, event, {path: "/"});
+    let result = await new Promise((r) =>
+      api.run(_event, {}, (e, res) => {
+        r(res);
+      })
+    );
+    expect(result).toEqual({
+      multiValueHeaders: { "content-type": ["application/json"] },
+      statusCode: 200,
+      body: '{"testMiddleware":"123"}',
+      isBase64Encoded: false,
+    });
+  })
+
+  it('should return testMiddleware2: 456 when calling the root route with POST', async function () {
+    let _event = Object.assign({}, event, {path: "/", httpMethod: "POST"});
+    let result = await new Promise((r) =>
+      api.run(_event, {}, (e, res) => {
+        r(res);
+      })
+    );
+    expect(result).toEqual({
+      multiValueHeaders: { "content-type": ["application/json"] },
+      statusCode: 200,
+      body: '{"testMiddleware2":"456"}',
+      isBase64Encoded: false,
+    });
+  })
 
   it("Set Values in res object", async function () {
     let _event = Object.assign({}, event, {});
