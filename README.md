@@ -9,6 +9,10 @@
 
 Lambda API is a lightweight web framework for AWS Lambda using AWS API Gateway Lambda Proxy Integration or ALB Lambda Target Support. This closely mirrors (and is based on) other web frameworks like Express.js and Fastify, but is significantly stripped down to maximize performance with Lambda's stateless, single run executions.
 
+## Using AWS SDK v2?
+lambda-api@v2 is using AWS SDK v3.
+If you are using AWS SDK v2, please use lambda-api@v1.
+
 ## Simple Example
 
 ```javascript
