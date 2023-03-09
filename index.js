@@ -1,24 +1,19 @@
 'use strict';
-
 /**
  * Lightweight web framework for your serverless applications
  * @author Jeremy Daly <jeremy@jeremydaly.com>
- * @version 0.11.0
  * @license MIT
  */
 
-const REQUEST = require('./lib/request'); // Resquest object
-const RESPONSE = require('./lib/response'); // Response object
-const UTILS = require('./lib/utils'); // Require utils library
-const LOGGER = require('./lib/logger'); // Require logger library
-const prettyPrint = require('./lib/prettyPrint'); // Pretty print for debugging
-const { ConfigurationError } = require('./lib/errors'); // Require custom errors
+const REQUEST = require('./lib/request');
+const RESPONSE = require('./lib/response');
+const UTILS = require('./lib/utils');
+const LOGGER = require('./lib/logger');
+const prettyPrint = require('./lib/prettyPrint');
+const { ConfigurationError } = require('./lib/errors');
 
-// Create the API class
 class API {
-  // Create the constructor function.
   constructor(props) {
-    // Set the version and base paths
     this._version = props && props.version ? props.version : 'v1';
     this._base =
       props && props.base && typeof props.base === 'string'
@@ -51,16 +46,12 @@ class API {
         ? props.compression
         : false;
 
-    // Set sampling info
     this._sampleCounts = {};
 
-    // Init request counter
     this._requestCount = 0;
 
-    // Track init date/time
     this._initTime = Date.now();
 
-    // Logging levels
     this._logLevels = {
       trace: 10,
       debug: 20,
@@ -70,13 +61,11 @@ class API {
       fatal: 60,
     };
 
-    // Configure logger
     this._logger = LOGGER.config(props && props.logger, this._logLevels);
 
     // Prefix stack w/ base
     this._prefix = this.parseRoute(this._base);
 
-    // Stores route mappings
     this._routes = {};
 
     // Init callback
@@ -94,7 +83,6 @@ class API {
     // Global error status (used for response parsing errors)
     this._errorStatus = 500;
 
-    // Methods
     this._methods = [
       'get',
       'post',
@@ -110,7 +98,7 @@ class API {
     this._methods.forEach((m) => {
       this[m] = (...a) => this.METHOD(m.toUpperCase(), ...a);
     });
-  } // end constructor
+  }
 
   // METHOD: Adds method, middleware, and handlers to routes
   METHOD(method, ...args) {
@@ -384,11 +372,14 @@ class API {
       for (const err of this._errors) {
         if (response._state === 'done') break;
         // Promisify error middleware
-        await new Promise((r) => {
-          let rtn = err(e, response._request, response, () => {
+        // TODO: using async within a promise is an antipattern, therefore we need to refactor this asap
+        // eslint-disable-next-line no-async-promise-executor
+        await new Promise(async (r) => {
+          let rtn = await err(e, response._request, response, () => {
             r();
           });
           if (rtn) response.send(rtn);
+          r();
         });
       } // end for
     }

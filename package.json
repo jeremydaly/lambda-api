@@ -1,16 +1,18 @@
 {
   "name": "lambda-api",
-  "version": "0.11.2",
+  "version": "0.12.0",
   "description": "Lightweight web framework for your serverless applications",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
     "test": "jest unit",
-    "prettier": "prettier --check .",
+    "lint:check": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prettier:check": "prettier --check .",
+    "prettier:write": "prettier --write .",
     "test-cov": "jest unit --coverage",
-    "test-ci": "eslint . && prettier --check . && jest unit --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "lint": "eslint .",
-    "prepublishOnly": "npm test && npm run lint",
+    "test-ci": "npm run lint:check && npm run prettier:check && jest unit --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "prepublishOnly": "npm test && npm run lint:check",
     "changelog": "git log $(git describe --tags --abbrev=0)..HEAD --oneline"
   },
   "repository": {

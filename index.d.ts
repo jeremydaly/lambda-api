@@ -1,6 +1,7 @@
 import {
-  APIGatewayEvent,
   APIGatewayEventRequestContext,
+  APIGatewayProxyEvent,
+  APIGatewayProxyEventV2,
   Context,
 } from 'aws-lambda';
 
@@ -11,7 +12,7 @@ export declare interface CookieOptions {
   maxAge?: number;
   path?: string;
   secure?: boolean;
-  sameSite?: boolean | 'Strict' | 'Lax';
+  sameSite?: boolean | 'Strict' | 'Lax' | 'None';
 }
 
 export declare interface CorsOptions {
@@ -59,7 +60,19 @@ export declare type HandlerFunction = (
   res: Response,
   next?: NextFunction
 ) => void | any | Promise<any>;
-export declare type LoggerFunction = (message: string) => void;
+
+export declare type LoggerFunction = (
+  message?: any,
+  additionalInfo?: LoggerFunctionAdditionalInfo
+) => void;
+export declare type LoggerFunctionAdditionalInfo =
+  | string
+  | number
+  | boolean
+  | null
+  | LoggerFunctionAdditionalInfo[]
+  | { [key: string]: LoggerFunctionAdditionalInfo };
+
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
 export declare type SerializerFunction = (body: object) => string;
@@ -181,7 +194,7 @@ export declare class Request {
 export declare class Response {
   status(code: number): this;
   sendStatus(code: number): void;
-  header(key: string, value: string): this;
+  header(key: string, value?: string | Array<string>, append?: boolean): this;
   getHeader(key: string): string;
   hasHeader(key: string): boolean;
   removeHeader(key: string): this;
@@ -194,7 +207,7 @@ export declare class Response {
   json(body: any): void;
   jsonp(body: any): void;
   html(body: any): void;
-  type(type: string): void;
+  type(type: string): this;
   location(path: string): this;
   redirect(status: number, path: string): void;
   redirect(path: string): void;
@@ -225,6 +238,11 @@ export declare class API {
   app(packages: App): App;
 
   get(path: string, ...handler: HandlerFunction[]): void;
+  get(
+    path: string,
+    middleware: Middleware,
+    ...handler: HandlerFunction[]
+  ): void;
   get(...handler: HandlerFunction[]): void;
   post(path: string, ...handler: HandlerFunction[]): void;
   post(...handler: HandlerFunction[]): void;
@@ -240,8 +258,12 @@ export declare class API {
   head(...handler: HandlerFunction[]): void;
   any(path: string, ...handler: HandlerFunction[]): void;
   any(...handler: HandlerFunction[]): void;
-  METHOD(method: METHODS, path: string, ...handler: HandlerFunction[]): void;
-  METHOD(method: METHODS, ...handler: HandlerFunction[]): void;
+  METHOD(
+    method: METHODS | METHODS[],
+    path: string,
+    ...handler: HandlerFunction[]
+  ): void;
+  METHOD(method: METHODS | METHODS[], ...handler: HandlerFunction[]): void;
   register(
     routes: (api: API, options?: RegisterOptions) => void,
     options?: RegisterOptions
@@ -252,17 +274,19 @@ export declare class API {
 
   use(path: string, ...middleware: Middleware[]): void;
   use(paths: string[], ...middleware: Middleware[]): void;
-  use(...middleware: Middleware[]): void;
-  use(...errorHandlingMiddleware: ErrorHandlingMiddleware[]): void;
+  use(...middleware: (Middleware | ErrorHandlingMiddleware)[]): void;
 
   finally(callback: FinallyFunction): void;
 
   run(
-    event: APIGatewayEvent,
+    event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
     context: Context,
     cb: (err: Error, result: any) => void
   ): void;
-  run(event: APIGatewayEvent, context: Context): Promise<any>;
+  run(
+    event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
+    context: Context
+  ): Promise<any>;
 }
 
 export declare class RouteError extends Error {

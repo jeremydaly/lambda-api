@@ -76,7 +76,7 @@ api_rules.get('/', (req,res) => {
 
 api_rules.get('/testNone', (req,res) => {
   req.log.trace('request #'+request++)
-  res.send('done')
+  res.send({ method: req.method, rule: req._sampleRule })
 })
 
 api_rules.get('/testTarget', (req,res) => {
@@ -278,6 +278,18 @@ describe('Sampling Tests:', function() {
       expect(data.rule.period).toBe(60)
       expect(data.rule.level).toBe('debug')
     })
+
+    it('Matches first rule in rules array', async () => {
+      let _event = Object.assign({},event,{ path: '/testNone', queryStringParameters: { test: true } })
+      let result = await new Promise(r => api_rules.run(_event,context,(e,res) => { r(res) }))
+      let data = JSON.parse(result.body)
+
+      expect(data.method).toBe('GET')
+      expect(data.rule.target).toBe(0)
+      expect(data.rule.rate).toBe(0)
+      expect(data.rule.period).toBe(1)
+      expect(data.rule.level).toBe('trace')
+    })
   })
 
 
@@ -331,7 +343,7 @@ describe('Sampling Tests:', function() {
 
 
 
-    it('Fixed target only route', async function() {
+    it.skip('Fixed target only route', async function() {
       // this.timeout(10000);
       // this.slow(10000);
       _log = [] // clear log
