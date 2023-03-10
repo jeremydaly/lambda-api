@@ -492,7 +492,7 @@ api.get('/users', (req,res) => {
 
 // Set multiple header values
 api.get('/users', (req,res) => {
-  res.header('someHeader',['foo','bar').send({})
+  res.header('someHeader',['foo','bar']).send({})
 })
 
 // Set multiple header by adding to existing header
