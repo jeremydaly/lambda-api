@@ -486,21 +486,22 @@ res.sendStatus(403); // equivalent to res.status(403).send('Forbidden')
 The `header` method allows for you to set additional headers to return to the client. By default, just the `content-type` header is sent with `application/json` as the value. Headers can be added or overwritten by calling the `header()` method with two string arguments. The first is the name of the header and then second is the value. You can utilize multi-value headers by specifying an array with multiple values as the `value`, or you can use an optional third boolean parameter and append multiple headers.
 
 ```javascript
-api.get('/users', (req,res) => {
-  res.header('content-type','text/html').send('<div>This is HTML</div>')
-})
+api.get('/users', (req, res) => {
+  res.header('content-type', 'text/html').send('<div>This is HTML</div>');
+});
 
 // Set multiple header values
-api.get('/users', (req,res) => {
-  res.header('someHeader',['foo','bar']).send({})
-})
+api.get('/users', (req, res) => {
+  res.header('someHeader', ['foo', 'bar']).send({});
+});
 
 // Set multiple header by adding to existing header
-api.get('/users', (req,res) => {
-  res.header('someHeader','foo')
-    .header('someHeader','bar',true) // append another value
-      .send({})
-})
+api.get('/users', (req, res) => {
+  res
+    .header('someHeader', 'foo')
+    .header('someHeader', 'bar', true) // append another value
+    .send({});
+});
 ```
 
 **NOTE:** Header keys are converted and stored as lowercase in compliance with [rfc7540 8.1.2. HTTP Header Fields](https://tools.ietf.org/html/rfc7540) for HTTP/2. Header convenience methods (`getHeader`, `hasHeader`, and `removeHeader`) automatically ignore case.
