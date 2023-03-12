@@ -24,7 +24,7 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Install latest npm
         run: |
-          npm install -g npm@$NPM_VERSION
+          npm install -g npm@$NPM_VERSION &&
           npm --version &&
           npm list -g --depth 0
       - name: Install dependencies
