@@ -36,9 +36,11 @@
     "url": "https://github.com/jeremydaly/lambda-api/issues"
   },
   "homepage": "https://github.com/jeremydaly/lambda-api#readme",
-  "devDependencies": {
+  "peerDependencies": {
     "@aws-sdk/client-s3": "^3.0.0",
-    "@aws-sdk/s3-request-presigner": "^3.0.0",
+    "@aws-sdk/s3-request-presigner": "^3.0.0"
+  },
+  "devDependencies": {
     "@types/aws-lambda": "^8.10.51",
     "@types/node": "^10.17.21",
     "bluebird": "^3.7.2",
