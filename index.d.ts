@@ -233,13 +233,15 @@ export declare class Response {
   ): Promise<void>;
 }
 
-export type MiddlewaresAndHandler<T extends (Middleware | HandlerFunction)[] = any> =
+export type MiddlewaresAndHandler<T extends (Middleware | HandlerFunction)[] = []> =
+  T extends [HandlerFunction] ? T :
+  T extends [Middleware] ? T :
   T extends [infer L, ...infer R]
   ? L extends HandlerFunction ?
       R extends never ? any : L extends Middleware ?
-        R extends never ? any : R extends (Middleware | HandlerFunction)[] ? [L, ...MiddlewaresAndHandler<R>] : never
-      : never
+      R extends never ? any : R extends (Middleware | HandlerFunction)[] ? [L, ...MiddlewaresAndHandler<R>] : never
     : never
+  : never
   : never;
 
 export declare class API {

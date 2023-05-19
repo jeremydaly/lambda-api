@@ -8,8 +8,12 @@ import createLambdaApi, {
 
 const api = createLambdaApi();
 
-api.get((req: Request, res: Response, next: () => void): void => {
-  next();
-}, (req: Request, res: Response): void => {
+const handler:HandlerFunction = (req: Request, res: Response) => {
   res.send('Hello world!');
-});
+}
+const middleware: Middleware = (req, res, next: () => void) => {
+  next()
+}
+
+api.get(middleware, handler);
+
