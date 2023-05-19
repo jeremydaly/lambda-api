@@ -233,41 +233,55 @@ export declare class Response {
   ): Promise<void>;
 }
 
+export type MiddlewaresAndHandler<T extends (Middleware | HandlerFunction)[] = any> =
+  T extends [infer L, ...infer R]
+  ? L extends HandlerFunction ?
+      R extends never ? any : L extends Middleware ?
+        R extends never ? any : R extends (Middleware | HandlerFunction)[] ? [L, ...MiddlewaresAndHandler<R>] : never
+      : never
+    : never
+  : never;
+
 export declare class API {
   app(namespace: string, package: Package): App;
   app(packages: App): App;
 
-  get(path: string, ...handler: HandlerFunction[]): void;
-  get(
-    path: string,
-    middleware: Middleware,
-    ...handler: HandlerFunction[]
-  ): void;
-  get(...handler: HandlerFunction[]): void;
-  post(path: string, ...handler: HandlerFunction[]): void;
-  post(...handler: HandlerFunction[]): void;
-  put(path: string, ...handler: HandlerFunction[]): void;
-  put(...handler: HandlerFunction[]): void;
-  patch(path: string, ...handler: HandlerFunction[]): void;
-  patch(...handler: HandlerFunction[]): void;
-  delete(path: string, ...handler: HandlerFunction[]): void;
-  delete(...handler: HandlerFunction[]): void;
-  options(path: string, ...handler: HandlerFunction[]): void;
-  options(...handler: HandlerFunction[]): void;
-  head(path: string, ...handler: HandlerFunction[]): void;
-  head(...handler: HandlerFunction[]): void;
-  any(path: string, ...handler: HandlerFunction[]): void;
-  any(...handler: HandlerFunction[]): void;
+  // get(path: string, ...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+  get(...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+
+  post(path: string, ...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+  post(...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+
+  put(path: string, ...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+  put(...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+
+  patch(path: string, ...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+  patch(...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+
+  delete(path: string, ...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+  delete(...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+
+  options(path: string, ...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+  options(...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+
+  head(path: string, ...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+  head(...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+
+  any(path: string, ...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+  any(...handlerOrMiddlewares: MiddlewaresAndHandler): void;
+
   METHOD(
     method: METHODS | METHODS[],
     path: string,
-    ...handler: HandlerFunction[]
+    ...handler: MiddlewaresAndHandler
   ): void;
   METHOD(method: METHODS | METHODS[], ...handler: HandlerFunction[]): void;
+
   register(
     routes: (api: API, options?: RegisterOptions) => void,
     options?: RegisterOptions
   ): void;
+
   routes(format: true): void;
   routes(format: false): string[][];
   routes(): string[][];
@@ -312,3 +326,7 @@ export declare class FileError extends Error {
 declare function createAPI(options?: Options): API;
 
 export default createAPI;
+
+
+type If<C extends 0 | 1, T, E = never> = C extends 1 ? (1 extends C ? T : E) : E
+type Equals<A1 extends any, A2 extends any> = (<A>() => A extends A2 ? 1 : 0) extends (<A>() => A extends A1 ? 1 : 0) ? 1 : 0;
