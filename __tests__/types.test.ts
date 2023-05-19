@@ -15,5 +15,7 @@ const middleware: Middleware = (req, res, next: () => void) => {
   next()
 }
 
+const a: MiddlewaresAndHandler<[HandlerFunction, Middleware]> = [middleware, handler];
+
 api.get(middleware, handler);
 
