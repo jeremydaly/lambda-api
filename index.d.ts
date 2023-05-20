@@ -46,24 +46,24 @@ export declare interface App {
 export declare type Middleware = (
   req: Request,
   res: Response,
-  next: () => void
+  next: () => void,
 ) => void;
 export declare type ErrorHandlingMiddleware = (
   error: Error,
   req: Request,
   res: Response,
-  next: () => void
+  next: () => void,
 ) => void;
 export declare type ErrorCallback = (error?: Error) => void;
 export declare type HandlerFunction = (
   req: Request,
   res: Response,
-  next?: NextFunction
+  next?: NextFunction,
 ) => void | any | Promise<any>;
 
 export declare type LoggerFunction = (
   message?: any,
-  additionalInfo?: LoggerFunctionAdditionalInfo
+  additionalInfo?: LoggerFunctionAdditionalInfo,
 ) => void;
 export declare type LoggerFunctionAdditionalInfo =
   | string
@@ -193,58 +193,80 @@ export declare class Request {
 
 export declare class Response {
   status(code: number): this;
+
   sendStatus(code: number): void;
+
   header(key: string, value?: string | Array<string>, append?: boolean): this;
+
   getHeader(key: string): string;
+
   hasHeader(key: string): boolean;
+
   removeHeader(key: string): this;
+
   getLink(
     s3Path: string,
     expires?: number,
-    callback?: ErrorCallback
+    callback?: ErrorCallback,
   ): Promise<string>;
+
   send(body: any): void;
+
   json(body: any): void;
+
   jsonp(body: any): void;
+
   html(body: any): void;
+
   type(type: string): this;
+
   location(path: string): this;
+
   redirect(status: number, path: string): void;
   redirect(path: string): void;
+
   cors(options: CorsOptions): this;
+
   error(message: string, detail?: any): void;
   error(code: number, message: string, detail?: any): void;
+
   cookie(name: string, value: string, options?: CookieOptions): this;
+
   clearCookie(name: string, options?: CookieOptions): this;
+
   etag(enable?: boolean): this;
+
   cache(age?: boolean | number | string, private?: boolean): this;
+
   modified(date: boolean | string | Date): this;
+
   attachment(fileName?: string): this;
+
   download(
     file: string | Buffer,
     fileName?: string,
     options?: FileOptions,
-    callback?: ErrorCallback
+    callback?: ErrorCallback,
   ): void;
+
   sendFile(
     file: string | Buffer,
     options?: FileOptions,
-    callback?: ErrorCallback
+    callback?: ErrorCallback,
   ): Promise<void>;
 }
 
-export type MiddlewaresAndHandler<T extends (Middleware | HandlerFunction)[]> =
-  T extends [HandlerFunction] ? T :
-  T extends [Middleware] ? T :
-    T extends [Middleware, HandlerFunction] ? T :
-      T extends [HandlerFunction, Middleware] ? never :
+export type MiddlewaresAndHandler<T extends (Middleware | HandlerFunction)[] = (Middleware | HandlerFunction)[]> =
   T extends [infer L, ...infer R]
-  ? L extends HandlerFunction ?
-      R extends never ? T : L extends Middleware ?
-      R extends never ? T : R extends (Middleware | HandlerFunction)[] ? [L, ...MiddlewaresAndHandler<R>] : never
-    : never
-  : never
-  : never;
+    ?
+    L extends HandlerFunction ? R extends [] ? T : never :
+    L extends Middleware ? R extends [] ? never
+      : R extends [HandlerFunction] ? [HandlerFunction]
+      : [L, ...MiddlewaresAndHandler<R>]
+      : T
+
+// [Middleware, Handler]
+// [Handler, Middleware]
 
 export declare class API {
   app(namespace: string, package: Package): App;
@@ -283,7 +305,7 @@ export declare class API {
 
   register(
     routes: (api: API, options?: RegisterOptions) => void,
-    options?: RegisterOptions
+    options?: RegisterOptions,
   ): void;
 
   routes(format: true): void;
@@ -299,11 +321,11 @@ export declare class API {
   run(
     event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
     context: Context,
-    cb: (err: Error, result: any) => void
+    cb: (err: Error, result: any) => void,
   ): void;
   run(
     event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
-    context: Context
+    context: Context,
   ): Promise<any>;
 }
 
@@ -331,6 +353,7 @@ declare function createAPI(options?: Options): API;
 
 export default createAPI;
 
-
 type If<C extends 0 | 1, T, E = never> = C extends 1 ? (1 extends C ? T : E) : E
-type Equals<A1 extends any, A2 extends any> = (<A>() => A extends A2 ? 1 : 0) extends (<A>() => A extends A1 ? 1 : 0) ? 1 : 0;
+type Equals<A1 extends any, A2 extends any> = (<A>() => A extends A2 ? 1 : 0) extends (<A>() => A extends A1 ? 1 : 0)
+  ? 1
+  : 0;
