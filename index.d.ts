@@ -256,7 +256,7 @@ export declare class API {
   METHOD(
     method: METHODS | METHODS[],
     path: string,
-    ...handler: HandlerFunction[]
+    ...handler: (Middleware | HandlerFunction)[]
   ): void;
   METHOD(method: METHODS | METHODS[], ...handler: (Middleware | HandlerFunction)[]): void
   register(
