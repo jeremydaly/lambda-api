@@ -46,24 +46,24 @@ export declare interface App {
 export declare type Middleware = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => void;
 export declare type ErrorHandlingMiddleware = (
   error: Error,
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => void;
 export declare type ErrorCallback = (error?: Error) => void;
 export declare type HandlerFunction = (
   req: Request,
   res: Response,
-  next?: NextFunction,
+  next?: NextFunction
 ) => void | any | Promise<any>;
 
 export declare type LoggerFunction = (
   message?: any,
-  additionalInfo?: LoggerFunctionAdditionalInfo,
+  additionalInfo?: LoggerFunctionAdditionalInfo
 ) => void;
 export declare type LoggerFunctionAdditionalInfo =
   | string
@@ -207,7 +207,7 @@ export declare class Response {
   getLink(
     s3Path: string,
     expires?: number,
-    callback?: ErrorCallback,
+    callback?: ErrorCallback
   ): Promise<string>;
 
   send(body: any): void;
@@ -246,13 +246,13 @@ export declare class Response {
     file: string | Buffer,
     fileName?: string,
     options?: FileOptions,
-    callback?: ErrorCallback,
+    callback?: ErrorCallback
   ): void;
 
   sendFile(
     file: string | Buffer,
     options?: FileOptions,
-    callback?: ErrorCallback,
+    callback?: ErrorCallback
   ): Promise<void>;
 }
 
@@ -275,25 +275,28 @@ export declare class API {
   delete(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
   delete(...handler: HandlerFunction[]): void;
 
-  options(path: string, ...handler: (Middleware | HandlerFunction)[]): void
-  options(...handler: (Middleware | HandlerFunction)[]): void
+  options(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
+  options(...handler: (Middleware | HandlerFunction)[]): void;
 
-  head(path: string, ...handler: (Middleware | HandlerFunction)[]): void
-  head(...handler: (Middleware | HandlerFunction)[]): void
+  head(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
+  head(...handler: (Middleware | HandlerFunction)[]): void;
 
-  any(path: string, ...handler: (Middleware | HandlerFunction)[]): void
-  any(...handler: (Middleware | HandlerFunction)[]): void
+  any(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
+  any(...handler: (Middleware | HandlerFunction)[]): void;
 
   METHOD(
     method: METHODS | METHODS[],
     path: string,
     ...handler: (Middleware | HandlerFunction)[]
   ): void;
-  METHOD(method: METHODS | METHODS[], ...handler: (Middleware | HandlerFunction)[]): void
+  METHOD(
+    method: METHODS | METHODS[],
+    ...handler: (Middleware | HandlerFunction)[]
+  ): void;
 
   register(
     routes: (api: API, options?: RegisterOptions) => void,
-    options?: RegisterOptions,
+    options?: RegisterOptions
   ): void;
 
   routes(format: true): void;
@@ -309,11 +312,11 @@ export declare class API {
   run(
     event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
     context: Context,
-    cb: (err: Error, result: any) => void,
+    cb: (err: Error, result: any) => void
   ): void;
   run(
     event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
-    context: Context,
+    context: Context
   ): Promise<any>;
 }
 
