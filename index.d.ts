@@ -260,28 +260,52 @@ export declare class API {
   app(namespace: string, package: Package): App;
   app(packages: App): App;
 
-  get(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  get(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
   get(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
-  post(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  post(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
   post(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
-  put(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  put(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
   put(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
-  patch(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  patch(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
   patch(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
-  delete(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  delete(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
   delete(...middlewaresAndHandler: HandlerFunction[]): void;
 
-  options(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  options(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
   options(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
-  head(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  head(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
   head(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
-  any(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  any(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
   any(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
   METHOD(
