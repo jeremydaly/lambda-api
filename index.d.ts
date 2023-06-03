@@ -46,13 +46,13 @@ export declare interface App {
 export declare type Middleware = (
   req: Request,
   res: Response,
-  next: () => void
+  next: NextFunction
 ) => void;
 export declare type ErrorHandlingMiddleware = (
   error: Error,
   req: Request,
   res: Response,
-  next: () => void
+  next: NextFunction
 ) => void;
 export declare type ErrorCallback = (error?: Error) => void;
 export declare type HandlerFunction = (
@@ -193,39 +193,62 @@ export declare class Request {
 
 export declare class Response {
   status(code: number): this;
+
   sendStatus(code: number): void;
+
   header(key: string, value?: string | Array<string>, append?: boolean): this;
+
   getHeader(key: string): string;
+
   hasHeader(key: string): boolean;
+
   removeHeader(key: string): this;
+
   getLink(
     s3Path: string,
     expires?: number,
     callback?: ErrorCallback
   ): Promise<string>;
+
   send(body: any): void;
+
   json(body: any): void;
+
   jsonp(body: any): void;
+
   html(body: any): void;
+
   type(type: string): this;
+
   location(path: string): this;
+
   redirect(status: number, path: string): void;
   redirect(path: string): void;
+
   cors(options: CorsOptions): this;
+
   error(message: string, detail?: any): void;
   error(code: number, message: string, detail?: any): void;
+
   cookie(name: string, value: string, options?: CookieOptions): this;
+
   clearCookie(name: string, options?: CookieOptions): this;
+
   etag(enable?: boolean): this;
+
   cache(age?: boolean | number | string, private?: boolean): this;
+
   modified(date: boolean | string | Date): this;
+
   attachment(fileName?: string): this;
+
   download(
     file: string | Buffer,
     fileName?: string,
     options?: FileOptions,
     callback?: ErrorCallback
   ): void;
+
   sendFile(
     file: string | Buffer,
     options?: FileOptions,
@@ -237,37 +260,69 @@ export declare class API {
   app(namespace: string, package: Package): App;
   app(packages: App): App;
 
-  get(path: string, ...handler: HandlerFunction[]): void;
   get(
     path: string,
-    middleware: Middleware,
-    ...handler: HandlerFunction[]
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
   ): void;
-  get(...handler: HandlerFunction[]): void;
-  post(path: string, ...handler: HandlerFunction[]): void;
-  post(...handler: HandlerFunction[]): void;
-  put(path: string, ...handler: HandlerFunction[]): void;
-  put(...handler: HandlerFunction[]): void;
-  patch(path: string, ...handler: HandlerFunction[]): void;
-  patch(...handler: HandlerFunction[]): void;
-  delete(path: string, ...handler: HandlerFunction[]): void;
-  delete(...handler: HandlerFunction[]): void;
-  options(path: string, ...handler: HandlerFunction[]): void;
-  options(...handler: HandlerFunction[]): void;
-  head(path: string, ...handler: HandlerFunction[]): void;
-  head(...handler: HandlerFunction[]): void;
-  any(path: string, ...handler: HandlerFunction[]): void;
-  any(...handler: HandlerFunction[]): void;
+  get(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+
+  post(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
+  post(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+
+  put(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
+  put(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+
+  patch(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
+  patch(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+
+  delete(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
+  delete(...middlewaresAndHandler: HandlerFunction[]): void;
+
+  options(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
+  options(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+
+  head(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
+  head(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+
+  any(
+    path: string,
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
+  any(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+
   METHOD(
     method: METHODS | METHODS[],
     path: string,
-    ...handler: HandlerFunction[]
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
   ): void;
-  METHOD(method: METHODS | METHODS[], ...handler: HandlerFunction[]): void;
+  METHOD(
+    method: METHODS | METHODS[],
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+  ): void;
+
   register(
     routes: (api: API, options?: RegisterOptions) => void,
     options?: RegisterOptions
   ): void;
+
   routes(format: true): void;
   routes(format: false): string[][];
   routes(): string[][];
