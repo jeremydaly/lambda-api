@@ -260,38 +260,38 @@ export declare class API {
   app(namespace: string, package: Package): App;
   app(packages: App): App;
 
-  get(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
-  get(...handler: (Middleware | HandlerFunction)[]): void;
+  get(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  get(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
-  post(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
-  post(...handler: (Middleware | HandlerFunction)[]): void;
+  post(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  post(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
-  put(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
-  put(...handler: (Middleware | HandlerFunction)[]): void;
+  put(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  put(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
-  patch(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
-  patch(...handler: (Middleware | HandlerFunction)[]): void;
+  patch(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  patch(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
-  delete(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
-  delete(...handler: HandlerFunction[]): void;
+  delete(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  delete(...middlewaresAndHandler: HandlerFunction[]): void;
 
-  options(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
-  options(...handler: (Middleware | HandlerFunction)[]): void;
+  options(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  options(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
-  head(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
-  head(...handler: (Middleware | HandlerFunction)[]): void;
+  head(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  head(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
-  any(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
-  any(...handler: (Middleware | HandlerFunction)[]): void;
+  any(path: string, ...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  any(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
 
   METHOD(
     method: METHODS | METHODS[],
     path: string,
-    ...handler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
   ): void;
   METHOD(
     method: METHODS | METHODS[],
-    ...handler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
   ): void;
 
   register(
