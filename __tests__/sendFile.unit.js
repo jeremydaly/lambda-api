@@ -134,7 +134,7 @@ api.get('/sendfile/s3', function(req,res) {
       ETag: '"ae771fbbba6a74eeeb77754355831713"',
       ContentType: 'text/plain',
       Metadata: {},
-      Body: Buffer.from('Test file for sendFile\n')
+      Body: Buffer.from('Test file for sendFile\n').toString('base64')
     }}
   })
 
@@ -151,7 +151,7 @@ api.get('/sendfile/s3path', function(req,res) {
       ETag: '"ae771fbbba6a74eeeb77754355831713"',
       ContentType: 'text/plain',
       Metadata: {},
-      Body: Buffer.from('Test file for sendFile\n')
+      Body: Buffer.from('Test file for sendFile\n').toString('base64')
     }}
   })
 
