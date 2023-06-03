@@ -1,6 +1,7 @@
 "use strict";
 
 const utils = require("../lib/utils");
+const { Readable } = require('stream');
 
 /******************************************************************************/
 /***  BEGIN TESTS                                                           ***/
@@ -489,5 +490,15 @@ describe("Utility Function Tests:", function () {
 
 	}); // end deepMerge tests
 
-
+  describe("streamToBuffer:", function () {
+    it("Should transform a given stream to a buffer", function () {
+      let stream = new Readable();
+      stream.push("test");
+      stream.push(null);
+      return utils.streamToBuffer(stream).then((buffer) => {
+        expect(Buffer.isBuffer(buffer)).toBe(true);
+        expect(buffer.toString()).toBe("test");
+      });
+    })
+  })
 }); // end UTILITY tests
