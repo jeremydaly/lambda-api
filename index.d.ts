@@ -237,33 +237,28 @@ export declare class API {
   app(namespace: string, package: Package): App;
   app(packages: App): App;
 
-  get(path: string, ...handler: (HandlerFunction | Middleware)[]): void;
-  get(
-    path: string,
-    middleware: Middleware,
-    ...handler: HandlerFunction[]
-  ): void;
-  get(...handler: HandlerFunction[]): void;
-  post(path: string, ...handler: HandlerFunction[]): void;
-  post(...handler: HandlerFunction[]): void;
-  put(path: string, ...handler: HandlerFunction[]): void;
-  put(...handler: HandlerFunction[]): void;
-  patch(path: string, ...handler: HandlerFunction[]): void;
-  patch(...handler: HandlerFunction[]): void;
-  delete(path: string, ...handler: HandlerFunction[]): void;
+  get(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
+  get(...handler: (Middleware | HandlerFunction)[]): void;
+  post(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
+  post(...handler: (Middleware | HandlerFunction)[]): void;
+  put(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
+  put(...handler: (Middleware | HandlerFunction)[]): void;
+  patch(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
+  patch(...handler: (Middleware | HandlerFunction)[]): void;
+  delete(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
   delete(...handler: HandlerFunction[]): void;
-  options(path: string, ...handler: HandlerFunction[]): void;
-  options(...handler: HandlerFunction[]): void;
-  head(path: string, ...handler: HandlerFunction[]): void;
-  head(...handler: HandlerFunction[]): void;
-  any(path: string, ...handler: HandlerFunction[]): void;
-  any(...handler: HandlerFunction[]): void;
+  options(path: string, ...handler: (Middleware | HandlerFunction)[]): void
+  options(...handler: (Middleware | HandlerFunction)[]): void
+  head(path: string, ...handler: (Middleware | HandlerFunction)[]): void
+  head(...handler: (Middleware | HandlerFunction)[]): void
+  any(path: string, ...handler: (Middleware | HandlerFunction)[]): void
+  any(...handler: (Middleware | HandlerFunction)[]): void
   METHOD(
     method: METHODS | METHODS[],
     path: string,
     ...handler: HandlerFunction[]
   ): void;
-  METHOD(method: METHODS | METHODS[], ...handler: HandlerFunction[]): void;
+  METHOD(method: METHODS | METHODS[], ...handler: (Middleware | HandlerFunction)[]): void
   register(
     routes: (api: API, options?: RegisterOptions) => void,
     options?: RegisterOptions
