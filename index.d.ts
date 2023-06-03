@@ -46,24 +46,24 @@ export declare interface App {
 export declare type Middleware = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => void;
 export declare type ErrorHandlingMiddleware = (
   error: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => void;
 export declare type ErrorCallback = (error?: Error) => void;
 export declare type HandlerFunction = (
   req: Request,
   res: Response,
-  next?: NextFunction
+  next?: NextFunction,
 ) => void | any | Promise<any>;
 
 export declare type LoggerFunction = (
   message?: any,
-  additionalInfo?: LoggerFunctionAdditionalInfo
+  additionalInfo?: LoggerFunctionAdditionalInfo,
 ) => void;
 export declare type LoggerFunctionAdditionalInfo =
   | string
@@ -193,43 +193,66 @@ export declare class Request {
 
 export declare class Response {
   status(code: number): this;
+
   sendStatus(code: number): void;
+
   header(key: string, value?: string | Array<string>, append?: boolean): this;
+
   getHeader(key: string): string;
+
   hasHeader(key: string): boolean;
+
   removeHeader(key: string): this;
+
   getLink(
     s3Path: string,
     expires?: number,
-    callback?: ErrorCallback
+    callback?: ErrorCallback,
   ): Promise<string>;
+
   send(body: any): void;
+
   json(body: any): void;
+
   jsonp(body: any): void;
+
   html(body: any): void;
+
   type(type: string): this;
+
   location(path: string): this;
+
   redirect(status: number, path: string): void;
   redirect(path: string): void;
+
   cors(options: CorsOptions): this;
+
   error(message: string, detail?: any): void;
   error(code: number, message: string, detail?: any): void;
+
   cookie(name: string, value: string, options?: CookieOptions): this;
+
   clearCookie(name: string, options?: CookieOptions): this;
+
   etag(enable?: boolean): this;
+
   cache(age?: boolean | number | string, private?: boolean): this;
+
   modified(date: boolean | string | Date): this;
+
   attachment(fileName?: string): this;
+
   download(
     file: string | Buffer,
     fileName?: string,
     options?: FileOptions,
-    callback?: ErrorCallback
+    callback?: ErrorCallback,
   ): void;
+
   sendFile(
     file: string | Buffer,
     options?: FileOptions,
-    callback?: ErrorCallback
+    callback?: ErrorCallback,
   ): Promise<void>;
 }
 
@@ -239,30 +262,40 @@ export declare class API {
 
   get(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
   get(...handler: (Middleware | HandlerFunction)[]): void;
+
   post(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
   post(...handler: (Middleware | HandlerFunction)[]): void;
+
   put(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
   put(...handler: (Middleware | HandlerFunction)[]): void;
+
   patch(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
   patch(...handler: (Middleware | HandlerFunction)[]): void;
+
   delete(path: string, ...handler: (Middleware | HandlerFunction)[]): void;
   delete(...handler: HandlerFunction[]): void;
+
   options(path: string, ...handler: (Middleware | HandlerFunction)[]): void
   options(...handler: (Middleware | HandlerFunction)[]): void
+
   head(path: string, ...handler: (Middleware | HandlerFunction)[]): void
   head(...handler: (Middleware | HandlerFunction)[]): void
+
   any(path: string, ...handler: (Middleware | HandlerFunction)[]): void
   any(...handler: (Middleware | HandlerFunction)[]): void
+
   METHOD(
     method: METHODS | METHODS[],
     path: string,
     ...handler: (Middleware | HandlerFunction)[]
   ): void;
   METHOD(method: METHODS | METHODS[], ...handler: (Middleware | HandlerFunction)[]): void
+
   register(
     routes: (api: API, options?: RegisterOptions) => void,
-    options?: RegisterOptions
+    options?: RegisterOptions,
   ): void;
+
   routes(format: true): void;
   routes(format: false): string[][];
   routes(): string[][];
@@ -276,11 +309,11 @@ export declare class API {
   run(
     event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
     context: Context,
-    cb: (err: Error, result: any) => void
+    cb: (err: Error, result: any) => void,
   ): void;
   run(
     event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
-    context: Context
+    context: Context,
   ): Promise<any>;
 }
 
