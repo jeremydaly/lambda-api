@@ -46,13 +46,13 @@ export declare interface App {
 export declare type Middleware = (
   req: Request,
   res: Response,
-  next: () => void
+  next: NextFunction
 ) => void;
 export declare type ErrorHandlingMiddleware = (
   error: Error,
   req: Request,
   res: Response,
-  next: () => void
+  next: NextFunction
 ) => void;
 export declare type ErrorCallback = (error?: Error) => void;
 export declare type HandlerFunction = (
@@ -237,7 +237,7 @@ export declare class API {
   app(namespace: string, package: Package): App;
   app(packages: App): App;
 
-  get(path: string, ...handler: HandlerFunction[]): void;
+  get(path: string, ...handler: (HandlerFunction | Middleware)[]): void;
   get(
     path: string,
     middleware: Middleware,
