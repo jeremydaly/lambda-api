@@ -9,7 +9,7 @@ const REQUEST = require('./lib/request');
 const RESPONSE = require('./lib/response');
 const UTILS = require('./lib/utils');
 const LOGGER = require('./lib/logger');
-const S3 = require('./lib/s3-service')
+const S3 = require('./lib/s3-service');
 const prettyPrint = require('./lib/prettyPrint');
 const { ConfigurationError } = require('./lib/errors');
 
@@ -288,7 +288,7 @@ class API {
     this._cb = cb ? cb : undefined;
 
     // Set S3 Client
-    S3.setClient(this._s3Config)
+    S3.setClient(this._s3Config);
 
     // Initalize request and response objects
     let request = new REQUEST(this);

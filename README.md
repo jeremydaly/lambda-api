@@ -152,6 +152,7 @@ Require the `lambda-api` module into your Lambda handler script and instantiate 
 | serializer           | `Function`            | Optional object serializer function. This function receives the `body` of a response and must return a string. Defaults to `JSON.stringify`                                                               |
 | version              | `String`              | Version number accessible via the `REQUEST` object                                                                                                                                                        |
 | errorHeaderWhitelist | `Array`               | Array of headers to maintain on errors                                                                                                                                                                    |
+| s3Config             | `Object`              | Optional object to provide as config to S3 sdk. [S3ClientConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html)                                 |
 
 ```javascript
 // Require the framework and instantiate it with optional version and base parameters
