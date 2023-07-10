@@ -288,7 +288,7 @@ class API {
     this._cb = cb ? cb : undefined;
 
     // Set S3 Client
-    S3.setClient(this._s3Config);
+    if (this._s3Config) S3.setConfig(this._s3Config);
 
     // Initalize request and response objects
     let request = new REQUEST(this);

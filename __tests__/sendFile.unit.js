@@ -184,12 +184,12 @@ api.use(function(err,req,res,next) {
 let stub
 
 describe('SendFile Tests:', function() {
-  let setClientSpy;
+  let setConfigSpy;
 
   beforeEach(function() {
      // Stub getObjectAsync
     stub = sinon.stub(S3,'getObject')
-    setClientSpy = sinon.spy(S3, 'setClient');
+    setConfigSpy = sinon.spy(S3, 'setConfig');
   })
 
   it('Bad path', async function() {
@@ -347,7 +347,7 @@ describe('SendFile Tests:', function() {
   it('S3 file', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/s3' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    sinon.assert.calledWith(setClientSpy, undefined);
+    sinon.assert.notCalled(setConfigSpy);
     expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
@@ -368,7 +368,7 @@ describe('SendFile Tests:', function() {
     await new Promise(r => apiWithConfig.run(_event,{
       s3Config
     },(e,res) => { r(res) }))
-    sinon.assert.calledWith(setClientSpy, s3Config);
+    sinon.assert.calledWith(setConfigSpy, s3Config);
   }) // end it
 
   it('S3 file w/ nested path', async function() {
@@ -411,7 +411,7 @@ describe('SendFile Tests:', function() {
 
   afterEach(function() {
     stub.restore()
-    setClientSpy.restore();
+    setConfigSpy.restore();
   })
 
 }) // end sendFile tests
