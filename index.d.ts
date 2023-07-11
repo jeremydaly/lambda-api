@@ -4,6 +4,7 @@ import {
   APIGatewayProxyEventV2,
   Context,
 } from 'aws-lambda';
+import { S3ClientConfig } from '@aws-sdk/client-s3';
 
 export declare interface CookieOptions {
   domain?: string;
@@ -132,6 +133,7 @@ export declare interface Options {
   isBase64?: boolean;
   compression?: boolean;
   headers?: object;
+  s3Config?: S3ClientConfig;
 }
 
 export declare class Request {
