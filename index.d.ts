@@ -133,7 +133,7 @@ export declare interface Options {
   isBase64?: boolean;
   compression?: boolean;
   headers?: object;
-  s3Config?: S3ClientConfig
+  s3Config?: S3ClientConfig;
 }
 
 export declare class Request {
