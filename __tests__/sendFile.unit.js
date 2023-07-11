@@ -10,7 +10,7 @@ const sinon = require('sinon')
 const S3 = require('../lib/s3-service'); // Init S3 Service
 
 // Init API instance
-const api = require('../index')({ version: 'v1.0', mimeTypes: { test: 'text/test' } })
+const api = require('../index')({ version: 'v1.0', mimeTypes: { test: 'text/test' }})
 
 let event = {
   httpMethod: 'get',
@@ -184,10 +184,12 @@ api.use(function(err,req,res,next) {
 let stub
 
 describe('SendFile Tests:', function() {
+  let setConfigSpy;
 
   beforeEach(function() {
      // Stub getObjectAsync
     stub = sinon.stub(S3,'getObject')
+    setConfigSpy = sinon.spy(S3, 'setConfig');
   })
 
   it('Bad path', async function() {
@@ -345,6 +347,7 @@ describe('SendFile Tests:', function() {
   it('S3 file', async function() {
     let _event = Object.assign({},event,{ path: '/sendfile/s3' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    sinon.assert.notCalled(setConfigSpy);
     expect(result).toEqual({
       multiValueHeaders: {
         'content-type': ['text/plain'],
@@ -354,6 +357,18 @@ describe('SendFile Tests:', function() {
         'last-modified': result.multiValueHeaders['last-modified']
       }, statusCode: 200, body: 'VGVzdCBmaWxlIGZvciBzZW5kRmlsZQo=', isBase64Encoded: true
     })
+  }) // end it
+
+  it('S3 file w/ custom config',async function() {
+    const s3Config = {
+      endpoint: "http://test"
+    }
+    const apiWithConfig = require('../index')({ version: 'v1.0', mimeTypes: { test: 'text/test' }, s3Config})
+    let _event = Object.assign({},event,{ path: '/sendfile/s3' })
+    await new Promise(r => apiWithConfig.run(_event,{
+      s3Config
+    },(e,res) => { r(res) }))
+    sinon.assert.calledWith(setConfigSpy, s3Config);
   }) // end it
 
   it('S3 file w/ nested path', async function() {
@@ -393,8 +408,10 @@ describe('SendFile Tests:', function() {
     })
   }) // end it
 
+
   afterEach(function() {
     stub.restore()
+    setConfigSpy.restore();
   })
 
 }) // end sendFile tests
