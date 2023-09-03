@@ -4,9 +4,6 @@ on:
   push:
     branches: [main]
 
-env:
-  NPM_VERSION: latest
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,11 +28,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install latest npm
-        run: |
-          npm install -g npm@$NPM_VERSION &&
-          npm --version &&
-          npm list -g --depth 0
+      - name: Install latest NPM version
+        run: npm install -g npm@9
       - run: npm ci
       - run: npm run test-ci
         env:
