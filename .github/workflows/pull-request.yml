@@ -1,4 +1,4 @@
-name: 'Pull Request'
+name: "Pull Request"
 on:
   pull_request:
     types: [opened, reopened, synchronize]
@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [14, 16.5.1, 18]
+        node: [14, "16.5.1", 18]
     name: Node ${{ matrix.node }}
     steps:
-      - name: 'Checkout latest code'
+      - name: "Checkout latest code"
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-          cache: 'npm'
+          cache: "npm"
       - name: Install latest NPM version
         run: npm install -g npm@latest
       - name: Install dependencies
@@ -28,7 +28,7 @@ jobs:
         run: npm run test
 
   lint:
-    name: 'ESLint'
+    name: "ESLint"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout latest code
@@ -38,15 +38,15 @@ jobs:
       - name: Set up node
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
-          cache: 'npm'
+          node-version: "16"
+          cache: "npm"
       - name: Install dependencies
         run: npm ci
       - name: Run ESLint
         run: npm run lint:check
 
   prettier:
-    name: 'Prettier'
+    name: "Prettier"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout latest code
@@ -56,7 +56,7 @@ jobs:
       - name: Set up node
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: "16"
       - name: Install dependencies
         run: npm ci
       - name: Run Prettier
