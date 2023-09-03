@@ -22,13 +22,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-      # - name: Install latest npm
-      #   run: |
-      #     npm install -g npm@$NPM_VERSION &&
-      #     npm --version &&
-      #     npm list -g --depth 0
-      - name: Install dependencies
-        run: npm ci
+          cache: "npm"
       - name: Install dependencies
         run: npm ci
       - name: Run tests
@@ -46,6 +40,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "16"
+          cache: "npm"
       - name: Install dependencies
         run: npm ci
       - name: Run ESLint
