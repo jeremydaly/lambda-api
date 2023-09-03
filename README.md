@@ -1,6 +1,6 @@
 [![Lambda API](https://www.jeremydaly.com/wp-content/uploads/2018/03/lambda-api-logo.svg)](https://serverless-api.com/)
 
-[![Build Status](https://github.com/jeremydaly/lambda-api/actions/workflows/build.yml/badge.svg)](https://github.com/jeremydaly/lambda-api/actions/workflows/build.yml)
+[![Build Status](https://github.com/jeremydaly/lambda-api/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/jeremydaly/lambda-api/actions/workflows/build.yml)
 [![npm](https://img.shields.io/npm/v/lambda-api.svg)](https://www.npmjs.com/package/lambda-api)
 [![npm](https://img.shields.io/npm/l/lambda-api.svg)](https://www.npmjs.com/package/lambda-api)
 [![Coverage Status](https://coveralls.io/repos/github/jeremydaly/lambda-api/badge.svg?branch=main)](https://coveralls.io/github/jeremydaly/lambda-api?branch=main)
