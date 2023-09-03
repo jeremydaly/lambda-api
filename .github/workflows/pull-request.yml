@@ -5,7 +5,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         node: [14, 16, 18]
@@ -21,7 +21,7 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: "npm"
       - name: Install latest NPM version
-        run: npm install -g npm@latest
+        run: npm install -g npm@9
       - name: Install dependencies
         run: npm ci
       - name: Run tests
