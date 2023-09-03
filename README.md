@@ -167,15 +167,13 @@ For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-a
 
 # v.1.0.3: allow to control header keys behavior
 
-In the past, by default, we normalized all headers to be lowercased based on [the http/2 spec](https://www.rfc-editor.org/rfc/rfc9113#name-http-fields). 
+In the past, by default, we normalized all headers to be lowercased based on [the http/2 spec](https://www.rfc-editor.org/rfc/rfc9113#name-http-fields).
 This has caused issues for some of our consumers, therefore we're adding a new API option called `lowercaseHeaderKeys`.
-By default it's set to true, in order to not break the already existing implementation. 
+By default it's set to true, in order to not break the already existing implementation.
 
 # v.1.0: move to AWS-SDK v3
 
 Lambda API is now using AWS SDK v3. In case you're still using AWS SDK v2, please use a lambda-api version that is lower than 1.0.
-
-
 
 ### v0.11: API Gateway v2 payload support and automatic compression
 
@@ -670,7 +668,7 @@ api.get('/redirectToS3File', (req, res) => {
 
 Convenience method for adding [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) headers to responses. An optional `options` object can be passed in to customize the defaults.
 
-NOTE: in order to allow CORS for all browsers when using http/1, please set `lowercaseHeaderKeys` option to `false`. 
+NOTE: in order to properly allow CORS for all browsers when using http/1, please set `lowercaseHeaderKeys` option to `false`.
 
 The six defined **CORS** headers are as follows:
 
