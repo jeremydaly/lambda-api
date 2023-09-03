@@ -3,9 +3,6 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
 
-env:
-  NPM_VERSION: latest
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -23,8 +20,10 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: "npm"
+      - name: Install latest NPM version
+        run: npm install -g npm@latest
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm ci
       - name: Run tests
         run: npm run test
 
