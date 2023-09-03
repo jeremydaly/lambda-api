@@ -670,7 +670,7 @@ api.get('/redirectToS3File', (req, res) => {
 
 Convenience method for adding [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) headers to responses. An optional `options` object can be passed in to customize the defaults.
 
-NOTE: in order to allow CORS for all browsers, please set `lowercaseHeaderKeys` option to `false`. 
+NOTE: in order to allow CORS for all browsers when using http/1, please set `lowercaseHeaderKeys` option to `false`. 
 
 The six defined **CORS** headers are as follows:
 
