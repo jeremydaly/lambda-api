@@ -1,4 +1,4 @@
-name: "Merge to main"
+name: 'Merge to main'
 
 on:
   push:
