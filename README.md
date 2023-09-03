@@ -165,13 +165,13 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
 
-# v.1.0.3: allow to control header keys behavior
+# v1.0.3: allow to control header keys behavior
 
 In the past, by default, we normalized all headers to be lowercased based on [the http/2 spec](https://www.rfc-editor.org/rfc/rfc9113#name-http-fields).
 This has caused issues for some of our consumers, therefore we're adding a new API option called `lowercaseHeaderKeys`.
 By default it's set to true, in order to not break the already existing implementation.
 
-# v.1.0: move to AWS-SDK v3
+# v1.0: move to AWS-SDK v3
 
 Lambda API is now using AWS SDK v3. In case you're still using AWS SDK v2, please use a lambda-api version that is lower than 1.0.
 
