@@ -154,7 +154,7 @@ Require the `lambda-api` module into your Lambda handler script and instantiate 
 | errorHeaderWhitelist | `Array`               | Array of headers to maintain on errors                                                                                                                                                                    |
 | s3Config             | `Object`              | Optional object to provide as config to S3 sdk. [S3ClientConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html)                                 |
 
-| lowercaseHeaders | `Boolean` | Decide whether to lowercase all header names and values. This allows you to decide whether to compile with the [http/2 spec](https://www.rfc-editor.org/rfc/rfc9113#name-http-fields).
+| lowercaseHeaderKeys | `Boolean` | Decide whether to lowercase all header names and values. This allows you to decide whether to compile with the [http/2 spec](https://www.rfc-editor.org/rfc/rfc9113#name-http-fields).
 
 ```javascript
 // Require the framework and instantiate it with optional version and base parameters
@@ -164,6 +164,18 @@ const api = require('lambda-api')({ version: 'v1.0', base: 'v1' });
 ## Recent Updates
 
 For detailed release notes see [Releases](https://github.com/jeremydaly/lambda-api/releases).
+
+# v.1.0.3: allow to control header keys behavior
+
+In the past, by default, we normalized all headers to be lowercased based on [the http/2 spec](https://www.rfc-editor.org/rfc/rfc9113#name-http-fields). 
+This has caused issues for some of our consumers, therefore we're adding a new API option called `lowercaseHeaderKeys`.
+By default it's set to true, in order to not break the already existing implementation. 
+
+# v.1.0: move to AWS-SDK v3
+
+Lambda API is now using AWS SDK v3. In case you're still using AWS SDK v2, please use a lambda-api version that is lower than 1.0.
+
+
 
 ### v0.11: API Gateway v2 payload support and automatic compression
 
@@ -657,6 +669,8 @@ api.get('/redirectToS3File', (req, res) => {
 ### cors([options])
 
 Convenience method for adding [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) headers to responses. An optional `options` object can be passed in to customize the defaults.
+
+NOTE: in order to allow CORS for all browsers, please set `lowercaseHeaderKeys` option to `false`. 
 
 The six defined **CORS** headers are as follows:
 

@@ -134,7 +134,7 @@ export declare interface Options {
   compression?: boolean;
   headers?: object;
   s3Config?: S3ClientConfig;
-  lowercaseHeaders?: boolean;
+  lowercaseHeaderKeys?: boolean;
 }
 
 export declare class Request {
