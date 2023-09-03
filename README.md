@@ -154,7 +154,7 @@ Require the `lambda-api` module into your Lambda handler script and instantiate 
 | errorHeaderWhitelist | `Array`               | Array of headers to maintain on errors                                                                                                                                                                    |
 | s3Config             | `Object`              | Optional object to provide as config to S3 sdk. [S3ClientConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html)                                 |
 
-| lowercaseHeaders     | `Boolean`          | Decide whether to lowercase all header names and values. This allows you to decide whether to compile with the [http/2 spec](https://www.rfc-editor.org/rfc/rfc9113#name-http-fields).
+| lowercaseHeaders | `Boolean` | Decide whether to lowercase all header names and values. This allows you to decide whether to compile with the [http/2 spec](https://www.rfc-editor.org/rfc/rfc9113#name-http-fields).
 
 ```javascript
 // Require the framework and instantiate it with optional version and base parameters
