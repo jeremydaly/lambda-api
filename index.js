@@ -9,7 +9,7 @@ const REQUEST = require('./lib/request');
 const RESPONSE = require('./lib/response');
 const UTILS = require('./lib/utils');
 const LOGGER = require('./lib/logger');
-const S3 = require('./lib/s3-service');
+const S3 = () => require('./lib/s3-service');
 const prettyPrint = require('./lib/prettyPrint');
 const { ConfigurationError } = require('./lib/errors');
 
@@ -48,6 +48,9 @@ class API {
         : false;
 
     this._s3Config = props && props.s3Config;
+
+    // Set S3 Client
+    if (this._s3Config) S3().setConfig(this._s3Config);
 
     this._sampleCounts = {};
 
@@ -286,9 +289,6 @@ class API {
     this._event = event || {};
     this._context = this.context = typeof context === 'object' ? context : {};
     this._cb = cb ? cb : undefined;
-
-    // Set S3 Client
-    if (this._s3Config) S3.setConfig(this._s3Config);
 
     // Initalize request and response objects
     let request = new REQUEST(this);

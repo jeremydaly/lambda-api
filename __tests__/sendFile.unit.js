@@ -364,10 +364,6 @@ describe('SendFile Tests:', function() {
       endpoint: "http://test"
     }
     const apiWithConfig = require('../index')({ version: 'v1.0', mimeTypes: { test: 'text/test' }, s3Config})
-    let _event = Object.assign({},event,{ path: '/sendfile/s3' })
-    await new Promise(r => apiWithConfig.run(_event,{
-      s3Config
-    },(e,res) => { r(res) }))
     sinon.assert.calledWith(setConfigSpy, s3Config);
   }) // end it
 
