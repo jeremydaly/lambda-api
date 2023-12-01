@@ -134,6 +134,7 @@ export declare interface Options {
   compression?: boolean;
   headers?: object;
   s3Config?: S3ClientConfig;
+  lowercaseHeaderKeys?: boolean;
 }
 
 export declare class Request {
@@ -200,7 +201,7 @@ export declare class Response {
 
   header(key: string, value?: string | Array<string>, append?: boolean): this;
 
-  getHeader(key: string): string;
+  getHeader(key: string, asArr?: boolean): string;
 
   hasHeader(key: string): boolean;
 
