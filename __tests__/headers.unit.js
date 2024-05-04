@@ -90,6 +90,13 @@ api.get('/hasHeader', function(req,res) {
   })
 })
 
+api.get('/setHeader', function(req,res) {
+  res.status(200).header('TestHeader','test').setHeader('NewHeader','test')
+  res.json({
+    headers: res.getHeaders()
+  })
+});
+
 api.get('/removeHeader', function(req,res) {
   res.status(200).header('TestHeader','test').header('NewHeader','test').removeHeader('testHeader')
   res.json({
@@ -239,6 +246,20 @@ describe('Header Tests:', function() {
           'testheader': ['test']
         }, statusCode: 200,
         body: '{"hasHeader":true,"hasHeaderCase":true,"hasHeaderMissing":false,"hasHeaderEmpty":false}',
+        isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Set Header', async function() {
+      let _event = Object.assign({},event,{ path: '/setHeader'})
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(result).toEqual({
+        multiValueHeaders: {
+          'content-type': ['application/json'],
+          'testheader': ['test'],
+          'newheader': ['test']
+        }, statusCode: 200,
+        body: "{\"headers\":{\"content-type\":[\"application/json\"],\"testheader\":[\"test\"],\"newheader\":[\"test\"]}}",
         isBase64Encoded: false
       })
     }) // end it

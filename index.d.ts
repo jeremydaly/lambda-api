@@ -205,6 +205,10 @@ export declare class Response {
 
   getHeader(key: string): string;
 
+  getHeaders(): { [key: string]: string };
+
+  setHeader(...args: Parameters<typeof this.header>): this;
+
   hasHeader(key: string): boolean;
 
   removeHeader(key: string): this;
