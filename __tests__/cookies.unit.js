@@ -299,6 +299,39 @@ describe('Cookie Tests:', function() {
       })
     }) // end it
 
+    /**
+     * There is no definitive standard on what the cookie value can contain.
+     * The most restrictive definition I could find comes from Safari which only supports
+     * the ASCII character set, excluding semi-colon, comma, backslash, and white space.
+     * 
+     * The % character is also ambiguous, as it is used as part of the URL encoded scheme. For the purpose of this test, we will leave this character out.
+     * 
+     * @see {@link https://stackoverflow.com/a/1969339 | This StackOverflow answer which provides more context regarding the cookie value}
+     */
+    it('Parse cookie with the entire supported set of ASCII characters', async function() {
+      let asciiCharacterSet = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+
+      asciiCharacterSet = 
+        asciiCharacterSet.replace(' ', '')
+          .replace(';', '')
+          .replace(',', '')
+          .replace('/', '')
+          .replace('%', '');
+
+      let _event = Object.assign({},event,{
+        path: '/cookieParse',
+        multiValueHeaders: {
+          cookie: [`test=${asciiCharacterSet}`]
+        }
+      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(JSON.parse(result.body)).toEqual({
+        cookies: {
+          test: asciiCharacterSet,
+        },
+      })
+    }) // end it
+
     it('Parse & decode two cookies', async function() {
       let _event = Object.assign({},event,{
         path: '/cookieParse',
@@ -327,6 +360,31 @@ describe('Cookie Tests:', function() {
         multiValueHeaders: {
           'content-type': ['application/json'],
         }, statusCode: 200, body: '{\"cookies\":{\"test\":\"some value\",\"test2\":{\"foo\":\"bar\"},\"test3\":\"domain\"}}', isBase64Encoded: false
+      })
+    }) // end it
+
+    it('Parse & decode multiple cookies with the entire supported set of ASCII characters', async function() {
+      let asciiCharacterSet = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~';
+
+      asciiCharacterSet = 
+        asciiCharacterSet.replace(' ', '')
+          .replace(';', '')
+          .replace(',', '')
+          .replace('/', '')
+          .replace('%', '');
+
+      let _event = Object.assign({},event,{
+        path: '/cookieParse',
+        multiValueHeaders: {
+          cookie: [`test=${asciiCharacterSet}; test2=${asciiCharacterSet}`]
+        }
+      })
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      expect(JSON.parse(result.body)).toEqual({
+        cookies: {
+          test: asciiCharacterSet,
+          test2: asciiCharacterSet,
+        },
       })
     }) // end it
 
