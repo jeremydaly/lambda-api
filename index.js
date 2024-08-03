@@ -478,7 +478,6 @@ class API {
         this.METHOD('__MW__', route, ...middleware);
       });
     }
-
   } // end use
 
   // Finally handler
