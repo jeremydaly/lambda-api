@@ -77,7 +77,7 @@ export declare type LoggerFunctionAdditionalInfo =
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
 export declare type SerializerFunction = (body: object) => string;
-export declare type FinallyFunction = (req: Request, res: Response) => void;
+export declare type FinallyFunction = (req: Request, res: Response) => void | Promise<void>;
 export declare type METHODS =
   | 'GET'
   | 'POST'

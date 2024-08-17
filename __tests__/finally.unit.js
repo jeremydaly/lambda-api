@@ -32,7 +32,8 @@ api.get('/test', function(req,res) {
 /******************************************************************************/
 /***  DEFINE FINALLY METHOD                                                 ***/
 /******************************************************************************/
-api.finally(function(req,res) {
+api.finally(async function(req,res) {
+  await new Promise(r => setTimeout(r,3_000))
   fakeDatabase.connected = false
 })
 
@@ -41,7 +42,6 @@ api.finally(function(req,res) {
 /******************************************************************************/
 
 describe('Finally Tests:', function() {
-
   it('Connected on first execution and after callback', async function() {
     let _event = Object.assign({},event,{})
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
