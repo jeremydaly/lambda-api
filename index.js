@@ -144,14 +144,8 @@ class API {
       route.push('');
     }
 
-    // Keep track of path variables
     let pathVars = {};
-
-    // Make a local copy of routes
     let routes = this._routes;
-    // console.log('routes', JSON.stringify(routes));
-
-    // Create a local stack for inheritance
     let _stack = { '*': [], m: [] };
 
     // Loop through the path levels
