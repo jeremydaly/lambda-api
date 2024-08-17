@@ -1,7 +1,5 @@
 'use strict';
 
-
-
 // Init API instance
 const api = require('../index')({ version: 'v1.0', base: '/v1' })
 

@@ -1,12 +1,6 @@
-# Dependency directories
 node_modules
-
-# Optional npm cache directory
 .npm
-
-# Local REDIS test data
 dump.rdb
-
-# Coverage reports
 .nyc_output
 coverage
+.idea
