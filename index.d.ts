@@ -155,7 +155,7 @@ export declare class Request {
     [key: string]: string | undefined;
   };
   multiValueHeaders: {
-    [key: string]: string | undefined;
+    [key: string]: string[] | undefined;
   };
   rawHeaders?: {
     [key: string]: string | undefined;
