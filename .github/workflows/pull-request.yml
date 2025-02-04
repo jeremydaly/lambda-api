@@ -20,6 +20,8 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: 'npm'
+      - name: Install NPM (if node 14)
+        run: if [ "${{ matrix.node }}" == "14" ]; then npm install -g npm@9; fi
       - name: Install dependencies
         run: npm ci
       - name: Run tests
