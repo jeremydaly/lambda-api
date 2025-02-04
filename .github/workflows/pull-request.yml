@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [14, 16, 18, 20]
+        node: [14, 16, 18, 20, 22]
     name: Node ${{ matrix.node }}
     steps:
       - name: 'Checkout latest code'
@@ -20,8 +20,6 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: 'npm'
-      - name: Install NPM
-        run: npm install -g npm@9
       - name: Install dependencies
         run: npm ci
       - name: Run tests
