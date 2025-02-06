@@ -1,6 +1,4 @@
 import {
-  ALBEvent,
-  ALBEventRequestContext,
   APIGatewayEventRequestContext,
   APIGatewayProxyEvent,
   APIGatewayProxyEventV2,
@@ -165,7 +163,7 @@ export declare class Request {
   body: any;
   rawBody: string;
   route: '';
-  requestContext: APIGatewayEventRequestContext | ALBEventRequestContext;
+  requestContext: APIGatewayEventRequestContext;
   isBase64Encoded: boolean;
   pathParameters: { [name: string]: string } | null;
   stageVariables: { [name: string]: string } | null;
@@ -345,12 +343,12 @@ export declare class API {
   finally(callback: FinallyFunction): void;
 
   run(
-    event: APIGatewayProxyEvent | APIGatewayProxyEventV2 | ALBEvent,
+    event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
     context: Context,
     cb: (err: Error, result: any) => void
   ): void;
   run(
-    event: APIGatewayProxyEvent | APIGatewayProxyEventV2 | ALBEvent,
+    event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
     context: Context
   ): Promise<any>;
 }
