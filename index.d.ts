@@ -2,6 +2,7 @@ import {
   APIGatewayEventRequestContext,
   APIGatewayProxyEvent,
   APIGatewayProxyEventV2,
+  ALBEvent,
   Context,
 } from 'aws-lambda';
 import { S3ClientConfig } from '@aws-sdk/client-s3';
@@ -44,23 +45,74 @@ export declare interface App {
   [namespace: string]: Package;
 }
 
-export declare type Middleware = (
-  req: Request,
-  res: Response,
+export type ALBContext = ALBEvent['requestContext'];
+export type APIGatewayV2Context = APIGatewayProxyEventV2['requestContext'];
+export type APIGatewayContext = APIGatewayEventRequestContext;
+
+export declare type RequestContext =
+  | APIGatewayContext
+  | APIGatewayV2Context
+  | ALBContext;
+
+export declare type Event =
+  | APIGatewayProxyEvent
+  | APIGatewayProxyEventV2
+  | ALBEvent;
+
+export declare type Middleware<
+  TResponse = any,
+  TContext extends RequestContext = APIGatewayContext,
+  TQuery extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TParams extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TBody = any
+> = (
+  req: Request<TContext, TQuery, TParams, TBody>,
+  res: Response<TResponse>,
   next: NextFunction
 ) => void;
-export declare type ErrorHandlingMiddleware = (
+
+export declare type ErrorHandlingMiddleware<
+  TResponse = any,
+  TContext extends RequestContext = APIGatewayContext,
+  TQuery extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TParams extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TBody = any
+> = (
   error: Error,
-  req: Request,
-  res: Response,
+  req: Request<TContext, TQuery, TParams, TBody>,
+  res: Response<TResponse>,
   next: NextFunction
 ) => void;
+
 export declare type ErrorCallback = (error?: Error) => void;
-export declare type HandlerFunction = (
-  req: Request,
-  res: Response,
-  next?: NextFunction
-) => void | any | Promise<any>;
+export declare type HandlerFunction<
+  TResponse = any,
+  TContext extends RequestContext = APIGatewayContext,
+  TQuery extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TParams extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TBody = any
+> = (
+  req: Request<TContext, TQuery, TParams, TBody>,
+  res: Response<TResponse>
+) => void | TResponse | Promise<TResponse>;
 
 export declare type LoggerFunction = (
   message?: any,
@@ -136,20 +188,27 @@ export declare interface Options {
   s3Config?: S3ClientConfig;
 }
 
-export declare class Request {
+export declare class Request<
+  TContext extends RequestContext = APIGatewayContext,
+  TQuery extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TParams extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TBody = any
+> {
   app: API;
   version: string;
   id: string;
-  params: {
-    [key: string]: string | undefined;
-  };
+  params: TParams;
   method: string;
   path: string;
-  query: {
-    [key: string]: string | undefined;
-  };
+  query: TQuery;
   multiValueQuery: {
-    [key: string]: string[] | undefined;
+    [K in keyof TQuery]: string[] | undefined;
   };
   headers: {
     [key: string]: string | undefined;
@@ -160,10 +219,10 @@ export declare class Request {
   rawHeaders?: {
     [key: string]: string | undefined;
   };
-  body: any;
+  body: TBody;
   rawBody: string;
   route: '';
-  requestContext: APIGatewayEventRequestContext;
+  requestContext: TContext;
   isBase64Encoded: boolean;
   pathParameters: { [name: string]: string } | null;
   stageVariables: { [name: string]: string } | null;
@@ -196,7 +255,7 @@ export declare class Request {
   [key: string]: any;
 }
 
-export declare class Response {
+export declare class Response<TResponse = any> {
   status(code: number): this;
 
   sendStatus(code: number): void;
@@ -219,13 +278,13 @@ export declare class Response {
     callback?: ErrorCallback
   ): Promise<string>;
 
-  send(body: any): void;
+  send(body: TResponse): void;
 
-  json(body: any): void;
+  json(body: TResponse): void;
 
-  jsonp(body: any): void;
+  jsonp(body: TResponse): void;
 
-  html(body: any): void;
+  html(body: string): void;
 
   type(type: string): this;
 
@@ -269,62 +328,237 @@ export declare class API {
   app(namespace: string, package: Package): App;
   app(packages: App): App;
 
-  get(
+  get<
+    TResponse = any,
+    TContext extends RequestContext = APIGatewayContext,
+    TQuery extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TParams extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TBody = any
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse, TContext, TQuery, TParams, TBody>
+      | HandlerFunction<TResponse, TContext, TQuery, TParams, TBody>
+    )[]
   ): void;
-  get(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  get<TResponse = any>(
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse>
+      | HandlerFunction<TResponse>
+    )[]
+  ): void;
 
-  post(
+  post<
+    TResponse = any,
+    TContext extends RequestContext = APIGatewayContext,
+    TQuery extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TParams extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TBody = any
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse, TContext, TQuery, TParams, TBody>
+      | HandlerFunction<TResponse, TContext, TQuery, TParams, TBody>
+    )[]
   ): void;
-  post(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  post<TResponse = any>(
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse>
+      | HandlerFunction<TResponse>
+    )[]
+  ): void;
 
-  put(
+  put<
+    TResponse = any,
+    TContext extends RequestContext = APIGatewayContext,
+    TQuery extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TParams extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TBody = any
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse, TContext, TQuery, TParams, TBody>
+      | HandlerFunction<TResponse, TContext, TQuery, TParams, TBody>
+    )[]
   ): void;
-  put(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  put<TResponse = any>(
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse>
+      | HandlerFunction<TResponse>
+    )[]
+  ): void;
 
-  patch(
+  patch<
+    TResponse = any,
+    TContext extends RequestContext = APIGatewayContext,
+    TQuery extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TParams extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TBody = any
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse, TContext, TQuery, TParams, TBody>
+      | HandlerFunction<TResponse, TContext, TQuery, TParams, TBody>
+    )[]
   ): void;
-  patch(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  patch<TResponse = any>(
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse>
+      | HandlerFunction<TResponse>
+    )[]
+  ): void;
 
-  delete(
+  delete<
+    TResponse = any,
+    TContext extends RequestContext = APIGatewayContext,
+    TQuery extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TParams extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TBody = any
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse, TContext, TQuery, TParams, TBody>
+      | HandlerFunction<TResponse, TContext, TQuery, TParams, TBody>
+    )[]
   ): void;
-  delete(...middlewaresAndHandler: HandlerFunction[]): void;
+  delete<TResponse = any>(
+    ...middlewaresAndHandler: HandlerFunction<TResponse>[]
+  ): void;
 
-  options(
+  options<
+    TResponse = any,
+    TContext extends RequestContext = APIGatewayContext,
+    TQuery extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TParams extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TBody = any
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse, TContext, TQuery, TParams, TBody>
+      | HandlerFunction<TResponse, TContext, TQuery, TParams, TBody>
+    )[]
   ): void;
-  options(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  options<TResponse = any>(
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse>
+      | HandlerFunction<TResponse>
+    )[]
+  ): void;
 
-  head(
+  head<
+    TResponse = any,
+    TContext extends RequestContext = APIGatewayContext,
+    TQuery extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TParams extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TBody = any
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse, TContext, TQuery, TParams, TBody>
+      | HandlerFunction<TResponse, TContext, TQuery, TParams, TBody>
+    )[]
   ): void;
-  head(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  head<TResponse = any>(
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse>
+      | HandlerFunction<TResponse>
+    )[]
+  ): void;
 
-  any(
+  any<
+    TResponse = any,
+    TContext extends RequestContext = APIGatewayContext,
+    TQuery extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TParams extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TBody = any
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse, TContext, TQuery, TParams, TBody>
+      | HandlerFunction<TResponse, TContext, TQuery, TParams, TBody>
+    )[]
   ): void;
-  any(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  any<TResponse = any>(
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse>
+      | HandlerFunction<TResponse>
+    )[]
+  ): void;
 
-  METHOD(
+  METHOD<
+    TResponse = any,
+    TContext extends RequestContext = APIGatewayContext,
+    TQuery extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TParams extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TBody = any
+  >(
     method: METHODS | METHODS[],
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse, TContext, TQuery, TParams, TBody>
+      | HandlerFunction<TResponse, TContext, TQuery, TParams, TBody>
+    )[]
   ): void;
-  METHOD(
+  METHOD<TResponse = any>(
     method: METHODS | METHODS[],
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse>
+      | HandlerFunction<TResponse>
+    )[]
   ): void;
 
   register(
@@ -336,21 +570,55 @@ export declare class API {
   routes(format: false): string[][];
   routes(): string[][];
 
-  use(path: string, ...middleware: Middleware[]): void;
-  use(paths: string[], ...middleware: Middleware[]): void;
-  use(...middleware: (Middleware | ErrorHandlingMiddleware)[]): void;
-
-  finally(callback: FinallyFunction): void;
-
-  run(
-    event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
-    context: Context,
-    cb: (err: Error, result: any) => void
+  use<
+    TResponse = any,
+    TContext extends RequestContext = APIGatewayContext,
+    TQuery extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TParams extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TBody = any
+  >(
+    path: string,
+    ...middleware: Middleware<TResponse, TContext, TQuery, TParams, TBody>[]
   ): void;
-  run(
-    event: APIGatewayProxyEvent | APIGatewayProxyEventV2,
-    context: Context
-  ): Promise<any>;
+  use<
+    TResponse = any,
+    TContext extends RequestContext = APIGatewayContext,
+    TQuery extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TParams extends Record<string, string | undefined> = Record<
+      string,
+      string | undefined
+    >,
+    TBody = any
+  >(
+    paths: string[],
+    ...middleware: Middleware<TResponse, TContext, TQuery, TParams, TBody>[]
+  ): void;
+  use<TResponse = any>(
+    ...middleware: (
+      | Middleware<TResponse>
+      | ErrorHandlingMiddleware<TResponse>
+    )[]
+  ): void;
+
+  finally<TResponse = any>(
+    callback: (req: Request, res: Response<TResponse>) => void
+  ): void;
+
+  run<TResponse = any>(
+    event: Event,
+    context: Context,
+    cb: (err: Error, result: TResponse) => void
+  ): void;
+  run<TResponse = any>(event: Event, context: Context): Promise<TResponse>;
 }
 
 export declare class RouteError extends Error {

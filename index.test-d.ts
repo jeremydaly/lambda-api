@@ -1,4 +1,4 @@
-import { expectType, expectError } from 'tsd';
+import { expectType } from 'tsd';
 import {
   API,
   Request,
@@ -17,6 +17,11 @@ import {
   ConfigurationError,
   ResponseError,
   FileError,
+  Event,
+  ALBContext,
+  APIGatewayV2Context,
+  APIGatewayContext,
+  RegisterOptions,
 } from './index';
 import {
   APIGatewayProxyEvent,
@@ -40,12 +45,71 @@ expectType<Options>(options);
 const req = {} as Request;
 expectType<string>(req.method);
 expectType<string>(req.path);
-expectType<{ [key: string]: string | undefined }>(req.params);
-expectType<{ [key: string]: string | undefined }>(req.query);
+expectType<Record<string, string | undefined>>(req.params);
+expectType<Record<string, string | undefined>>(req.query);
 expectType<{ [key: string]: string | undefined }>(req.headers);
 expectType<any>(req.body);
 expectType<{ [key: string]: string }>(req.cookies);
+expectType<APIGatewayContext>(req.requestContext);
 
+type ALBParams = { userId: string };
+type ALBQuery = { filter: string };
+type ALBBody = { data: string };
+
+const albReq = {} as Request<ALBContext, ALBQuery, ALBParams, ALBBody>;
+expectType<ALBContext>(albReq.requestContext);
+expectType<{ filter: string | undefined }>(albReq.query);
+expectType<{ userId: string | undefined }>(albReq.params);
+expectType<{ data: string }>(albReq.body);
+
+const typedMiddleware: Middleware<
+  UserResponse,
+  ALBContext,
+  ALBQuery,
+  ALBParams,
+  ALBBody
+> = (req, res, next) => {
+  expectType<ALBContext>(req.requestContext);
+  expectType<{ filter: string | undefined }>(req.query);
+  expectType<{ userId: string | undefined }>(req.params);
+  expectType<{ data: string }>(req.body);
+  next();
+};
+
+const typedHandler: HandlerFunction<
+  UserResponse,
+  ALBContext,
+  ALBQuery,
+  ALBParams,
+  ALBBody
+> = (req, res) => {
+  expectType<ALBContext>(req.requestContext);
+  expectType<{ filter: string | undefined }>(req.query);
+  expectType<{ userId: string | undefined }>(req.params);
+  expectType<{ data: string }>(req.body);
+  res.json({
+    id: '123',
+    name: 'John',
+    email: 'john@example.com',
+  });
+};
+
+type ApiGwV2Params = { id: string };
+type ApiGwV2Query = { page: string };
+type ApiGwV2Body = { name: string };
+
+const apiGwV2Req = {} as Request<
+  APIGatewayV2Context,
+  ApiGwV2Query,
+  ApiGwV2Params,
+  ApiGwV2Body
+>;
+expectType<APIGatewayV2Context>(apiGwV2Req.requestContext);
+expectType<{ page: string | undefined }>(apiGwV2Req.query);
+expectType<{ id: string | undefined }>(apiGwV2Req.params);
+expectType<{ name: string }>(apiGwV2Req.body);
+
+const api = new API();
 const apiGwV1Event: APIGatewayProxyEvent = {
   body: '{"test":"body"}',
   headers: { 'content-type': 'application/json' },
@@ -146,11 +210,83 @@ const context: Context = {
   succeed: () => {},
 };
 
-const api = new API();
 expectType<Promise<any>>(api.run(apiGwV1Event, context));
 expectType<Promise<any>>(api.run(apiGwV2Event, context));
-// @ts-expect-error ALB events are not supported
-expectType<void & Promise<any>>(api.run(albEvent, context));
+expectType<Promise<any>>(api.run(albEvent, context));
+
+expectType<Event>(apiGwV1Event);
+expectType<Event>(apiGwV2Event);
+expectType<Event>(albEvent);
+
+interface UserResponse {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface ErrorResponse {
+  code: number;
+  message: string;
+}
+
+interface UserParams extends Record<string, string | undefined> {
+  id: string;
+}
+
+interface UserQuery extends Record<string, string | undefined> {
+  fields: string;
+}
+
+interface UserBody {
+  name: string;
+  email: string;
+}
+
+const testApi = new API();
+
+const albHandler: HandlerFunction<
+  UserResponse,
+  ALBContext,
+  UserQuery,
+  UserParams,
+  UserBody
+> = (req, res) => {
+  const { id } = req.params;
+  const { fields } = req.query;
+  const { name, email } = req.body;
+  const { elb } = req.requestContext;
+
+  res.json({
+    id: id || 'new',
+    name,
+    email,
+  });
+};
+
+const apiGwV2Handler: HandlerFunction<UserResponse, APIGatewayV2Context> = (
+  req,
+  res
+) => {
+  const { requestContext } = req;
+  const { domainName, domainPrefix } = requestContext;
+
+  res.json({
+    id: req.params.id || '',
+    name: 'John',
+    email: 'john@example.com',
+  });
+};
+
+testApi.post('/users/:id', albHandler);
+testApi.get('/users/:id', apiGwV2Handler);
+
+expectType<Promise<UserResponse>>(
+  testApi.run<UserResponse>(apiGwV1Event, context)
+);
+
+testApi.run<UserResponse>(apiGwV1Event, context, (err, result) => {
+  expectType<UserResponse>(result);
+});
 
 const res = {} as Response;
 expectType<Response>(res.status(200));
@@ -172,21 +308,6 @@ expectType<void>(
 );
 
 expectType<void>(res.redirect('/new-path'));
-
-const middleware: Middleware = (req, res, next) => {
-  next();
-};
-expectType<Middleware>(middleware);
-
-const errorMiddleware: ErrorHandlingMiddleware = (error, req, res, next) => {
-  res.status(500).json({ error: error.message });
-};
-expectType<ErrorHandlingMiddleware>(errorMiddleware);
-
-const handler: HandlerFunction = (req, res) => {
-  res.json({ success: true });
-};
-expectType<HandlerFunction>(handler);
 
 const cookieOptions: CookieOptions = {
   domain: 'example.com',
@@ -255,3 +376,114 @@ const fileError = new FileError('File not found', {
   syscall: 'open',
 });
 expectType<FileError>(fileError);
+
+const defaultReq = {} as Request;
+expectType<APIGatewayContext>(defaultReq.requestContext);
+expectType<Record<string, string | undefined>>(defaultReq.query);
+expectType<Record<string, string | undefined>>(defaultReq.params);
+expectType<any>(defaultReq.body);
+
+const defaultMiddleware: Middleware = (req, res, next) => {
+  expectType<APIGatewayContext>(req.requestContext);
+  expectType<Record<string, string | undefined>>(req.query);
+  expectType<Record<string, string | undefined>>(req.params);
+  expectType<any>(req.body);
+  expectType<Response<any>>(res);
+  next();
+};
+
+const errorMiddleware: ErrorHandlingMiddleware<ErrorResponse> = (
+  error,
+  req,
+  res,
+  next
+) => {
+  expectType<APIGatewayContext>(req.requestContext);
+  expectType<Record<string, string | undefined>>(req.query);
+  expectType<Record<string, string | undefined>>(req.params);
+  expectType<any>(req.body);
+  expectType<Response<ErrorResponse>>(res);
+  res.status(500).json({ code: 500, message: error.message });
+  next();
+};
+
+const partialContextReq = {} as Request<ALBContext>;
+expectType<ALBContext>(partialContextReq.requestContext);
+expectType<Record<string, string | undefined>>(partialContextReq.query);
+expectType<Record<string, string | undefined>>(partialContextReq.params);
+expectType<any>(partialContextReq.body);
+
+const partialContextAndQueryReq = {} as Request<ALBContext, ALBQuery>;
+expectType<ALBContext>(partialContextAndQueryReq.requestContext);
+expectType<{ filter: string | undefined }>(partialContextAndQueryReq.query);
+expectType<Record<string, string | undefined>>(
+  partialContextAndQueryReq.params
+);
+expectType<any>(partialContextAndQueryReq.body);
+
+const stringResponse = {} as Response<string>;
+expectType<void>(stringResponse.json('test'));
+expectType<void>(stringResponse.send('test'));
+
+const numberResponse = {} as Response<number>;
+expectType<void>(numberResponse.json(42));
+expectType<void>(numberResponse.send(42));
+
+testApi.get<string>('/echo', (req, res) => res.send('hello'));
+
+testApi.post<number, APIGatewayContext>('/count', (req, res) => res.json(42));
+
+testApi.put<boolean, ALBContext, Record<string, string | undefined>>(
+  '/flag',
+  (req, res) => res.json(true)
+);
+
+testApi.use((req, res, next) => {
+  expectType<APIGatewayContext>(req.requestContext);
+  next();
+});
+
+testApi.use<UserResponse, ALBContext>('/users', (req, res, next) => {
+  expectType<ALBContext>(req.requestContext);
+  next();
+});
+
+testApi.use<UserResponse, ALBContext, UserQuery>(
+  ['/users', '/admin'],
+  (req, res, next) => {
+    expectType<ALBContext>(req.requestContext);
+    expectType<{ fields: string | undefined }>(req.query);
+    next();
+  }
+);
+
+testApi.finally<UserResponse>((req, res) => {
+  expectType<Request>(req);
+  expectType<Response<UserResponse>>(res);
+});
+
+testApi.METHOD<UserResponse>('GET', '/users', (req, res) => {
+  res.json({ id: '1', name: 'John', email: 'john@example.com' });
+});
+
+testApi.METHOD<UserResponse, ALBContext>(
+  ['GET', 'POST'],
+  '/users',
+  (req, res) => {
+    expectType<ALBContext>(req.requestContext);
+    res.json({ id: '1', name: 'John', email: 'john@example.com' });
+  }
+);
+
+testApi.register(
+  (api, options) => {
+    expectType<API>(api);
+    expectType<RegisterOptions | undefined>(options);
+  },
+  { prefix: '/api' }
+);
+
+const routesArray = testApi.routes(false);
+expectType<string[][]>(routesArray);
+
+testApi.routes(true);
