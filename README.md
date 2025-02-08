@@ -34,6 +34,84 @@ exports.handler = async (event, context) => {
 
 For a full tutorial see [How To: Build a Serverless API with Serverless, AWS Lambda and Lambda API](https://www.jeremydaly.com/build-serverless-api-serverless-aws-lambda-lambda-api/).
 
+## TypeScript Support
+
+Lambda API includes comprehensive TypeScript definitions out of the box. You can leverage type safety across your entire API:
+
+```typescript
+import { API, Request, Response } from 'lambda-api';
+
+// Define your response type
+interface UserResponse {
+  id: string;
+  name: string;
+  email: string;
+}
+
+// Create a typed API instance
+const api = new API();
+
+// Routes with type-safe request/response
+api.get<UserResponse>('/users/:id', (req, res) => {
+  res.json({
+    id: req.params.id,
+    name: 'John',
+    email: 'john@example.com'
+  });
+});
+
+// Middleware with type checking
+const authMiddleware: Middleware<UserResponse> = (req, res, next) => {
+  // TypeScript will ensure type safety
+  next();
+};
+
+// Full type support for complex scenarios
+interface UserQuery { fields: string }
+interface UserParams { id: string }
+interface UserBody { name: string; email: string }
+
+api.post<UserResponse, ALBContext, UserQuery, UserParams, UserBody>(
+  '/users',
+  (req, res) => {
+    // Full type safety for:
+    req.query.fields;     // UserQuery
+    req.params.id;        // UserParams
+    req.body.name;        // UserBody
+    req.requestContext;   // ALBContext
+    
+    res.json({
+      id: '1',
+      name: req.body.name,
+      email: req.body.email
+    });
+  }
+);
+
+// Error handling with types
+const errorHandler: ErrorHandlingMiddleware<UserResponse> = (
+  error,
+  req,
+  res,
+  next
+) => {
+  res.status(500).json({
+    id: 'error',
+    name: error.name,
+    email: error.message
+  });
+};
+```
+
+Key TypeScript Features:
+- Full type inference for request and response objects
+- Generic type parameters for response types
+- Support for API Gateway and ALB contexts
+- Type-safe query parameters, path parameters, and request body
+- Middleware and error handler type definitions
+- Automatic type inference for all HTTP methods
+- Type safety for cookies, headers, and other API features
+
 ## Why Another Web Framework?
 
 Express.js, Fastify, Koa, Restify, and Hapi are just a few of the many amazing web frameworks out there for Node.js. So why build yet another one when there are so many great options already? One word: **DEPENDENCIES**.
@@ -1478,33 +1556,6 @@ Simply create a `{proxy+}` route that uses the `ANY` method and all requests wil
 ## Reusing Persistent Connections
 
 If you are using persistent connections in your function routes (such as AWS RDS or Elasticache), be sure to set `context.callbackWaitsForEmptyEventLoop = false;` in your main handler. This will allow the freezing of connections and will prevent Lambda from hanging on open connections. See [here](https://www.jeremydaly.com/reuse-database-connections-aws-lambda/) for more information.
-
-## TypeScript Support
-
-An `index.d.ts` declaration file has been included for use with your TypeScript projects (thanks @hassankhan). Please feel free to make suggestions and contributions to keep this up-to-date with future releases.
-
-**TypeScript Example**
-
-```typescript
-// import AWS Lambda types
-import { APIGatewayEvent, Context } from 'aws-lambda';
-// import Lambda API default function
-import createAPI from 'lambda-api';
-
-// instantiate framework
-const api = createAPI();
-
-// Define a route
-api.get('/status', async (req, res) => {
-  return { status: 'ok' };
-});
-
-// Declare your Lambda handler
-exports.run = async (event: APIGatewayEvent, context: Context) => {
-  // Run the request
-  return await api.run(event, context);
-};
-```
 
 ## Contributions
 
