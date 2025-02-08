@@ -127,12 +127,25 @@ export type HandlerFunction<
 ) => void;
 
 export interface Options {
+  base?: string;
+  callbackName?: string;
   logger?: {
     level?: string;
     format?: string;
     [key: string]: any;
   };
-  [key: string]: any;
+  mimeTypes?: {
+    [key: string]: string;
+  };
+  serializer?: (data: any) => string;
+  version?: string;
+  errorHeaderWhitelist?: string[];
+  isBase64?: boolean;
+  compression?: boolean | string[];
+  headers?: {
+    [key: string]: string;
+  };
+  s3Config?: S3ClientConfig;
 }
 
 export declare class Request<
