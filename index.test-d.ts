@@ -509,8 +509,8 @@ const testErrorHandlingMiddleware: ErrorHandlingMiddleware = async (
 };
 
 const testDefaultTypes = () => {
-  api.get('/simple', (req, res) => {
-    expectType<Request>(req);
+  api.get('/simple', (req: Request<APIGatewayContext>, res: Response) => {
+    expectType<Request<APIGatewayContext>>(req);
     expectType<Response>(res);
     expectType<APIGatewayContext>(req.requestContext);
     expectType<Record<string, string | undefined>>(req.query);
@@ -519,58 +519,71 @@ const testDefaultTypes = () => {
     res.json({ message: 'ok' });
   });
 
-  const simpleMiddleware: Middleware = (req, res, next) => {
-    expectType<Request>(req);
+  const simpleMiddleware: Middleware = (
+    req: Request<APIGatewayContext>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    expectType<Request<APIGatewayContext>>(req);
     expectType<Response>(res);
     expectType<APIGatewayContext>(req.requestContext);
     next();
   };
 
   const simpleErrorHandler: ErrorHandlingMiddleware = (
-    error,
-    req,
-    res,
-    next
+    error: Error,
+    req: Request<APIGatewayContext>,
+    res: Response,
+    next: NextFunction
   ) => {
-    expectType<Request>(req);
+    expectType<Request<APIGatewayContext>>(req);
     expectType<Response>(res);
     expectType<APIGatewayContext>(req.requestContext);
     res.status(500).json({ error: error.message });
   };
 
-  api.post('/simple-chain', simpleMiddleware, (req, res) => {
-    expectType<Request>(req);
-    expectType<Response>(res);
-    res.json({ status: 'ok' });
-  });
+  api.post(
+    '/simple-chain',
+    simpleMiddleware,
+    (req: Request<APIGatewayContext>, res: Response) => {
+      expectType<Request<APIGatewayContext>>(req);
+      expectType<Response>(res);
+      res.json({ status: 'ok' });
+    }
+  );
 
-  api.use((req, res, next) => {
-    expectType<Request>(req);
-    expectType<Response>(res);
-    next();
-  });
+  api.use(
+    (req: Request<APIGatewayContext>, res: Response, next: NextFunction) => {
+      expectType<Request<APIGatewayContext>>(req);
+      expectType<Response>(res);
+      next();
+    }
+  );
 
-  api.use('/path', (req, res, next) => {
-    expectType<Request>(req);
-    expectType<Response>(res);
-    next();
-  });
+  api.use(
+    '/path',
+    (req: Request<APIGatewayContext>, res: Response, next: NextFunction) => {
+      expectType<Request<APIGatewayContext>>(req);
+      expectType<Response>(res);
+      next();
+    }
+  );
 
-  api.finally((req, res) => {
-    expectType<Request>(req);
+  api.finally((req: Request<APIGatewayContext>, res: Response) => {
+    expectType<Request<APIGatewayContext>>(req);
     expectType<Response>(res);
   });
 
   const runResult = api.run({} as APIGatewayProxyEvent, {} as Context);
   expectType<Promise<any>>(runResult);
 
-  api.run({} as APIGatewayProxyEvent, {} as Context, (err, res) => {
+  api.run({} as APIGatewayProxyEvent, {} as Context, (err: Error, res: any) => {
     expectType<Error>(err);
     expectType<any>(res);
   });
 
   const albApi = new API();
-  albApi.get('/alb-default', (req, res) => {
+  albApi.get('/alb-default', (req: Request<ALBContext>, res: Response) => {
     if (isAlbContext(req.requestContext)) {
       expectType<ALBContext>(req.requestContext);
       expectType<{ targetGroupArn: string }>(req.requestContext.elb);
@@ -585,16 +598,19 @@ const testDefaultTypes = () => {
   expectType<Promise<any>>(albResult);
 
   const apiGwV2Api = new API();
-  apiGwV2Api.get('/apigw-v2-default', (req, res) => {
-    if (isApiGatewayV2Context(req.requestContext)) {
-      expectType<APIGatewayV2Context>(req.requestContext);
-      expectType<string>(req.requestContext.accountId);
-      expectType<Record<string, string | undefined>>(req.query);
-      expectType<Record<string, string | undefined>>(req.params);
-      expectType<any>(req.body);
-      res.json({ message: 'API Gateway V2 response' });
+  apiGwV2Api.get(
+    '/apigw-v2-default',
+    (req: Request<APIGatewayV2Context>, res: Response) => {
+      if (isApiGatewayV2Context(req.requestContext)) {
+        expectType<APIGatewayV2Context>(req.requestContext);
+        expectType<string>(req.requestContext.accountId);
+        expectType<Record<string, string | undefined>>(req.query);
+        expectType<Record<string, string | undefined>>(req.params);
+        expectType<any>(req.body);
+        res.json({ message: 'API Gateway V2 response' });
+      }
     }
-  });
+  );
 
   const apiGwV2Result = apiGwV2Api.run(
     {} as APIGatewayProxyEventV2,
