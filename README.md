@@ -1,4 +1,4 @@
-[![Lambda API](https://www.jeremydaly.com/wp-content/uploads/2018/03/lambda-api-logo.svg)](https://serverless-api.com/)
+[![Lambda API](https://www.jeremydaly.com/images/uploads/2018/03/lambda-api-logo.png)](https://serverless-api.com/)
 
 [![Build Status](https://github.com/jeremydaly/lambda-api/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/jeremydaly/lambda-api/actions/workflows/build.yml)
 [![npm](https://img.shields.io/npm/v/lambda-api.svg)](https://www.npmjs.com/package/lambda-api)
