@@ -205,6 +205,7 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
 - [TypeScript Support](#typescript-support)
 - [Contributions](#contributions)
 - [Are you using Lambda API?](#are-you-using-lambda-api)
+- [Handling Multiple Request Sources](#handling-multiple-request-sources)
 
 ## Installation
 
@@ -1564,3 +1565,158 @@ Contributions, ideas and bug reports are welcome and greatly appreciated. Please
 ## Are you using Lambda API?
 
 If you're using Lambda API and finding it useful, hit me up on [Twitter](https://twitter.com/jeremy_daly) or email me at contact[at]jeremydaly.com. I'd love to hear your stories, ideas, and even your complaints!
+
+## Type-Safe Middleware and Extensions
+
+Lambda API provides full TypeScript support with type-safe middleware and request/response extensions. Here are the recommended patterns:
+
+### Extending Request and Response Types
+
+```typescript
+declare module 'lambda-api' {
+  interface Request {
+    user?: {
+      id: string;
+      roles: string[];
+      email: string;
+    };
+  }
+}
+
+function hasUser(req: Request): req is Request & { user: { id: string; roles: string[]; email: string; } } {
+  return 'user' in req && req.user !== undefined;
+}
+
+const authMiddleware: Middleware = (req, res, next) => {
+  req.user = {
+    id: '123',
+    roles: ['admin'],
+    email: 'user@example.com'
+  };
+  next();
+};
+
+api.get('/protected', (req, res) => {
+  if (hasUser(req)) {
+    const { id, roles, email } = req.user;
+    res.json({ message: `Hello ${email}` });
+  }
+});
+```
+
+### Response Extensions
+
+```typescript
+declare module 'lambda-api' {
+  interface Response {
+    sendWithTimestamp?: (data: any) => void;
+  }
+}
+
+const responseEnhancer: Middleware = (req, res, next) => {
+  res.sendWithTimestamp = (data: any) => {
+    res.json({
+      ...data,
+      timestamp: Date.now()
+    });
+  };
+  next();
+};
+
+api.get('/users', (req, res) => {
+  res.sendWithTimestamp({ name: 'John' });
+});
+```
+
+### Using Built-in Auth Property
+
+```typescript
+interface AuthInfo {
+  userId: string;
+  roles: string[];
+  type: 'Bearer' | 'Basic' | 'OAuth' | 'Digest' | 'none';
+  value: string | null;
+}
+
+function hasAuth(req: Request): req is Request & { auth: AuthInfo } {
+  return 'auth' in req && req.auth?.type !== undefined;
+}
+
+const authMiddleware: Middleware = (req, res, next) => {
+  req.auth = {
+    userId: '123',
+    roles: ['user'],
+    type: 'Bearer',
+    value: 'token123'
+  };
+  next();
+};
+```
+
+### Type Safety Examples
+
+```typescript
+function hasUser(req: Request): req is Request & { user: UserType } {
+  return 'user' in req && req.user !== undefined;
+}
+
+interface QueryParams {
+  limit?: string;
+  offset?: string;
+}
+
+api.get<UserResponse, APIGatewayContext, QueryParams>(
+  '/users',
+  (req, res) => {
+    const { limit, offset } = req.query;
+    res.json({ /* ... */ });
+  }
+);
+
+interface CreateUserBody {
+  name: string;
+  email: string;
+}
+
+api.post<UserResponse, APIGatewayContext, never, never, CreateUserBody>(
+  '/users',
+  (req, res) => {
+    const { name, email } = req.body;
+    res.json({ /* ... */ });
+  }
+);
+
+const withUser = <T>(handler: HandlerFunction<T>): HandlerFunction<T> => {
+  return (req, res) => {
+    if (!hasUser(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    return handler(req, res);
+  };
+};
+
+api.get('/protected', withUser(handler));
+```
+
+## Handling Multiple Request Sources
+
+```typescript
+import { isApiGatewayContext, isApiGatewayV2Context, isAlbContext } from 'lambda-api';
+
+api.get<Response, APIGatewayRequestContext>('/api-gateway', (req, res) => {
+  console.log(req.requestContext.identity);
+});
+
+api.get<Response, ALBRequestContext>('/alb', (req, res) => {
+  console.log(req.requestContext.elb);
+});
+
+api.get('/any', (req, res) => {
+  if (isApiGatewayContext(req.requestContext)) {
+    console.log(req.requestContext.identity);
+  } else if (isAlbContext(req.requestContext)) {
+    console.log(req.requestContext.elb);
+  }
+});
+```
+

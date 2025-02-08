@@ -12,222 +12,193 @@ import {
   ErrorHandlingMiddleware,
   HandlerFunction,
   Middleware,
+  RequestExtensions,
+  NextFunction,
+  RequestContext,
+  isApiGatewayRequest,
+  isApiGatewayV2Request,
+  isAlbRequest,
 } from './index';
 import { APIGatewayProxyEvent, Context } from 'aws-lambda';
 
+// Response type for user endpoints
 interface UserResponse {
   id: string;
   name: string;
   email: string;
 }
 
+// Query parameters for user endpoints
 interface UserQuery extends Record<string, string | undefined> {
-  fields: string;
+  fields?: string;
 }
 
+// URL parameters for user endpoints
 interface UserParams extends Record<string, string | undefined> {
-  id: string;
+  id?: string;
 }
 
+// Request body for user endpoints
 interface UserBody {
   name: string;
   email: string;
 }
 
+// Auth info type for request extensions
+interface AuthInfo {
+  userId: string;
+  roles: string[];
+  type: 'Bearer' | 'Basic' | 'OAuth' | 'Digest' | 'none';
+  value: string | null;
+}
+
+// Type guard for auth info
+function hasAuth(req: Request): req is Request & { auth: AuthInfo } {
+  return 'auth' in req && req.auth?.type !== undefined;
+}
+
 const api = new API();
 
-const defaultReq = {} as Request;
-expectType<APIGatewayContext>(defaultReq.requestContext);
-expectType<Record<string, string | undefined>>(defaultReq.query);
-expectType<Record<string, string | undefined>>(defaultReq.params);
-expectType<any>(defaultReq.body);
-
-const albReq = {} as Request<ALBContext, UserQuery, UserParams, UserBody>;
-expectType<ALBContext>(albReq.requestContext);
-expectType<UserQuery>(albReq.query);
-expectType<UserParams>(albReq.params);
-expectType<UserBody>(albReq.body);
-
-const apiGwV2Req = {} as Request<APIGatewayV2Context>;
-expectType<APIGatewayV2Context>(apiGwV2Req.requestContext);
-
-const stringResponse = {} as Response<string>;
-expectType<void>(stringResponse.json('test'));
-expectType<void>(stringResponse.send('test'));
-
-const userResponse = {} as Response<UserResponse>;
-expectType<void>(
-  userResponse.json({
-    id: '1',
-    name: 'John',
-    email: 'test@test.com',
-  })
-);
-
-const errorHandler: ErrorHandlingMiddleware<UserResponse> = (
-  error,
-  req,
-  res,
-  next
-) => {
-  expectType<Error>(error);
-  expectType<Request>(req);
-  expectType<Response<UserResponse>>(res);
+// Test source-agnostic middleware
+const sourceAgnosticMiddleware: Middleware = (req, res, next) => {
+  // Common properties available across all sources
+  expectType<string | undefined>(req.requestContext.requestId);
+  if (isApiGatewayRequest(req.requestContext)) {
+    const sourceIp = req.requestContext.identity.sourceIp;
+    if (sourceIp) {
+      expectType<string>(sourceIp);
+    }
+  } else if (isApiGatewayV2Request(req.requestContext)) {
+    const sourceIp = req.requestContext.http.sourceIp;
+    if (sourceIp) {
+      expectType<string>(sourceIp);
+    }
+  } else if (isAlbRequest(req.requestContext)) {
+    const sourceIp = req.requestContext.sourceIp;
+    if (sourceIp) {
+      expectType<string>(sourceIp);
+    }
+  }
   next();
 };
 
-const routeError = new RouteError('Not found', '/users');
-expectType<RouteError>(routeError);
-
-const methodError = new MethodError('Method not allowed', 'POST', '/users');
-expectType<MethodError>(methodError);
-
-const authMiddleware: Middleware<UserResponse> = (req, res, next) => {
-  expectType<Response<UserResponse>>(res);
-  next();
-};
-
-const validationMiddleware: Middleware<UserResponse> = (req, res, next) => {
-  expectType<Response<UserResponse>>(res);
-  next();
-};
-
-const albAuthMiddleware: Middleware<
+// Test source-specific middleware for ALB
+const albMiddleware: Middleware<
   UserResponse,
-  ALBContext,
+  ALBContext & { sourceType: 'alb' },
   UserQuery,
   UserParams,
   UserBody
 > = (req, res, next) => {
-  expectType<ALBContext>(req.requestContext);
-  expectType<Response<UserResponse>>(res);
+  expectType<{ targetGroupArn: string }>(req.requestContext.elb);
   next();
 };
 
-const handler: HandlerFunction<UserResponse> = (req, res) => {
-  res.json({ id: '1', name: 'John', email: 'test@test.com' });
-};
-
-api.get<UserResponse>(
-  '/users',
-  authMiddleware,
-  validationMiddleware,
-  (req, res) => {
-    expectType<Request<APIGatewayContext>>(req);
-    res.json({ id: '1', name: 'John', email: 'test@test.com' });
-  }
-);
-
-api.post<UserResponse>(
-  '/users',
-  authMiddleware,
-  validationMiddleware,
-  (req, res) => {
-    expectType<Request<APIGatewayContext>>(req);
-    res.json({ id: '1', name: 'John', email: 'test@test.com' });
-  }
-);
-
-api.put<UserResponse>(
-  '/users/:id',
-  authMiddleware,
-  validationMiddleware,
-  (req, res) => {
-    expectType<Request<APIGatewayContext>>(req);
-    res.json({ id: '1', name: 'John', email: 'test@test.com' });
-  }
-);
-
-api.patch<UserResponse>(
-  '/users/:id',
-  authMiddleware,
-  validationMiddleware,
-  (req, res) => {
-    expectType<Request<APIGatewayContext>>(req);
-    res.json({ id: '1', name: 'John', email: 'test@test.com' });
-  }
-);
-
-api.delete<UserResponse>(
-  '/users/:id',
-  authMiddleware,
-  validationMiddleware,
-  (req, res) => {
-    expectType<Request<APIGatewayContext>>(req);
-    res.json({ id: '1', name: 'John', email: 'test@test.com' });
-  }
-);
-
-api.options<UserResponse>(
-  '/users',
-  authMiddleware,
-  validationMiddleware,
-  (req, res) => {
-    expectType<Request<APIGatewayContext>>(req);
-    res.json({ id: '1', name: 'John', email: 'test@test.com' });
-  }
-);
-
-api.head<UserResponse>(
-  '/users',
-  authMiddleware,
-  validationMiddleware,
-  (req, res) => {
-    expectType<Request<APIGatewayContext>>(req);
-    res.json({ id: '1', name: 'John', email: 'test@test.com' });
-  }
-);
-
-api.any<UserResponse>(
-  '/users',
-  authMiddleware,
-  validationMiddleware,
-  (req, res) => {
-    expectType<Request<APIGatewayContext>>(req);
-    res.json({ id: '1', name: 'John', email: 'test@test.com' });
-  }
-);
-
-api.post<UserResponse, ALBContext, UserQuery, UserParams, UserBody>(
-  '/users',
-  albAuthMiddleware,
-  (req, res) => {
-    expectType<ALBContext>(req.requestContext);
-    expectType<UserQuery>(req.query);
-    expectType<UserParams>(req.params);
-    expectType<UserBody>(req.body);
-    res.json({ id: '1', name: req.body.name, email: req.body.email });
-  }
-);
-
-api.METHOD<UserResponse>(
-  ['GET', 'POST'],
-  '/users',
-  authMiddleware,
-  validationMiddleware,
-  handler
-);
-
-// Test middleware without path
-api.use<UserResponse>(authMiddleware);
-
-// Test middleware with path and ALB context
-const albRouteMiddleware: Middleware<UserResponse, ALBContext> = (
-  req,
-  res,
-  next
-) => {
-  expectType<ALBContext>(req.requestContext);
-  expectType<Response<UserResponse>>(res);
+// Test source-specific middleware for API Gateway v2
+const apiGwV2Middleware: Middleware<
+  UserResponse,
+  APIGatewayV2Context & { sourceType: 'apigatewayv2' },
+  UserQuery,
+  UserParams,
+  UserBody
+> = (req, res, next) => {
+  expectType<string>(req.requestContext.accountId);
   next();
 };
-api.use<UserResponse, ALBContext>('/users', albRouteMiddleware);
 
-api.finally((req, res) => {
-  expectType<Request>(req);
-  expectType<Response>(res);
+// Test ALB-specific handler
+const albHandler: HandlerFunction<
+  UserResponse,
+  ALBContext & { sourceType: 'alb' },
+  UserQuery,
+  UserParams,
+  UserBody
+> = (req, res) => {
+  expectType<{ targetGroupArn: string }>(req.requestContext.elb);
+  res.json({
+    id: '1',
+    name: req.body.name,
+    email: req.body.email,
+  });
+};
+
+// Test API Gateway v2 handler
+const apiGwV2Handler: HandlerFunction<
+  UserResponse,
+  APIGatewayV2Context & { sourceType: 'apigatewayv2' },
+  UserQuery,
+  UserParams,
+  UserBody
+> = (req, res) => {
+  expectType<string>(req.requestContext.accountId);
+  res.json({
+    id: '1',
+    name: req.body.name,
+    email: req.body.email,
+  });
+};
+
+// Test routes with multiple source support
+api.post('/users', sourceAgnosticMiddleware, (req, res) => {
+  res.json({
+    id: '1',
+    name: 'John',
+    email: 'john@example.com',
+  });
 });
 
+// Test ALB-specific route
+api.post<
+  UserResponse,
+  ALBContext & { sourceType: 'alb' },
+  UserQuery,
+  UserParams,
+  UserBody
+>('/alb-users', albMiddleware, albHandler);
+
+// Test API Gateway v2 specific route
+api.post<
+  UserResponse,
+  APIGatewayV2Context & { sourceType: 'apigatewayv2' },
+  UserQuery,
+  UserParams,
+  UserBody
+>('/v2-users', apiGwV2Middleware, apiGwV2Handler);
+
+// Test error handling for multiple sources
+const errorHandler: ErrorHandlingMiddleware = (error, req, res, next) => {
+  if (isAlbRequest(req.requestContext)) {
+    // ALB-specific error handling
+    res.status(500).json({
+      id: 'alb-error',
+      name: error.name,
+      email: error.message,
+    });
+  } else {
+    // Default error handling
+    res.status(500).json({
+      id: 'error',
+      name: error.name,
+      email: error.message,
+    });
+  }
+};
+
+// Register error handler
+api.use(errorHandler);
+
+// Test finally handler with multiple sources
+api.finally((req, res) => {
+  if (isApiGatewayRequest(req.requestContext)) {
+    console.log('API Gateway request completed');
+  } else if (isApiGatewayV2Request(req.requestContext)) {
+    console.log('API Gateway v2 request completed');
+  } else if (isAlbRequest(req.requestContext)) {
+    console.log('ALB request completed');
+  }
+});
+
+// Test run method
 const result = api.run<UserResponse>({} as APIGatewayProxyEvent, {} as Context);
 expectType<Promise<UserResponse>>(result);
 

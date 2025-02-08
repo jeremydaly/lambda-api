@@ -12,6 +12,7 @@ const LOGGER = require('./lib/logger');
 const S3 = () => require('./lib/s3-service');
 const prettyPrint = require('./lib/prettyPrint');
 const { ConfigurationError } = require('./lib/errors');
+const { isApiGatewayContext, isApiGatewayV2Context, isAlbContext } = require('./lib/typeguards');
 
 class API {
   constructor(props) {
@@ -42,8 +43,8 @@ class API {
         : {};
     this._compression =
       props &&
-      (typeof props.compression === 'boolean' ||
-        Array.isArray(props.compression))
+        (typeof props.compression === 'boolean' ||
+          Array.isArray(props.compression))
         ? props.compression
         : false;
 
@@ -84,7 +85,7 @@ class API {
     this._app = {};
 
     // Executed after the callback
-    this._finally = () => {};
+    this._finally = () => { };
 
     // Global error status (used for response parsing errors)
     this._errorStatus = 500;
@@ -213,8 +214,8 @@ class API {
               stack: _stack['m'][method]
                 ? _stack['m'][method].concat(stack)
                 : _stack['*'][method]
-                ? _stack['*'][method].concat(stack)
-                : stack,
+                  ? _stack['*'][method].concat(stack)
+                  : stack,
               // inherited: _stack[method] ? _stack[method] : [],
               route: '/' + parsedPath.join('/'),
               path: '/' + this._prefix.concat(parsedPath).join('/'),
@@ -450,8 +451,8 @@ class API {
       typeof args[0] === 'string'
         ? Array.of(args.shift())
         : Array.isArray(args[0])
-        ? args.shift()
-        : ['/*'];
+          ? args.shift()
+          : ['/*'];
 
     // Init middleware stack
     let middleware = [];
@@ -552,6 +553,10 @@ class API {
 } // end API class
 
 // Export the API class as a new instance
-module.exports = (opts) => new API(opts);
+module.exports = (options) => new API(options);
 // Add createAPI as default export (to match index.d.ts)
 module.exports.default = module.exports;
+
+module.exports.isApiGatewayContext = isApiGatewayContext;
+module.exports.isApiGatewayV2Context = isApiGatewayV2Context;
+module.exports.isAlbContext = isAlbContext;
