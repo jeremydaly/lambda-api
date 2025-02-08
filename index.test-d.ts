@@ -414,33 +414,6 @@ const handlerWithCustomProps: HandlerFunction<any, RequestContext> = (
   res.send({ status: 'ok' });
 };
 
-const testResponseMethods: HandlerFunction<any, RequestContext> = (
-  req,
-  res
-) => {
-  res.status(201);
-  res.header('X-Custom', 'value');
-  res.getHeader('X-Custom');
-  res.hasHeader('X-Custom');
-  res.removeHeader('X-Custom');
-  res.send({ data: 'raw' });
-  res.json({ data: 'json' });
-  res.html('<div>html</div>');
-  res.redirect('/new-location');
-  res.redirect(301, '/permanent-location');
-  res.type('json');
-  res.cookie('session', 'value', { httpOnly: true });
-  res.clearCookie('session');
-  res.cache(3600);
-  res.cache(true, true);
-  res.cors({
-    origin: '*',
-    methods: 'GET, POST',
-    headers: 'Content-Type',
-  });
-  res.error(400, 'Bad Request');
-};
-
 const testRequestProperties: HandlerFunction<any, RequestContext> = (
   req,
   res
@@ -469,13 +442,50 @@ const testRequestProperties: HandlerFunction<any, RequestContext> = (
   req.log.fatal('fatal message');
 };
 
+const testResponseMethods: HandlerFunction<any, RequestContext> = (
+  req,
+  res
+) => {
+  res
+    .status(201)
+    .header('X-Custom', 'value')
+    .type('json')
+    .cors({
+      origin: '*',
+      methods: 'GET, POST',
+      headers: 'Content-Type',
+    })
+    .cookie('session', 'value', { httpOnly: true })
+    .cache(3600)
+    .etag(true)
+    .modified(new Date());
+
+  expectType<string>(res.getHeader('X-Custom'));
+  expectType<{ [key: string]: string }>(res.getHeaders());
+  expectType<boolean>(res.hasHeader('X-Custom'));
+  res.removeHeader('X-Custom');
+
+  res.send({ data: 'raw' });
+  res.json({ data: 'json' });
+  res.jsonp({ data: 'jsonp' });
+  res.html('<div>html</div>');
+  res.sendStatus(204);
+
+  res.redirect('/new-location');
+  res.redirect(301, '/permanent-location');
+
+  res.clearCookie('session');
+
+  res.error(400, 'Bad Request');
+  res.error('Error message');
+};
+
 const testErrorHandlingMiddleware: ErrorHandlingMiddleware = async (
   error,
   req,
   res,
   next
 ) => {
-  // Test that we can return different types
   if (error.message === 'sync') {
     return { message: 'handled synchronously' };
   }

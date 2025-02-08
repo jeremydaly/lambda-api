@@ -278,8 +278,6 @@ export declare class Request<
 }
 
 export declare class Response<TResponse = any> {
-  app: API;
-
   status(code: number): this;
   sendStatus(code: number): void;
   header(key: string, value?: string | Array<string>, append?: boolean): this;
@@ -321,8 +319,6 @@ export declare class Response<TResponse = any> {
     options?: FileOptions,
     callback?: ErrorCallback
   ): Promise<void>;
-
-  [key: string]: any;
 }
 
 export declare class API {
