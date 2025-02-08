@@ -39,14 +39,14 @@ For a full tutorial see [How To: Build a Serverless API with Serverless, AWS Lam
 Lambda API includes comprehensive TypeScript definitions out of the box. You can leverage type safety across your entire API:
 
 ```typescript
-import { 
-  API, 
-  Request, 
+import {
+  API,
+  Request,
   Response,
   SourceAgnosticHandler,
   SourceAgnosticMiddleware,
   isApiGatewayContext,
-  isAlbContext
+  isAlbContext,
 } from 'lambda-api';
 
 // Define your response type
@@ -63,18 +63,18 @@ const api = new API();
 const handler: SourceAgnosticHandler<UserResponse> = (req, res) => {
   // Common properties are always available
   console.log(req.method, req.path);
-  
+
   // Type-safe access to source-specific features
   if (isApiGatewayContext(req.requestContext)) {
     console.log(req.requestContext.identity);
   } else if (isAlbContext(req.requestContext)) {
     console.log(req.requestContext.elb);
   }
-  
+
   res.json({
     id: '1',
     name: 'John',
-    email: 'john@example.com'
+    email: 'john@example.com',
   });
 };
 
@@ -89,29 +89,37 @@ const middleware: SourceAgnosticMiddleware = (req, res, next) => {
 api.get('/users', middleware, handler);
 
 // For source-specific handlers, you can specify the context type
-interface UserQuery { fields: string }
-interface UserParams { id: string }
-interface UserBody { name: string; email: string }
+interface UserQuery {
+  fields: string;
+}
+interface UserParams {
+  id: string;
+}
+interface UserBody {
+  name: string;
+  email: string;
+}
 
 api.post<UserResponse, APIGatewayContext, UserQuery, UserParams, UserBody>(
   '/users',
   (req, res) => {
     // Full type safety for:
-    req.query.fields;     // UserQuery
-    req.params.id;        // UserParams
-    req.body.name;        // UserBody
-    req.requestContext;   // APIGatewayContext
-    
+    req.query.fields; // UserQuery
+    req.params.id; // UserParams
+    req.body.name; // UserBody
+    req.requestContext; // APIGatewayContext
+
     res.json({
       id: '1',
       name: req.body.name,
-      email: req.body.email
+      email: req.body.email,
     });
   }
 );
 ```
 
 Key TypeScript Features:
+
 - Source-agnostic types that work with any Lambda trigger
 - Type guards for safe context type checking
 - Full type inference for request and response objects
@@ -127,13 +135,13 @@ Key TypeScript Features:
 Lambda API provides type guards to safely work with different request sources:
 
 ```typescript
-import { 
+import {
   isApiGatewayContext,
-  isApiGatewayV2Context, 
+  isApiGatewayV2Context,
   isAlbContext,
   isApiGatewayRequest,
   isApiGatewayV2Request,
-  isAlbRequest
+  isAlbRequest,
 } from 'lambda-api';
 
 // Check request context type
@@ -154,11 +162,11 @@ if (isApiGatewayRequest(req)) {
 Lambda API provides type-safe support for different AWS Lambda triggers. You can write source-specific handlers or use source-agnostic handlers that work with any trigger:
 
 ```typescript
-import { 
-  isApiGatewayContext, 
-  isApiGatewayV2Context, 
+import {
+  isApiGatewayContext,
+  isApiGatewayV2Context,
   isAlbContext,
-  SourceAgnosticHandler 
+  SourceAgnosticHandler,
 } from 'lambda-api';
 
 // Source-specific handler
@@ -177,7 +185,7 @@ const handler: SourceAgnosticHandler = (req, res) => {
   } else if (isAlbContext(req.requestContext)) {
     console.log(req.requestContext.elb);
   }
-  
+
   res.json({ status: 'ok' });
 };
 
@@ -185,6 +193,7 @@ api.get('/any', handler);
 ```
 
 Key features for handling multiple sources:
+
 - Type guards for safe context type checking
 - Source-agnostic types that work with any trigger
 - Full type safety for source-specific properties
@@ -1661,7 +1670,9 @@ declare module 'lambda-api' {
   }
 }
 
-function hasUser(req: Request): req is Request & { user: { id: string; roles: string[]; email: string; } } {
+function hasUser(
+  req: Request
+): req is Request & { user: { id: string; roles: string[]; email: string } } {
   return 'user' in req && req.user !== undefined;
 }
 
@@ -1669,7 +1680,7 @@ const authMiddleware: Middleware = (req, res, next) => {
   req.user = {
     id: '123',
     roles: ['admin'],
-    email: 'user@example.com'
+    email: 'user@example.com',
   };
   next();
 };
@@ -1695,7 +1706,7 @@ const responseEnhancer: Middleware = (req, res, next) => {
   res.sendWithTimestamp = (data: any) => {
     res.json({
       ...data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   };
   next();
@@ -1725,7 +1736,7 @@ const authMiddleware: Middleware = (req, res, next) => {
     userId: '123',
     roles: ['user'],
     type: 'Bearer',
-    value: 'token123'
+    value: 'token123',
   };
   next();
 };
@@ -1743,13 +1754,12 @@ interface QueryParams {
   offset?: string;
 }
 
-api.get<UserResponse, APIGatewayContext, QueryParams>(
-  '/users',
-  (req, res) => {
-    const { limit, offset } = req.query;
-    res.json({ /* ... */ });
-  }
-);
+api.get<UserResponse, APIGatewayContext, QueryParams>('/users', (req, res) => {
+  const { limit, offset } = req.query;
+  res.json({
+    /* ... */
+  });
+});
 
 interface CreateUserBody {
   name: string;
@@ -1760,7 +1770,9 @@ api.post<UserResponse, APIGatewayContext, never, never, CreateUserBody>(
   '/users',
   (req, res) => {
     const { name, email } = req.body;
-    res.json({ /* ... */ });
+    res.json({
+      /* ... */
+    });
   }
 );
 
@@ -1779,7 +1791,11 @@ api.get('/protected', withUser(handler));
 ## Handling Multiple Request Sources
 
 ```typescript
-import { isApiGatewayContext, isApiGatewayV2Context, isAlbContext } from 'lambda-api';
+import {
+  isApiGatewayContext,
+  isApiGatewayV2Context,
+  isAlbContext,
+} from 'lambda-api';
 
 api.get<Response, APIGatewayRequestContext>('/api-gateway', (req, res) => {
   console.log(req.requestContext.identity);
@@ -1797,4 +1813,3 @@ api.get('/any', (req, res) => {
   }
 });
 ```
-
