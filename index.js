@@ -12,6 +12,11 @@ const LOGGER = require('./lib/logger');
 const S3 = () => require('./lib/s3-service');
 const prettyPrint = require('./lib/prettyPrint');
 const { ConfigurationError } = require('./lib/errors');
+const {
+  isApiGatewayContext,
+  isApiGatewayV2Context,
+  isAlbContext,
+} = require('./lib/typeguards');
 
 class API {
   constructor(props) {
@@ -552,6 +557,10 @@ class API {
 } // end API class
 
 // Export the API class as a new instance
-module.exports = (opts) => new API(opts);
+module.exports = (options) => new API(options);
 // Add createAPI as default export (to match index.d.ts)
 module.exports.default = module.exports;
+
+module.exports.isApiGatewayContext = isApiGatewayContext;
+module.exports.isApiGatewayV2Context = isApiGatewayV2Context;
+module.exports.isAlbContext = isAlbContext;

@@ -34,6 +34,171 @@ exports.handler = async (event, context) => {
 
 For a full tutorial see [How To: Build a Serverless API with Serverless, AWS Lambda and Lambda API](https://www.jeremydaly.com/build-serverless-api-serverless-aws-lambda-lambda-api/).
 
+## TypeScript Support
+
+Lambda API includes comprehensive TypeScript definitions out of the box. You can leverage type safety across your entire API:
+
+```typescript
+import {
+  API,
+  Request,
+  Response,
+  SourceAgnosticHandler,
+  SourceAgnosticMiddleware,
+  isApiGatewayContext,
+  isAlbContext,
+} from 'lambda-api';
+
+// Define your response type
+interface UserResponse {
+  id: string;
+  name: string;
+  email: string;
+}
+
+// Create a typed API instance
+const api = new API();
+
+// Source-agnostic handler that works with any Lambda trigger
+const handler: SourceAgnosticHandler<UserResponse> = (req, res) => {
+  // Common properties are always available
+  console.log(req.method, req.path);
+
+  // Type-safe access to source-specific features
+  if (isApiGatewayContext(req.requestContext)) {
+    console.log(req.requestContext.identity);
+  } else if (isAlbContext(req.requestContext)) {
+    console.log(req.requestContext.elb);
+  }
+
+  res.json({
+    id: '1',
+    name: 'John',
+    email: 'john@example.com',
+  });
+};
+
+// Source-agnostic middleware
+const middleware: SourceAgnosticMiddleware = (req, res, next) => {
+  // Works with any Lambda trigger
+  console.log(`${req.method} ${req.path}`);
+  next();
+};
+
+// Use with API methods
+api.get('/users', middleware, handler);
+
+// For source-specific handlers, you can specify the context type
+interface UserQuery {
+  fields: string;
+}
+interface UserParams {
+  id: string;
+}
+interface UserBody {
+  name: string;
+  email: string;
+}
+
+api.post<UserResponse, APIGatewayContext, UserQuery, UserParams, UserBody>(
+  '/users',
+  (req, res) => {
+    // Full type safety for:
+    req.query.fields; // UserQuery
+    req.params.id; // UserParams
+    req.body.name; // UserBody
+    req.requestContext; // APIGatewayContext
+
+    res.json({
+      id: '1',
+      name: req.body.name,
+      email: req.body.email,
+    });
+  }
+);
+```
+
+Key TypeScript Features:
+
+- Source-agnostic types that work with any Lambda trigger
+- Type guards for safe context type checking
+- Full type inference for request and response objects
+- Generic type parameters for response types
+- Support for API Gateway and ALB contexts
+- Type-safe query parameters, path parameters, and request body
+- Middleware and error handler type definitions
+- Automatic type inference for all HTTP methods
+- Type safety for cookies, headers, and other API features
+
+## Type Guards
+
+Lambda API provides type guards to safely work with different request sources:
+
+```typescript
+import {
+  isApiGatewayContext,
+  isApiGatewayV2Context,
+  isAlbContext,
+  isApiGatewayRequest,
+  isApiGatewayV2Request,
+  isAlbRequest,
+} from 'lambda-api';
+
+// Check request context type
+if (isApiGatewayContext(req.requestContext)) {
+  // TypeScript knows this is APIGatewayContext
+  console.log(req.requestContext.identity);
+}
+
+// Check entire request type
+if (isApiGatewayRequest(req)) {
+  // TypeScript knows this is Request<APIGatewayContext>
+  console.log(req.requestContext.identity);
+}
+```
+
+## Handling Multiple Request Sources
+
+Lambda API provides type-safe support for different AWS Lambda triggers. You can write source-specific handlers or use source-agnostic handlers that work with any trigger:
+
+```typescript
+import {
+  isApiGatewayContext,
+  isApiGatewayV2Context,
+  isAlbContext,
+  SourceAgnosticHandler,
+} from 'lambda-api';
+
+// Source-specific handler
+api.get<Response, APIGatewayContext>('/api-gateway', (req, res) => {
+  console.log(req.requestContext.identity);
+});
+
+api.get<Response, ALBContext>('/alb', (req, res) => {
+  console.log(req.requestContext.elb);
+});
+
+// Source-agnostic handler (works with any trigger)
+const handler: SourceAgnosticHandler = (req, res) => {
+  if (isApiGatewayContext(req.requestContext)) {
+    console.log(req.requestContext.identity);
+  } else if (isAlbContext(req.requestContext)) {
+    console.log(req.requestContext.elb);
+  }
+
+  res.json({ status: 'ok' });
+};
+
+api.get('/any', handler);
+```
+
+Key features for handling multiple sources:
+
+- Type guards for safe context type checking
+- Source-agnostic types that work with any trigger
+- Full type safety for source-specific properties
+- Automatic payload format detection
+
 ## Why Another Web Framework?
 
 Express.js, Fastify, Koa, Restify, and Hapi are just a few of the many amazing web frameworks out there for Node.js. So why build yet another one when there are so many great options already? One word: **DEPENDENCIES**.
@@ -127,6 +292,7 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
 - [TypeScript Support](#typescript-support)
 - [Contributions](#contributions)
 - [Are you using Lambda API?](#are-you-using-lambda-api)
+- [Handling Multiple Request Sources](#handling-multiple-request-sources)
 
 ## Installation
 
@@ -1463,7 +1629,7 @@ Lambda API automatically parses this information to create a normalized `REQUEST
 
 ## ALB Integration
 
-AWS recently added support for Lambda functions as targets for Application Load Balancers. While the events from ALBs are similar to API Gateway, there are a number of differences that would require code changes based on implementation. Lambda API detects the event `interface` and automatically normalizes the `REQUEST` object. It also correctly formats the `RESPONSE` (supporting both multi-header and non-multi-header mode) for you. This allows you to call your Lambda function from API Gateway, ALB, or both, without requiring any code changes.
+AWS supports Lambda functions as targets for Application Load Balancers. While the events from ALBs are similar to API Gateway, there are a number of differences that would require code changes based on implementation. Lambda API detects the event `interface` and automatically normalizes the `REQUEST` object. It also correctly formats the `RESPONSE` (supporting both multi-header and non-multi-header mode) for you. This allows you to call your Lambda function from API Gateway, ALB, or both, without requiring any code changes.
 
 Please note that ALB events do not contain all of the same headers as API Gateway (such as `clientType`), but Lambda API provides defaults for seamless integration between the interfaces. ALB also automatically enables binary support, giving you the ability to serve images and other binary file types. Lambda API reads the `path` parameter supplied by the ALB event and uses that to route your requests. If you specify a wildcard in your listener rule, then all matching paths will be forwarded to your Lambda function. Lambda API's routing system can be used to process these routes just like with API Gateway. This includes static paths, parameterized paths, wildcards, middleware, etc.
 
@@ -1479,33 +1645,6 @@ Simply create a `{proxy+}` route that uses the `ANY` method and all requests wil
 
 If you are using persistent connections in your function routes (such as AWS RDS or Elasticache), be sure to set `context.callbackWaitsForEmptyEventLoop = false;` in your main handler. This will allow the freezing of connections and will prevent Lambda from hanging on open connections. See [here](https://www.jeremydaly.com/reuse-database-connections-aws-lambda/) for more information.
 
-## TypeScript Support
-
-An `index.d.ts` declaration file has been included for use with your TypeScript projects (thanks @hassankhan). Please feel free to make suggestions and contributions to keep this up-to-date with future releases.
-
-**TypeScript Example**
-
-```typescript
-// import AWS Lambda types
-import { APIGatewayEvent, Context } from 'aws-lambda';
-// import Lambda API default function
-import createAPI from 'lambda-api';
-
-// instantiate framework
-const api = createAPI();
-
-// Define a route
-api.get('/status', async (req, res) => {
-  return { status: 'ok' };
-});
-
-// Declare your Lambda handler
-exports.run = async (event: APIGatewayEvent, context: Context) => {
-  // Run the request
-  return await api.run(event, context);
-};
-```
-
 ## Contributions
 
 Contributions, ideas and bug reports are welcome and greatly appreciated. Please add [issues](https://github.com/jeremydaly/lambda-api/issues) for suggestions and bug reports or create a pull request.
@@ -1513,3 +1652,164 @@ Contributions, ideas and bug reports are welcome and greatly appreciated. Please
 ## Are you using Lambda API?
 
 If you're using Lambda API and finding it useful, hit me up on [Twitter](https://twitter.com/jeremy_daly) or email me at contact[at]jeremydaly.com. I'd love to hear your stories, ideas, and even your complaints!
+
+## Type-Safe Middleware and Extensions
+
+Lambda API provides full TypeScript support with type-safe middleware and request/response extensions. Here are the recommended patterns:
+
+### Extending Request and Response Types
+
+```typescript
+declare module 'lambda-api' {
+  interface Request {
+    user?: {
+      id: string;
+      roles: string[];
+      email: string;
+    };
+  }
+}
+
+function hasUser(
+  req: Request
+): req is Request & { user: { id: string; roles: string[]; email: string } } {
+  return 'user' in req && req.user !== undefined;
+}
+
+const authMiddleware: Middleware = (req, res, next) => {
+  req.user = {
+    id: '123',
+    roles: ['admin'],
+    email: 'user@example.com',
+  };
+  next();
+};
+
+api.get('/protected', (req, res) => {
+  if (hasUser(req)) {
+    const { id, roles, email } = req.user;
+    res.json({ message: `Hello ${email}` });
+  }
+});
+```
+
+### Response Extensions
+
+```typescript
+declare module 'lambda-api' {
+  interface Response {
+    sendWithTimestamp?: (data: any) => void;
+  }
+}
+
+const responseEnhancer: Middleware = (req, res, next) => {
+  res.sendWithTimestamp = (data: any) => {
+    res.json({
+      ...data,
+      timestamp: Date.now(),
+    });
+  };
+  next();
+};
+
+api.get('/users', (req, res) => {
+  res.sendWithTimestamp({ name: 'John' });
+});
+```
+
+### Using Built-in Auth Property
+
+```typescript
+interface AuthInfo {
+  userId: string;
+  roles: string[];
+  type: 'Bearer' | 'Basic' | 'OAuth' | 'Digest' | 'none';
+  value: string | null;
+}
+
+function hasAuth(req: Request): req is Request & { auth: AuthInfo } {
+  return 'auth' in req && req.auth?.type !== undefined;
+}
+
+const authMiddleware: Middleware = (req, res, next) => {
+  req.auth = {
+    userId: '123',
+    roles: ['user'],
+    type: 'Bearer',
+    value: 'token123',
+  };
+  next();
+};
+```
+
+### Type Safety Examples
+
+```typescript
+function hasUser(req: Request): req is Request & { user: UserType } {
+  return 'user' in req && req.user !== undefined;
+}
+
+interface QueryParams {
+  limit?: string;
+  offset?: string;
+}
+
+api.get<UserResponse, APIGatewayContext, QueryParams>('/users', (req, res) => {
+  const { limit, offset } = req.query;
+  res.json({
+    /* ... */
+  });
+});
+
+interface CreateUserBody {
+  name: string;
+  email: string;
+}
+
+api.post<UserResponse, APIGatewayContext, never, never, CreateUserBody>(
+  '/users',
+  (req, res) => {
+    const { name, email } = req.body;
+    res.json({
+      /* ... */
+    });
+  }
+);
+
+const withUser = <T>(handler: HandlerFunction<T>): HandlerFunction<T> => {
+  return (req, res) => {
+    if (!hasUser(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    return handler(req, res);
+  };
+};
+
+api.get('/protected', withUser(handler));
+```
+
+## Handling Multiple Request Sources
+
+```typescript
+import {
+  isApiGatewayContext,
+  isApiGatewayV2Context,
+  isAlbContext,
+} from 'lambda-api';
+
+api.get<Response, APIGatewayRequestContext>('/api-gateway', (req, res) => {
+  console.log(req.requestContext.identity);
+});
+
+api.get<Response, ALBRequestContext>('/alb', (req, res) => {
+  console.log(req.requestContext.elb);
+});
+
+api.get('/any', (req, res) => {
+  if (isApiGatewayContext(req.requestContext)) {
+    console.log(req.requestContext.identity);
+  } else if (isAlbContext(req.requestContext)) {
+    console.log(req.requestContext.elb);
+  }
+});
+```
