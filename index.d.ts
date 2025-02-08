@@ -105,7 +105,8 @@ export type METHODS =
   | 'PATCH'
   | 'DELETE'
   | 'HEAD'
-  | 'OPTIONS';
+  | 'OPTIONS'
+  | 'ANY';
 
 export type LoggerFunction = (message: string, ...args: any[]) => void;
 
@@ -126,14 +127,44 @@ export type HandlerFunction<
   res: Response<TResponse>
 ) => void;
 
+export type TimestampFunction = () => string;
+
+export declare interface SamplingOptions {
+  route?: string;
+  target?: number;
+  rate?: number;
+  period?: number;
+  method?: string | string[];
+}
+
+export declare interface LoggerOptions {
+  access?: boolean | string;
+  customKey?: string;
+  errorLogging?: boolean;
+  detail?: boolean;
+  level?: string;
+  levels?: {
+    [key: string]: string;
+  };
+  messageKey?: string;
+  nested?: boolean;
+  timestamp?: boolean | TimestampFunction;
+  sampling?: {
+    target?: number;
+    rate?: number;
+    period?: number;
+    rules?: SamplingOptions[];
+  };
+  serializers?: {
+    [name: string]: (prop: any) => any;
+  };
+  stack?: boolean;
+}
+
 export interface Options {
   base?: string;
   callbackName?: string;
-  logger?: {
-    level?: string;
-    format?: string;
-    [key: string]: any;
-  };
+  logger?: boolean | LoggerOptions;
   mimeTypes?: {
     [key: string]: string;
   };
