@@ -22,6 +22,9 @@ import {
   isApiGatewayV2Event,
   isAlbEvent,
   App,
+  SourceAgnosticMiddleware,
+  SourceAgnosticHandler,
+  SourceAgnosticErrorHandler,
 } from './index';
 import {
   APIGatewayProxyEvent,
@@ -99,11 +102,7 @@ const testEventTypeGuards = () => {
   }
 };
 
-const sourceAgnosticMiddleware: Middleware<any, RequestContext> = (
-  req,
-  res,
-  next
-) => {
+const sourceAgnosticMiddleware: SourceAgnosticMiddleware = (req, res, next) => {
   if (isApiGatewayContext(req.requestContext)) {
     expectType<string>(req.requestContext.requestId);
     const sourceIp = req.requestContext.identity.sourceIp;
@@ -190,7 +189,7 @@ const testRequestTypeGuards = () => {
   }
 };
 
-const sourceAgnosticHandler: HandlerFunction<UserResponse, RequestContext> = (
+const sourceAgnosticHandler: SourceAgnosticHandler<UserResponse> = (
   req,
   res
 ) => {
@@ -613,4 +612,54 @@ const testDefaultTypes = () => {
     {} as Context
   );
   expectType<Promise<any>>(apiGwV2Result);
+};
+
+const testSourceAgnosticTypes = () => {
+  // Test source-agnostic handler with minimal type parameters
+  const simpleSourceAgnosticHandler: SourceAgnosticHandler = (req, res) => {
+    expectType<RequestContext>(req.requestContext);
+    res.json({ message: 'ok' });
+  };
+
+  // Test source-agnostic handler with response type
+  const typedSourceAgnosticHandler: SourceAgnosticHandler<UserResponse> = (
+    req,
+    res
+  ) => {
+    res.json({
+      id: '1',
+      name: 'John',
+      email: 'john@example.com',
+    });
+  };
+
+  // Test source-agnostic middleware with minimal type parameters
+  const simpleSourceAgnosticMiddleware: SourceAgnosticMiddleware = (
+    req,
+    res,
+    next
+  ) => {
+    expectType<RequestContext>(req.requestContext);
+    next();
+  };
+
+  // Test source-agnostic error handler
+  const sourceAgnosticErrorHandler: SourceAgnosticErrorHandler = (
+    error,
+    req,
+    res,
+    next
+  ) => {
+    expectType<RequestContext>(req.requestContext);
+    res.status(500).json({ error: error.message });
+  };
+
+  // Test using source-agnostic types with API
+  api.get('/source-agnostic', simpleSourceAgnosticHandler);
+  api.post(
+    '/source-agnostic',
+    simpleSourceAgnosticMiddleware,
+    typedSourceAgnosticHandler
+  );
+  api.use(sourceAgnosticErrorHandler);
 };

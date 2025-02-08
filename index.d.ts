@@ -653,3 +653,66 @@ export declare function isAlbRequest<
 >(
   req: Request<any, TQuery, TParams, TBody>
 ): req is Request<ALBContext, TQuery, TParams, TBody>;
+
+/**
+ * Source-agnostic request type that works with any AWS Lambda trigger
+ */
+export type SourceAgnosticRequest<
+  TQuery extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TParams extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TBody = any
+> = Request<RequestContext, TQuery, TParams, TBody>;
+
+/**
+ * Source-agnostic middleware type that works with any AWS Lambda trigger
+ */
+export type SourceAgnosticMiddleware<
+  TResponse = any,
+  TQuery extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TParams extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TBody = any
+> = Middleware<TResponse, RequestContext, TQuery, TParams, TBody>;
+
+/**
+ * Source-agnostic handler function type that works with any AWS Lambda trigger
+ */
+export type SourceAgnosticHandler<
+  TResponse = any,
+  TQuery extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TParams extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TBody = any
+> = HandlerFunction<TResponse, RequestContext, TQuery, TParams, TBody>;
+
+/**
+ * Source-agnostic error handling middleware type that works with any AWS Lambda trigger
+ */
+export type SourceAgnosticErrorHandler<
+  TResponse = any,
+  TQuery extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TParams extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TBody = any
+> = ErrorHandlingMiddleware<TResponse, RequestContext, TQuery, TParams, TBody>;
