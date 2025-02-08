@@ -1,4 +1,5 @@
 import { expectType } from 'tsd';
+
 import {
   API,
   Request,
@@ -12,39 +13,44 @@ import {
   ErrorHandlingMiddleware,
   HandlerFunction,
   Middleware,
-  RequestExtensions,
   NextFunction,
   RequestContext,
+  isApiGatewayContext,
+  isApiGatewayV2Context,
+  isAlbContext,
   isApiGatewayRequest,
   isApiGatewayV2Request,
   isAlbRequest,
+  isApiGatewayEvent,
+  isApiGatewayV2Event,
+  isAlbEvent,
 } from './index';
-import { APIGatewayProxyEvent, Context } from 'aws-lambda';
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyEventV2,
+  ALBEvent,
+  Context,
+} from 'aws-lambda';
 
-// Response type for user endpoints
 interface UserResponse {
   id: string;
   name: string;
   email: string;
 }
 
-// Query parameters for user endpoints
 interface UserQuery extends Record<string, string | undefined> {
   fields?: string;
 }
 
-// URL parameters for user endpoints
 interface UserParams extends Record<string, string | undefined> {
   id?: string;
 }
 
-// Request body for user endpoints
 interface UserBody {
   name: string;
   email: string;
 }
 
-// Auth info type for request extensions
 interface AuthInfo {
   userId: string;
   roles: string[];
@@ -52,40 +58,75 @@ interface AuthInfo {
   value: string | null;
 }
 
-// Type guard for auth info
 function hasAuth(req: Request): req is Request & { auth: AuthInfo } {
   return 'auth' in req && req.auth?.type !== undefined;
 }
 
 const api = new API();
 
-// Test source-agnostic middleware
-const sourceAgnosticMiddleware: Middleware = (req, res, next) => {
-  // Common properties available across all sources
-  expectType<string | undefined>(req.requestContext.requestId);
-  if (isApiGatewayRequest(req.requestContext)) {
+const testContextTypeGuards = () => {
+  const apiGatewayContext: APIGatewayContext = {} as APIGatewayContext;
+  const apiGatewayV2Context: APIGatewayV2Context = {} as APIGatewayV2Context;
+  const albContext: ALBContext = {} as ALBContext;
+
+  if (isApiGatewayContext(apiGatewayContext)) {
+    expectType<APIGatewayContext>(apiGatewayContext);
+  }
+
+  if (isApiGatewayV2Context(apiGatewayV2Context)) {
+    expectType<APIGatewayV2Context>(apiGatewayV2Context);
+  }
+
+  if (isAlbContext(albContext)) {
+    expectType<ALBContext>(albContext);
+  }
+};
+
+const testEventTypeGuards = () => {
+  const apiGatewayEvent: APIGatewayProxyEvent = {} as APIGatewayProxyEvent;
+  const apiGatewayV2Event: APIGatewayProxyEventV2 =
+    {} as APIGatewayProxyEventV2;
+  const albEvent: ALBEvent = {} as ALBEvent;
+
+  if (isApiGatewayEvent(apiGatewayEvent)) {
+    expectType<APIGatewayProxyEvent>(apiGatewayEvent);
+  }
+
+  if (isApiGatewayV2Event(apiGatewayV2Event)) {
+    expectType<APIGatewayProxyEventV2>(apiGatewayV2Event);
+  }
+
+  if (isAlbEvent(albEvent)) {
+    expectType<ALBEvent>(albEvent);
+  }
+};
+
+const sourceAgnosticMiddleware: Middleware<any, RequestContext> = (
+  req,
+  res,
+  next
+) => {
+  if (isApiGatewayContext(req.requestContext)) {
+    expectType<string>(req.requestContext.requestId);
     const sourceIp = req.requestContext.identity.sourceIp;
     if (sourceIp) {
       expectType<string>(sourceIp);
     }
-  } else if (isApiGatewayV2Request(req.requestContext)) {
+  } else if (isApiGatewayV2Context(req.requestContext)) {
+    expectType<string>(req.requestContext.requestId);
     const sourceIp = req.requestContext.http.sourceIp;
     if (sourceIp) {
       expectType<string>(sourceIp);
     }
-  } else if (isAlbRequest(req.requestContext)) {
-    const sourceIp = req.requestContext.sourceIp;
-    if (sourceIp) {
-      expectType<string>(sourceIp);
-    }
+  } else if (isAlbContext(req.requestContext)) {
+    expectType<{ targetGroupArn: string }>(req.requestContext.elb);
   }
   next();
 };
 
-// Test source-specific middleware for ALB
 const albMiddleware: Middleware<
   UserResponse,
-  ALBContext & { sourceType: 'alb' },
+  ALBContext,
   UserQuery,
   UserParams,
   UserBody
@@ -94,10 +135,9 @@ const albMiddleware: Middleware<
   next();
 };
 
-// Test source-specific middleware for API Gateway v2
 const apiGwV2Middleware: Middleware<
   UserResponse,
-  APIGatewayV2Context & { sourceType: 'apigatewayv2' },
+  APIGatewayV2Context,
   UserQuery,
   UserParams,
   UserBody
@@ -106,10 +146,9 @@ const apiGwV2Middleware: Middleware<
   next();
 };
 
-// Test ALB-specific handler
 const albHandler: HandlerFunction<
   UserResponse,
-  ALBContext & { sourceType: 'alb' },
+  ALBContext,
   UserQuery,
   UserParams,
   UserBody
@@ -122,10 +161,9 @@ const albHandler: HandlerFunction<
   });
 };
 
-// Test API Gateway v2 handler
 const apiGwV2Handler: HandlerFunction<
   UserResponse,
-  APIGatewayV2Context & { sourceType: 'apigatewayv2' },
+  APIGatewayV2Context,
   UserQuery,
   UserParams,
   UserBody
@@ -138,44 +176,97 @@ const apiGwV2Handler: HandlerFunction<
   });
 };
 
-// Test routes with multiple source support
-api.post('/users', sourceAgnosticMiddleware, (req, res) => {
-  res.json({
-    id: '1',
-    name: 'John',
-    email: 'john@example.com',
-  });
-});
+const testRequestTypeGuards = () => {
+  const req = {} as Request<RequestContext>;
 
-// Test ALB-specific route
-api.post<
-  UserResponse,
-  ALBContext & { sourceType: 'alb' },
-  UserQuery,
-  UserParams,
-  UserBody
->('/alb-users', albMiddleware, albHandler);
+  if (isApiGatewayRequest(req)) {
+    expectType<Request<APIGatewayContext>>(req);
+  }
 
-// Test API Gateway v2 specific route
-api.post<
-  UserResponse,
-  APIGatewayV2Context & { sourceType: 'apigatewayv2' },
-  UserQuery,
-  UserParams,
-  UserBody
->('/v2-users', apiGwV2Middleware, apiGwV2Handler);
+  if (isApiGatewayV2Request(req)) {
+    expectType<Request<APIGatewayV2Context>>(req);
+  }
 
-// Test error handling for multiple sources
+  if (isAlbRequest(req)) {
+    expectType<Request<ALBContext>>(req);
+  }
+};
+
+const sourceAgnosticHandler: HandlerFunction<UserResponse, RequestContext> = (
+  req,
+  res
+) => {
+  expectType<string>(req.method);
+  expectType<string>(req.path);
+  expectType<Record<string, string | undefined>>(req.query);
+  expectType<Record<string, string | undefined>>(req.headers);
+  expectType<string>(req.ip);
+
+  if (isApiGatewayContext(req.requestContext)) {
+    expectType<string>(req.requestContext.requestId);
+    expectType<string>(req.requestContext.identity.sourceIp);
+    res.json({
+      id: req.requestContext.requestId,
+      name: 'API Gateway User',
+      email: 'user@apigateway.com',
+    });
+  } else if (isApiGatewayV2Context(req.requestContext)) {
+    expectType<string>(req.requestContext.requestId);
+    expectType<string>(req.requestContext.http.sourceIp);
+    res.json({
+      id: req.requestContext.requestId,
+      name: 'API Gateway V2 User',
+      email: 'user@apigatewayv2.com',
+    });
+  } else if (isAlbContext(req.requestContext)) {
+    expectType<{ targetGroupArn: string }>(req.requestContext.elb);
+    res.json({
+      id: req.requestContext.elb.targetGroupArn,
+      name: 'ALB User',
+      email: 'user@alb.com',
+    });
+  }
+};
+
+api.get<UserResponse>('/source-agnostic', sourceAgnosticHandler);
+api.post<UserResponse>(
+  '/source-agnostic',
+  sourceAgnosticMiddleware,
+  sourceAgnosticHandler
+);
+
+api.post<UserResponse, RequestContext>(
+  '/users',
+  sourceAgnosticMiddleware,
+  (req: Request<RequestContext>, res: Response<UserResponse>) => {
+    res.json({
+      id: '1',
+      name: 'John',
+      email: 'john@example.com',
+    });
+  }
+);
+
+api.post<UserResponse, ALBContext, UserQuery, UserParams, UserBody>(
+  '/alb-users',
+  albMiddleware,
+  albHandler
+);
+
+api.post<UserResponse, APIGatewayV2Context, UserQuery, UserParams, UserBody>(
+  '/v2-users',
+  apiGwV2Middleware,
+  apiGwV2Handler
+);
+
 const errorHandler: ErrorHandlingMiddleware = (error, req, res, next) => {
-  if (isAlbRequest(req.requestContext)) {
-    // ALB-specific error handling
+  if (isAlbContext(req.requestContext)) {
     res.status(500).json({
       id: 'alb-error',
       name: error.name,
       email: error.message,
     });
   } else {
-    // Default error handling
     res.status(500).json({
       id: 'error',
       name: error.name,
@@ -184,21 +275,18 @@ const errorHandler: ErrorHandlingMiddleware = (error, req, res, next) => {
   }
 };
 
-// Register error handler
 api.use(errorHandler);
 
-// Test finally handler with multiple sources
 api.finally((req, res) => {
-  if (isApiGatewayRequest(req.requestContext)) {
+  if (isApiGatewayContext(req.requestContext)) {
     console.log('API Gateway request completed');
-  } else if (isApiGatewayV2Request(req.requestContext)) {
+  } else if (isApiGatewayV2Context(req.requestContext)) {
     console.log('API Gateway v2 request completed');
-  } else if (isAlbRequest(req.requestContext)) {
+  } else if (isAlbContext(req.requestContext)) {
     console.log('ALB request completed');
   }
 });
 
-// Test run method
 const result = api.run<UserResponse>({} as APIGatewayProxyEvent, {} as Context);
 expectType<Promise<UserResponse>>(result);
 
@@ -206,3 +294,172 @@ api.run<UserResponse>({} as APIGatewayProxyEvent, {} as Context, (err, res) => {
   expectType<Error>(err);
   expectType<UserResponse>(res);
 });
+
+const testHttpMethods = () => {
+  api.get<UserResponse, APIGatewayContext, UserQuery, UserParams>(
+    '/users/:id',
+    (
+      req: Request<APIGatewayContext, UserQuery, UserParams>,
+      res: Response<UserResponse>
+    ) => {
+      expectType<string | undefined>(req.params.id);
+      res.json({ id: '1', name: 'John', email: 'test@example.com' });
+    }
+  );
+
+  api.put<UserResponse, APIGatewayContext, UserQuery, UserParams, UserBody>(
+    '/users/:id',
+    (
+      req: Request<APIGatewayContext, UserQuery, UserParams, UserBody>,
+      res: Response<UserResponse>
+    ) => {
+      expectType<UserBody>(req.body);
+      res
+        .status(200)
+        .json({ id: '1', name: req.body.name, email: req.body.email });
+    }
+  );
+
+  api.patch<
+    UserResponse,
+    APIGatewayContext,
+    UserQuery,
+    UserParams,
+    Partial<UserBody>
+  >(
+    '/users/:id',
+    (
+      req: Request<APIGatewayContext, UserQuery, UserParams, Partial<UserBody>>,
+      res: Response<UserResponse>
+    ) => {
+      expectType<Partial<UserBody>>(req.body);
+      res.json({ id: '1', name: 'John', email: 'test@example.com' });
+    }
+  );
+
+  api.delete<void, APIGatewayContext>(
+    '/users/:id',
+    (req: Request<APIGatewayContext>, res: Response<void>) => {
+      res.status(204).send();
+    }
+  );
+
+  api.head<void, APIGatewayContext>(
+    '/users',
+    (req: Request<APIGatewayContext>, res: Response<void>) => {
+      res.status(200).send();
+    }
+  );
+
+  api.options<void, APIGatewayContext>(
+    '/users',
+    (req: Request<APIGatewayContext>, res: Response<void>) => {
+      res.header('Allow', 'GET, POST, PUT, DELETE').status(204).send();
+    }
+  );
+
+  api.any<{ method: string }, APIGatewayContext>(
+    '/wildcard',
+    (req: Request<APIGatewayContext>, res: Response<{ method: string }>) => {
+      expectType<string>(req.method);
+      res.send({ method: req.method });
+    }
+  );
+};
+
+const pathSpecificMiddleware: Middleware<any, RequestContext> = (
+  req,
+  res,
+  next
+) => {
+  req.log.info('Path-specific middleware');
+  next();
+};
+
+api.use('/specific-path', pathSpecificMiddleware);
+api.use(['/path1', '/path2'], pathSpecificMiddleware);
+
+interface RequestWithCustom1 extends Request<RequestContext> {
+  custom1: string;
+}
+
+interface RequestWithCustom2 extends Request<RequestContext> {
+  custom2: string;
+}
+
+const middleware1: Middleware<any, RequestContext> = (req, res, next) => {
+  (req as RequestWithCustom1).custom1 = 'value1';
+  next();
+};
+
+const middleware2: Middleware<any, RequestContext> = (req, res, next) => {
+  (req as RequestWithCustom2).custom2 = 'value2';
+  next();
+};
+
+api.use(middleware1, middleware2);
+
+const handlerWithCustomProps: HandlerFunction<any, RequestContext> = (
+  req,
+  res
+) => {
+  if ('custom1' in req) {
+    expectType<string>((req as RequestWithCustom1).custom1);
+  }
+  if ('custom2' in req) {
+    expectType<string>((req as RequestWithCustom2).custom2);
+  }
+  res.send({ status: 'ok' });
+};
+
+const testResponseMethods: HandlerFunction<any, RequestContext> = (
+  req,
+  res
+) => {
+  res.status(201);
+  res.header('X-Custom', 'value');
+  res.getHeader('X-Custom');
+  res.hasHeader('X-Custom');
+  res.removeHeader('X-Custom');
+  res.send({ data: 'raw' });
+  res.json({ data: 'json' });
+  res.html('<div>html</div>');
+  res.redirect('/new-location');
+  res.redirect(301, '/permanent-location');
+  res.type('json');
+  res.cookie('session', 'value', { httpOnly: true });
+  res.clearCookie('session');
+  res.cache(3600);
+  res.cache(true, true);
+  res.cors({
+    origin: '*',
+    methods: 'GET, POST',
+    headers: 'Content-Type',
+  });
+  res.error(400, 'Bad Request');
+};
+
+const testRequestProperties: HandlerFunction<any, RequestContext> = (
+  req,
+  res
+) => {
+  expectType<string>(req.id);
+  expectType<string>(req.method);
+  expectType<string>(req.path);
+  expectType<Record<string, string | undefined>>(req.query);
+  expectType<Record<string, string | undefined>>(req.headers);
+  expectType<string>(req.ip);
+  expectType<string>(req.userAgent);
+  expectType<'desktop' | 'mobile' | 'tv' | 'tablet' | 'unknown'>(
+    req.clientType
+  );
+  expectType<string>(req.clientCountry);
+  expectType<boolean>(req.coldStart);
+  expectType<number>(req.requestCount);
+  req.log.trace('trace message');
+  req.log.debug('debug message');
+  req.log.info('info message');
+  req.log.warn('warn message');
+  req.log.error('error message');
+  req.log.fatal('fatal message');
+};

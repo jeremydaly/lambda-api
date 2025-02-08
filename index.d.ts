@@ -528,3 +528,55 @@ export declare function isApiGatewayV2Context(
 export declare function isAlbContext(
   context: RequestContext
 ): context is ALBContext;
+
+export declare function isApiGatewayEvent(
+  event: Event
+): event is APIGatewayProxyEvent;
+
+export declare function isApiGatewayV2Event(
+  event: Event
+): event is APIGatewayProxyEventV2;
+
+export declare function isAlbEvent(event: Event): event is ALBEvent;
+
+export declare function isApiGatewayRequest<
+  TQuery extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TParams extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TBody = any
+>(
+  req: Request<any, TQuery, TParams, TBody>
+): req is Request<APIGatewayContext, TQuery, TParams, TBody>;
+
+export declare function isApiGatewayV2Request<
+  TQuery extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TParams extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TBody = any
+>(
+  req: Request<any, TQuery, TParams, TBody>
+): req is Request<APIGatewayV2Context, TQuery, TParams, TBody>;
+
+export declare function isAlbRequest<
+  TQuery extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TParams extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+  TBody = any
+>(
+  req: Request<any, TQuery, TParams, TBody>
+): req is Request<ALBContext, TQuery, TParams, TBody>;
