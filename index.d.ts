@@ -452,7 +452,10 @@ export declare class API {
     )[]
   ): void;
   delete<TResponse = any>(
-    ...middlewaresAndHandler: HandlerFunction<TResponse>[]
+    ...middlewaresAndHandler: (
+      | Middleware<TResponse>
+      | HandlerFunction<TResponse>
+    )[]
   ): void;
 
   options<

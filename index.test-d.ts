@@ -82,48 +82,137 @@ expectType<RouteError>(routeError);
 const methodError = new MethodError('Method not allowed', 'POST', '/users');
 expectType<MethodError>(methodError);
 
-const getHandler: HandlerFunction<UserResponse> = (req, res) => {
-  res.json({ id: '1', name: 'John', email: 'test@test.com' });
+const authMiddleware: Middleware<UserResponse> = (req, res, next) => {
+  expectType<Response<UserResponse>>(res);
+  next();
 };
-api.METHOD<UserResponse>('GET', '/users', getHandler);
 
-const multiHandler: HandlerFunction<UserResponse> = (req, res) => {
-  res.json({ id: '1', name: 'John', email: 'test@test.com' });
+const validationMiddleware: Middleware<UserResponse> = (req, res, next) => {
+  expectType<Response<UserResponse>>(res);
+  next();
 };
-api.METHOD<UserResponse>(['GET', 'POST'], '/users', multiHandler);
 
-const getUserHandler: HandlerFunction<UserResponse> = (req, res) => {
-  expectType<Request<APIGatewayContext>>(req);
-  expectType<APIGatewayContext>(req.requestContext);
-  res.json({ id: '1', name: 'John', email: 'test@test.com' });
-};
-api.get<UserResponse>('/users', getUserHandler);
-
-const postUserHandler: HandlerFunction<
+const albAuthMiddleware: Middleware<
   UserResponse,
   ALBContext,
   UserQuery,
   UserParams,
   UserBody
-> = (req, res) => {
+> = (req, res, next) => {
   expectType<ALBContext>(req.requestContext);
-  expectType<UserQuery>(req.query);
-  expectType<UserParams>(req.params);
-  expectType<UserBody>(req.body);
-  res.json({ id: '1', name: req.body.name, email: req.body.email });
-};
-api.post<UserResponse, ALBContext, UserQuery, UserParams, UserBody>(
-  '/users',
-  postUserHandler
-);
-
-const userMiddleware: Middleware<UserResponse> = (req, res, next) => {
   expectType<Response<UserResponse>>(res);
   next();
 };
-api.use<UserResponse>(userMiddleware);
 
-const albMiddleware: Middleware<UserResponse, ALBContext> = (
+const handler: HandlerFunction<UserResponse> = (req, res) => {
+  res.json({ id: '1', name: 'John', email: 'test@test.com' });
+};
+
+api.get<UserResponse>(
+  '/users',
+  authMiddleware,
+  validationMiddleware,
+  (req, res) => {
+    expectType<Request<APIGatewayContext>>(req);
+    res.json({ id: '1', name: 'John', email: 'test@test.com' });
+  }
+);
+
+api.post<UserResponse>(
+  '/users',
+  authMiddleware,
+  validationMiddleware,
+  (req, res) => {
+    expectType<Request<APIGatewayContext>>(req);
+    res.json({ id: '1', name: 'John', email: 'test@test.com' });
+  }
+);
+
+api.put<UserResponse>(
+  '/users/:id',
+  authMiddleware,
+  validationMiddleware,
+  (req, res) => {
+    expectType<Request<APIGatewayContext>>(req);
+    res.json({ id: '1', name: 'John', email: 'test@test.com' });
+  }
+);
+
+api.patch<UserResponse>(
+  '/users/:id',
+  authMiddleware,
+  validationMiddleware,
+  (req, res) => {
+    expectType<Request<APIGatewayContext>>(req);
+    res.json({ id: '1', name: 'John', email: 'test@test.com' });
+  }
+);
+
+api.delete<UserResponse>(
+  '/users/:id',
+  authMiddleware,
+  validationMiddleware,
+  (req, res) => {
+    expectType<Request<APIGatewayContext>>(req);
+    res.json({ id: '1', name: 'John', email: 'test@test.com' });
+  }
+);
+
+api.options<UserResponse>(
+  '/users',
+  authMiddleware,
+  validationMiddleware,
+  (req, res) => {
+    expectType<Request<APIGatewayContext>>(req);
+    res.json({ id: '1', name: 'John', email: 'test@test.com' });
+  }
+);
+
+api.head<UserResponse>(
+  '/users',
+  authMiddleware,
+  validationMiddleware,
+  (req, res) => {
+    expectType<Request<APIGatewayContext>>(req);
+    res.json({ id: '1', name: 'John', email: 'test@test.com' });
+  }
+);
+
+api.any<UserResponse>(
+  '/users',
+  authMiddleware,
+  validationMiddleware,
+  (req, res) => {
+    expectType<Request<APIGatewayContext>>(req);
+    res.json({ id: '1', name: 'John', email: 'test@test.com' });
+  }
+);
+
+api.post<UserResponse, ALBContext, UserQuery, UserParams, UserBody>(
+  '/users',
+  albAuthMiddleware,
+  (req, res) => {
+    expectType<ALBContext>(req.requestContext);
+    expectType<UserQuery>(req.query);
+    expectType<UserParams>(req.params);
+    expectType<UserBody>(req.body);
+    res.json({ id: '1', name: req.body.name, email: req.body.email });
+  }
+);
+
+api.METHOD<UserResponse>(
+  ['GET', 'POST'],
+  '/users',
+  authMiddleware,
+  validationMiddleware,
+  handler
+);
+
+// Test middleware without path
+api.use<UserResponse>(authMiddleware);
+
+// Test middleware with path and ALB context
+const albRouteMiddleware: Middleware<UserResponse, ALBContext> = (
   req,
   res,
   next
@@ -132,13 +221,12 @@ const albMiddleware: Middleware<UserResponse, ALBContext> = (
   expectType<Response<UserResponse>>(res);
   next();
 };
-api.use<UserResponse, ALBContext>('/users', albMiddleware);
+api.use<UserResponse, ALBContext>('/users', albRouteMiddleware);
 
-const finallyHandler: HandlerFunction = (req, res) => {
+api.finally((req, res) => {
   expectType<Request>(req);
   expectType<Response>(res);
-};
-api.finally(finallyHandler);
+});
 
 const result = api.run<UserResponse>({} as APIGatewayProxyEvent, {} as Context);
 expectType<Promise<UserResponse>>(result);
