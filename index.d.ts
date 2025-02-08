@@ -92,11 +92,25 @@ export declare type ErrorHandlingMiddleware<
   >,
   TBody = any
 > = (
+  /**
+   * The error that was thrown or passed to res.error()
+   */
   error: Error,
+  /**
+   * The request object
+   */
   req: Request<TContext, TQuery, TParams, TBody>,
+  /**
+   * The response object. Call res.send() or return a value to send a response.
+   * The error will continue through the error middleware chain until a response is sent.
+   */
   res: Response<TResponse>,
+  /**
+   * Call next() to continue to the next error middleware.
+   * Note: next(error) is not supported - the error parameter will be ignored.
+   */
   next: NextFunction
-) => void;
+) => void | Promise<void | TResponse> | TResponse;
 
 export type METHODS =
   | 'GET'
@@ -142,23 +156,32 @@ export declare interface LoggerOptions {
   customKey?: string;
   errorLogging?: boolean;
   detail?: boolean;
-  level?: string;
+  level?: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | 'none';
   levels?: {
-    [key: string]: string;
+    [key: string]: number;
   };
   messageKey?: string;
   nested?: boolean;
   timestamp?: boolean | TimestampFunction;
-  sampling?: {
-    target?: number;
-    rate?: number;
-    period?: number;
-    rules?: SamplingOptions[];
-  };
+  sampling?:
+    | boolean
+    | {
+        target?: number;
+        rate?: number;
+        period?: number;
+        rules?: SamplingOptions[];
+      };
   serializers?: {
-    [name: string]: (prop: any) => any;
+    main?: (req: Request) => object;
+    req?: (req: Request) => object;
+    res?: (res: Response) => object;
+    context?: (context: Context) => object;
+    custom?: (custom: any) => object;
   };
   stack?: boolean;
+  timer?: boolean;
+  multiValue?: boolean;
+  log?: (message: string) => void;
 }
 
 export interface Options {
@@ -214,7 +237,7 @@ export declare class Request<
   };
   body: TBody;
   rawBody: string;
-  route: '';
+  route: string;
   requestContext: TContext;
   isBase64Encoded: boolean;
   pathParameters: { [name: string]: string } | null;
@@ -235,6 +258,12 @@ export declare class Request<
   clientType: 'desktop' | 'mobile' | 'tv' | 'tablet' | 'unknown';
   clientCountry: string;
   namespace: App;
+  /**
+   * Alias for namespace
+   */
+  ns: App;
+  interface: 'apigateway' | 'alb';
+  payloadVersion?: string;
 
   log: {
     trace: LoggerFunction;
@@ -249,6 +278,8 @@ export declare class Request<
 }
 
 export declare class Response<TResponse = any> {
+  app: API;
+
   status(code: number): this;
   sendStatus(code: number): void;
   header(key: string, value?: string | Array<string>, append?: boolean): this;

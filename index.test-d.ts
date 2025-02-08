@@ -24,6 +24,8 @@ import {
   isApiGatewayEvent,
   isApiGatewayV2Event,
   isAlbEvent,
+  App,
+  SerializerFunction,
 } from './index';
 import {
   APIGatewayProxyEvent,
@@ -456,10 +458,42 @@ const testRequestProperties: HandlerFunction<any, RequestContext> = (
   expectType<string>(req.clientCountry);
   expectType<boolean>(req.coldStart);
   expectType<number>(req.requestCount);
+  expectType<'apigateway' | 'alb'>(req.interface);
+  expectType<string | undefined>(req.payloadVersion);
+  expectType<App>(req.ns);
   req.log.trace('trace message');
   req.log.debug('debug message');
   req.log.info('info message');
   req.log.warn('warn message');
   req.log.error('error message');
   req.log.fatal('fatal message');
+};
+
+const testErrorHandlingMiddleware: ErrorHandlingMiddleware = async (
+  error,
+  req,
+  res,
+  next
+) => {
+  // Test that we can return different types
+  if (error.message === 'sync') {
+    return { message: 'handled synchronously' };
+  }
+
+  if (error.message === 'async') {
+    return Promise.resolve({ message: 'handled asynchronously' });
+  }
+
+  if (error.message === 'void') {
+    res.json({ message: 'handled with void' });
+    return;
+  }
+
+  if (error.message === 'promise-void') {
+    await Promise.resolve();
+    res.json({ message: 'handled with promise void' });
+    return;
+  }
+
+  next();
 };
