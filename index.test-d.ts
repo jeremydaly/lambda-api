@@ -4,12 +4,9 @@ import {
   API,
   Request,
   Response,
-  RouteError,
-  MethodError,
   ALBContext,
   APIGatewayV2Context,
   APIGatewayContext,
-  METHODS,
   ErrorHandlingMiddleware,
   HandlerFunction,
   Middleware,
@@ -25,7 +22,6 @@ import {
   isApiGatewayV2Event,
   isAlbEvent,
   App,
-  SerializerFunction,
 } from './index';
 import {
   APIGatewayProxyEvent,
