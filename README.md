@@ -39,7 +39,15 @@ For a full tutorial see [How To: Build a Serverless API with Serverless, AWS Lam
 Lambda API includes comprehensive TypeScript definitions out of the box. You can leverage type safety across your entire API:
 
 ```typescript
-import { API, Request, Response } from 'lambda-api';
+import { 
+  API, 
+  Request, 
+  Response,
+  SourceAgnosticHandler,
+  SourceAgnosticMiddleware,
+  isApiGatewayContext,
+  isAlbContext
+} from 'lambda-api';
 
 // Define your response type
 interface UserResponse {
@@ -51,34 +59,48 @@ interface UserResponse {
 // Create a typed API instance
 const api = new API();
 
-// Routes with type-safe request/response
-api.get<UserResponse>('/users/:id', (req, res) => {
+// Source-agnostic handler that works with any Lambda trigger
+const handler: SourceAgnosticHandler<UserResponse> = (req, res) => {
+  // Common properties are always available
+  console.log(req.method, req.path);
+  
+  // Type-safe access to source-specific features
+  if (isApiGatewayContext(req.requestContext)) {
+    console.log(req.requestContext.identity);
+  } else if (isAlbContext(req.requestContext)) {
+    console.log(req.requestContext.elb);
+  }
+  
   res.json({
-    id: req.params.id,
+    id: '1',
     name: 'John',
     email: 'john@example.com'
   });
-});
+};
 
-// Middleware with type checking
-const authMiddleware: Middleware<UserResponse> = (req, res, next) => {
-  // TypeScript will ensure type safety
+// Source-agnostic middleware
+const middleware: SourceAgnosticMiddleware = (req, res, next) => {
+  // Works with any Lambda trigger
+  console.log(`${req.method} ${req.path}`);
   next();
 };
 
-// Full type support for complex scenarios
+// Use with API methods
+api.get('/users', middleware, handler);
+
+// For source-specific handlers, you can specify the context type
 interface UserQuery { fields: string }
 interface UserParams { id: string }
 interface UserBody { name: string; email: string }
 
-api.post<UserResponse, ALBContext, UserQuery, UserParams, UserBody>(
+api.post<UserResponse, APIGatewayContext, UserQuery, UserParams, UserBody>(
   '/users',
   (req, res) => {
     // Full type safety for:
     req.query.fields;     // UserQuery
     req.params.id;        // UserParams
     req.body.name;        // UserBody
-    req.requestContext;   // ALBContext
+    req.requestContext;   // APIGatewayContext
     
     res.json({
       id: '1',
@@ -87,23 +109,11 @@ api.post<UserResponse, ALBContext, UserQuery, UserParams, UserBody>(
     });
   }
 );
-
-// Error handling with types
-const errorHandler: ErrorHandlingMiddleware<UserResponse> = (
-  error,
-  req,
-  res,
-  next
-) => {
-  res.status(500).json({
-    id: 'error',
-    name: error.name,
-    email: error.message
-  });
-};
 ```
 
 Key TypeScript Features:
+- Source-agnostic types that work with any Lambda trigger
+- Type guards for safe context type checking
 - Full type inference for request and response objects
 - Generic type parameters for response types
 - Support for API Gateway and ALB contexts
@@ -111,6 +121,74 @@ Key TypeScript Features:
 - Middleware and error handler type definitions
 - Automatic type inference for all HTTP methods
 - Type safety for cookies, headers, and other API features
+
+## Type Guards
+
+Lambda API provides type guards to safely work with different request sources:
+
+```typescript
+import { 
+  isApiGatewayContext,
+  isApiGatewayV2Context, 
+  isAlbContext,
+  isApiGatewayRequest,
+  isApiGatewayV2Request,
+  isAlbRequest
+} from 'lambda-api';
+
+// Check request context type
+if (isApiGatewayContext(req.requestContext)) {
+  // TypeScript knows this is APIGatewayContext
+  console.log(req.requestContext.identity);
+}
+
+// Check entire request type
+if (isApiGatewayRequest(req)) {
+  // TypeScript knows this is Request<APIGatewayContext>
+  console.log(req.requestContext.identity);
+}
+```
+
+## Handling Multiple Request Sources
+
+Lambda API provides type-safe support for different AWS Lambda triggers. You can write source-specific handlers or use source-agnostic handlers that work with any trigger:
+
+```typescript
+import { 
+  isApiGatewayContext, 
+  isApiGatewayV2Context, 
+  isAlbContext,
+  SourceAgnosticHandler 
+} from 'lambda-api';
+
+// Source-specific handler
+api.get<Response, APIGatewayContext>('/api-gateway', (req, res) => {
+  console.log(req.requestContext.identity);
+});
+
+api.get<Response, ALBContext>('/alb', (req, res) => {
+  console.log(req.requestContext.elb);
+});
+
+// Source-agnostic handler (works with any trigger)
+const handler: SourceAgnosticHandler = (req, res) => {
+  if (isApiGatewayContext(req.requestContext)) {
+    console.log(req.requestContext.identity);
+  } else if (isAlbContext(req.requestContext)) {
+    console.log(req.requestContext.elb);
+  }
+  
+  res.json({ status: 'ok' });
+};
+
+api.get('/any', handler);
+```
+
+Key features for handling multiple sources:
+- Type guards for safe context type checking
+- Source-agnostic types that work with any trigger
+- Full type safety for source-specific properties
+- Automatic payload format detection
 
 ## Why Another Web Framework?
 
