@@ -77,7 +77,7 @@ export declare type Middleware<
   next: NextFunction
 ) => void;
 
-export declare type NextFunction = (error?: Error) => void;
+export declare type NextFunction = () => void;
 
 export declare type ErrorHandlingMiddleware<
   TResponse = any,
@@ -168,7 +168,7 @@ export interface Options {
   mimeTypes?: {
     [key: string]: string;
   };
-  serializer?: (data: any) => string;
+  serializer?: SerializerFunction;
   version?: string;
   errorHeaderWhitelist?: string[];
   isBase64?: boolean;
@@ -178,6 +178,8 @@ export interface Options {
   };
   s3Config?: S3ClientConfig;
 }
+
+export declare type SerializerFunction = (body: object) => string;
 
 export declare class Request<
   TContext extends RequestContext = APIGatewayContext,
