@@ -9,9 +9,11 @@ const REQUEST = require('./lib/request');
 const RESPONSE = require('./lib/response');
 const UTILS = require('./lib/utils');
 const LOGGER = require('./lib/logger');
-const S3 = () => require('./lib/s3-service');
+const { ResponseError, ConfigurationError } = require('./lib/errors');
 const prettyPrint = require('./lib/prettyPrint');
-const { ConfigurationError } = require('./lib/errors');
+
+// Lazy load AWS S3 service
+const S3 = () => require('./lib/s3-service');
 
 class API {
   constructor(props) {
@@ -42,8 +44,8 @@ class API {
         : {};
     this._compression =
       props &&
-      (typeof props.compression === 'boolean' ||
-        Array.isArray(props.compression))
+        (typeof props.compression === 'boolean' ||
+          Array.isArray(props.compression))
         ? props.compression
         : false;
 
@@ -84,7 +86,7 @@ class API {
     this._app = {};
 
     // Executed after the callback
-    this._finally = () => {};
+    this._finally = () => { };
 
     // Global error status (used for response parsing errors)
     this._errorStatus = 500;
@@ -213,8 +215,8 @@ class API {
               stack: _stack['m'][method]
                 ? _stack['m'][method].concat(stack)
                 : _stack['*'][method]
-                ? _stack['*'][method].concat(stack)
-                : stack,
+                  ? _stack['*'][method].concat(stack)
+                  : stack,
               // inherited: _stack[method] ? _stack[method] : [],
               route: '/' + parsedPath.join('/'),
               path: '/' + this._prefix.concat(parsedPath).join('/'),
@@ -357,13 +359,16 @@ class API {
       stack: (this._logger.stack && e.stack) || undefined,
     };
 
-    if (e instanceof Error) {
+    // Determine if this was originally a string error
+    const wasStringError = e instanceof ResponseError && e.originalMessage !== undefined;
+
+    if (e instanceof Error && !wasStringError) {
       message = e.message;
       if (this._logger.errorLogging) {
         this.log.fatal(message, info);
       }
     } else {
-      message = e;
+      message = e instanceof Error ? e.message : e;
       if (this._logger.errorLogging) {
         this.log.error(message, info);
       }
@@ -450,8 +455,8 @@ class API {
       typeof args[0] === 'string'
         ? Array.of(args.shift())
         : Array.isArray(args[0])
-        ? args.shift()
-        : ['/*'];
+          ? args.shift()
+          : ['/*'];
 
     // Init middleware stack
     let middleware = [];

@@ -366,7 +366,10 @@ export declare class ConfigurationError extends Error {
 }
 
 export declare class ResponseError extends Error {
-  constructor(message: string, code: number);
+  constructor(message: string, code?: number, detail?: any);
+  name: 'ResponseError';
+  code: number;
+  detail?: any;
 }
 
 export declare class FileError extends Error {
