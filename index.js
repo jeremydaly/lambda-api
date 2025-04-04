@@ -357,7 +357,6 @@ class API {
       stack: (this._logger.stack && e.stack) || undefined,
     };
 
-    // Determine if this was originally a string error
     const wasStringError =
       e instanceof ResponseError && e.originalMessage !== undefined;
 
