@@ -328,52 +328,6 @@ describe('Error Handling Tests:', function () {
       expect(error.name).toEqual('ConfigurationError')
     }) // end it
 
-    it('ResponseError with string message', async function () {
-      let _event = Object.assign({}, event, { path: '/testError' });
-      let result = await new Promise(r => api5.run(_event, {}, (e, res) => { r(res) }));
-      expect(result).toEqual({
-        multiValueHeaders: { 'content-type': ['application/json'] },
-        statusCode: 500,
-        body: '{"error":"This is a test error message"}',
-        isBase64Encoded: false
-      });
-    });
-
-    it('ResponseError with code and message', async function () {
-      let _event = Object.assign({}, event, { path: '/testError' });
-      let result = await new Promise(r => api4.run(_event, {}, (e, res) => { r(res) }));
-      expect(result).toEqual({
-        multiValueHeaders: {},
-        statusCode: 500,
-        body: 'this is an error: false',
-        isBase64Encoded: false
-      });
-    });
-
-    it('ResponseError with message and detail', async function () {
-      let _event = Object.assign({}, event, { path: '/testErrorDetail' });
-      let result = await new Promise(r => api5.run(_event, {}, (e, res) => { r(res) }));
-      expect(result).toEqual({
-        multiValueHeaders: { 'content-type': ['application/json'] },
-        statusCode: 500,
-        body: '{"error":"This is a test error message"}',
-        isBase64Encoded: false
-      });
-    });
-
-    it('ResponseError properties', function () {
-      const error = new errors.ResponseError('test message', 403, { foo: 'bar' });
-      expect(error.name).toBe('ResponseError');
-      expect(error.message).toBe('test message');
-      expect(error.code).toBe(403);
-      expect(error.detail).toEqual({ foo: 'bar' });
-    });
-
-    it('ResponseError default code', function () {
-      const error = new errors.ResponseError('test message');
-      expect(error.code).toBe(500);
-    });
-
     it('ApiError with string message', async function () {
       let _event = Object.assign({}, event, { path: '/testError' });
       let result = await new Promise(r => api5.run(_event, {}, (e, res) => { r(res) }));
