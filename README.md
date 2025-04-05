@@ -1310,7 +1310,7 @@ api.use(errorHandler1,errorHandler2)
 
 ### Error Types
 
-Lambda API provides several different types of errors that can be used by your application. `RouteError`, `MethodError`, `ResponseError`, and `FileError` will all be passed to your error middleware. `ConfigurationError`s will throw an exception when you attempt to `.run()` your route and can be caught in a `try/catch` block. Most error types contain additional properties that further detail the issue.
+Lambda API provides several different types of errors that can be used by your application. `ApiError`, `RouteError`, `MethodError`, `ResponseError`, and `FileError` will all be passed to your error middleware. `ConfigurationError`s will throw an exception when you attempt to `.run()` your route and can be caught in a `try/catch` block. Most error types contain additional properties that further detail the issue.
 
 ```javascript
 const errorHandler = (err,req,res,next) => {
