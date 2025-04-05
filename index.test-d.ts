@@ -17,6 +17,7 @@ import {
   ConfigurationError,
   ResponseError,
   FileError,
+  ApiError,
 } from './index';
 import {
   APIGatewayProxyEvent,
@@ -255,3 +256,12 @@ const fileError = new FileError('File not found', {
   syscall: 'open',
 });
 expectType<FileError>(fileError);
+expectType<string>(fileError.message);
+expectType<string>(fileError.name);
+expectType<string | undefined>(fileError.stack);
+
+const apiError = new ApiError('Api error', 500);
+expectType<ApiError>(apiError);
+expectType<string>(apiError.message);
+expectType<number | undefined>(apiError.code);
+expectType<any>(apiError.detail);
