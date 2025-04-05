@@ -369,6 +369,13 @@ export declare class ResponseError extends Error {
   constructor(message: string, code: number);
 }
 
+export declare class ApiError extends Error {
+  constructor(message: string, code?: number, detail?: any);
+  name: 'ApiError';
+  code?: number;
+  detail?: any;
+}
+
 export declare class FileError extends Error {
   constructor(message: string, err: object);
 }

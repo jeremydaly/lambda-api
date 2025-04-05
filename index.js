@@ -10,8 +10,8 @@ const RESPONSE = require('./lib/response');
 const UTILS = require('./lib/utils');
 const LOGGER = require('./lib/logger');
 const S3 = () => require('./lib/s3-service');
+const { ConfigurationError, ApiError } = require('./lib/errors');
 const prettyPrint = require('./lib/prettyPrint');
-const { ConfigurationError } = require('./lib/errors');
 
 class API {
   constructor(props) {
@@ -328,26 +328,21 @@ class API {
 
   // Catch all async/sync errors
   async catchErrors(e, response, code, detail) {
-    // Error messages should respect the app's base64 configuration
     response._isBase64 = this._isBase64;
 
-    // Strip the headers, keep whitelist
     const strippedHeaders = Object.entries(response._headers).reduce(
       (acc, [headerName, value]) => {
         if (!this._errorHeaderWhitelist.includes(headerName.toLowerCase())) {
           return acc;
         }
-
         return Object.assign(acc, { [headerName]: value });
       },
       {}
     );
 
     response._headers = Object.assign(strippedHeaders, this._headers);
-
     let message;
 
-    // Set the status code
     response.status(code ? code : this._errorStatus);
 
     let info = {
@@ -357,13 +352,15 @@ class API {
       stack: (this._logger.stack && e.stack) || undefined,
     };
 
-    if (e instanceof Error) {
+    const isApiError = e instanceof ApiError;
+
+    if (e instanceof Error && !isApiError) {
       message = e.message;
       if (this._logger.errorLogging) {
         this.log.fatal(message, info);
       }
     } else {
-      message = e;
+      message = e instanceof Error ? e.message : e;
       if (this._logger.errorLogging) {
         this.log.error(message, info);
       }
@@ -387,7 +384,7 @@ class API {
           if (rtn) response.send(rtn);
           r();
         });
-      } // end for
+      }
     }
 
     // Throw standard error unless callback has already been executed
