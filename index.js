@@ -376,175 +376,176 @@ class API {
         if (response._state === 'done') break;
         // Promisify error middleware
         // TODO: using async within a promise is an antipattern, therefore we need to refactor this asap
-        // eslint-disable-next-line no-async-promise-executorawait new Promise(async (r) => {
-        let rtn = await err(e, response._request, response, () => {
+        // eslint-disable-next-line no-async-promise-executor
+        await new Promise(async (r) => {
+          let rtn = await err(e, response._request, response, () => {
+            r();
+          });
+          if (rtn) response.send(rtn);
           r();
         });
-        if (rtn) response.send(rtn);
-        r();
-      });
+      }
     }
-  }
 
-  // Throw standard error unless callback has already been executed
-  if(response._state !== 'done') response.json({ error: message });
+    // Throw standard error unless callback has already been executed
+    if (response._state !== 'done') response.json({ error: message });
   } // end catch
 
   // Custom callback
   async _callback(err, res, response) {
-  // Set done status
-  response._state = 'done';
+    // Set done status
+    response._state = 'done';
 
-  // Execute finally
-  await this._finally(response._request, response);
+    // Execute finally
+    await this._finally(response._request, response);
 
-  // Output logs
-  response._request._logs.forEach((log) => {
-    this._logger.logger(
-      JSON.stringify(
-        this._logger.detail
-          ? this._logger.format(log, response._request, response)
-          : log
-      )
-    );
-  });
+    // Output logs
+    response._request._logs.forEach((log) => {
+      this._logger.logger(
+        JSON.stringify(
+          this._logger.detail
+            ? this._logger.format(log, response._request, response)
+            : log
+        )
+      );
+    });
 
-  // Generate access log
-  if (
-    (this._logger.access || response._request._logs.length > 0) &&
-    this._logger.access !== 'never'
-  ) {
-    let access = Object.assign(
-      this._logger.log(
-        'access',
-        undefined,
-        response._request,
-        response._request.context
-      ),
-      {
-        statusCode: res.statusCode,
-        coldStart: response._request.coldStart,
-        count: response._request.requestCount,
-      }
-    );
-    this._logger.logger(
-      JSON.stringify(this._logger.format(access, response._request, response))
-    );
-  }
+    // Generate access log
+    if (
+      (this._logger.access || response._request._logs.length > 0) &&
+      this._logger.access !== 'never'
+    ) {
+      let access = Object.assign(
+        this._logger.log(
+          'access',
+          undefined,
+          response._request,
+          response._request.context
+        ),
+        {
+          statusCode: res.statusCode,
+          coldStart: response._request.coldStart,
+          count: response._request.requestCount,
+        }
+      );
+      this._logger.logger(
+        JSON.stringify(this._logger.format(access, response._request, response))
+      );
+    }
 
-  // Reset global error code
-  this._errorStatus = 500;
+    // Reset global error code
+    this._errorStatus = 500;
 
-  // Execute the primary callback
-  typeof this._cb === 'function' && this._cb(err, res);
-} // end _callback
+    // Execute the primary callback
+    typeof this._cb === 'function' && this._cb(err, res);
+  } // end _callback
 
-// Middleware handler
-use(...args) {
-  // Extract routes
-  let routes =
-    typeof args[0] === 'string'
-      ? Array.of(args.shift())
-      : Array.isArray(args[0])
-        ? args.shift()
-        : ['/*'];
+  // Middleware handler
+  use(...args) {
+    // Extract routes
+    let routes =
+      typeof args[0] === 'string'
+        ? Array.of(args.shift())
+        : Array.isArray(args[0])
+          ? args.shift()
+          : ['/*'];
 
-  // Init middleware stack
-  let middleware = [];
+    // Init middleware stack
+    let middleware = [];
 
-  // Add func args as middleware
-  for (let arg in args) {
-    if (typeof args[arg] === 'function') {
-      if (args[arg].length === 3) {
-        middleware.push(args[arg]);
-      } else if (args[arg].length === 4) {
-        this._errors.push(args[arg]);
-      } else {
-        throw new ConfigurationError(
-          'Middleware must have 3 or 4 parameters'
-        );
+    // Add func args as middleware
+    for (let arg in args) {
+      if (typeof args[arg] === 'function') {
+        if (args[arg].length === 3) {
+          middleware.push(args[arg]);
+        } else if (args[arg].length === 4) {
+          this._errors.push(args[arg]);
+        } else {
+          throw new ConfigurationError(
+            'Middleware must have 3 or 4 parameters'
+          );
+        }
       }
     }
-  }
 
-  // Add middleware for all methods
-  if (middleware.length > 0) {
-    routes.forEach((route) => {
-      this.METHOD('__MW__', route, ...middleware);
-    });
-  }
-} // end use
+    // Add middleware for all methods
+    if (middleware.length > 0) {
+      routes.forEach((route) => {
+        this.METHOD('__MW__', route, ...middleware);
+      });
+    }
+  } // end use
 
   // Finally handler
   finally(fn) {
-  this._finally = fn;
-}
+    this._finally = fn;
+  }
 
-//-------------------------------------------------------------------------//
-// UTILITY FUNCTIONS
-//-------------------------------------------------------------------------//
+  //-------------------------------------------------------------------------//
+  // UTILITY FUNCTIONS
+  //-------------------------------------------------------------------------//
 
-parseRoute(path) {
-  return path
-    .trim()
-    .replace(/^\/(.*?)(\/)*$/, '$1')
-    .split('/')
-    .filter((x) => x.trim() !== '');
-}
+  parseRoute(path) {
+    return path
+      .trim()
+      .replace(/^\/(.*?)(\/)*$/, '$1')
+      .split('/')
+      .filter((x) => x.trim() !== '');
+  }
 
-// Load app packages
-app(packages) {
-  // Check for supplied packages
-  if (typeof packages === 'object') {
-    // Loop through and set package namespaces
-    for (let namespace in packages) {
-      try {
-        this._app[namespace] = packages[namespace];
-      } catch (e) {
-        console.error(e.message); // eslint-disable-line no-console
+  // Load app packages
+  app(packages) {
+    // Check for supplied packages
+    if (typeof packages === 'object') {
+      // Loop through and set package namespaces
+      for (let namespace in packages) {
+        try {
+          this._app[namespace] = packages[namespace];
+        } catch (e) {
+          console.error(e.message); // eslint-disable-line no-console
+        }
       }
+    } else if (arguments.length === 2 && typeof packages === 'string') {
+      this._app[packages] = arguments[1];
+    } // end if
+
+    // Return a reference
+    return this._app;
+  }
+
+  // Register routes with options
+  register(fn, opts) {
+    let options = typeof opts === 'object' ? opts : {};
+
+    // Extract Prefix
+    let prefix =
+      options.prefix && options.prefix.toString().trim() !== ''
+        ? this.parseRoute(options.prefix)
+        : [];
+
+    // Concat to existing prefix
+    this._prefix = this._prefix.concat(prefix);
+
+    // Execute the routing function
+    fn(this, options);
+
+    // Remove the last prefix (if a prefix exists)
+    if (prefix.length > 0) {
+      this._prefix = this._prefix.slice(0, -prefix.length);
     }
-  } else if (arguments.length === 2 && typeof packages === 'string') {
-    this._app[packages] = arguments[1];
-  } // end if
+  } // end register
 
-  // Return a reference
-  return this._app;
-}
+  // prettyPrint debugger
+  routes(format) {
+    // Parse the routes
+    let routes = UTILS.extractRoutes(this._routes);
 
-// Register routes with options
-register(fn, opts) {
-  let options = typeof opts === 'object' ? opts : {};
-
-  // Extract Prefix
-  let prefix =
-    options.prefix && options.prefix.toString().trim() !== ''
-      ? this.parseRoute(options.prefix)
-      : [];
-
-  // Concat to existing prefix
-  this._prefix = this._prefix.concat(prefix);
-
-  // Execute the routing function
-  fn(this, options);
-
-  // Remove the last prefix (if a prefix exists)
-  if (prefix.length > 0) {
-    this._prefix = this._prefix.slice(0, -prefix.length);
+    if (format) {
+      console.log(prettyPrint(routes)); // eslint-disable-line no-console
+    } else {
+      return routes;
+    }
   }
-} // end register
-
-// prettyPrint debugger
-routes(format) {
-  // Parse the routes
-  let routes = UTILS.extractRoutes(this._routes);
-
-  if (format) {
-    console.log(prettyPrint(routes)); // eslint-disable-line no-console
-  } else {
-    return routes;
-  }
-}
 } // end API class
 
 // Export the API class as a new instance
