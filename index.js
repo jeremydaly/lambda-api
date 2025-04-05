@@ -10,7 +10,7 @@ const RESPONSE = require('./lib/response');
 const UTILS = require('./lib/utils');
 const LOGGER = require('./lib/logger');
 const S3 = () => require('./lib/s3-service');
-const { ResponseError, ConfigurationError } = require('./lib/errors');
+const { ResponseError, ConfigurationError, ApiError } = require('./lib/errors');
 const prettyPrint = require('./lib/prettyPrint');
 
 class API {
@@ -42,8 +42,8 @@ class API {
         : {};
     this._compression =
       props &&
-      (typeof props.compression === 'boolean' ||
-        Array.isArray(props.compression))
+        (typeof props.compression === 'boolean' ||
+          Array.isArray(props.compression))
         ? props.compression
         : false;
 
@@ -84,7 +84,7 @@ class API {
     this._app = {};
 
     // Executed after the callback
-    this._finally = () => {};
+    this._finally = () => { };
 
     // Global error status (used for response parsing errors)
     this._errorStatus = 500;
@@ -213,8 +213,8 @@ class API {
               stack: _stack['m'][method]
                 ? _stack['m'][method].concat(stack)
                 : _stack['*'][method]
-                ? _stack['*'][method].concat(stack)
-                : stack,
+                  ? _stack['*'][method].concat(stack)
+                  : stack,
               // inherited: _stack[method] ? _stack[method] : [],
               route: '/' + parsedPath.join('/'),
               path: '/' + this._prefix.concat(parsedPath).join('/'),
@@ -328,26 +328,21 @@ class API {
 
   // Catch all async/sync errors
   async catchErrors(e, response, code, detail) {
-    // Error messages should respect the app's base64 configuration
     response._isBase64 = this._isBase64;
 
-    // Strip the headers, keep whitelist
     const strippedHeaders = Object.entries(response._headers).reduce(
       (acc, [headerName, value]) => {
         if (!this._errorHeaderWhitelist.includes(headerName.toLowerCase())) {
           return acc;
         }
-
         return Object.assign(acc, { [headerName]: value });
       },
       {}
     );
 
     response._headers = Object.assign(strippedHeaders, this._headers);
-
     let message;
 
-    // Set the status code
     response.status(code ? code : this._errorStatus);
 
     let info = {
@@ -357,10 +352,9 @@ class API {
       stack: (this._logger.stack && e.stack) || undefined,
     };
 
-    const wasStringError =
-      e instanceof ResponseError && e.originalMessage !== undefined;
+    const isApiError = e instanceof ApiError;
 
-    if (e instanceof Error && !wasStringError) {
+    if (e instanceof Error && !isApiError) {
       message = e.message;
       if (this._logger.errorLogging) {
         this.log.fatal(message, info);
@@ -372,17 +366,10 @@ class API {
       }
     }
 
-    // If first time through, process error middleware
     if (response._state === 'processing') {
-      // Flag error state (this will avoid infinite error loops)
       response._state = 'error';
-
-      // Execute error middleware
       for (const err of this._errors) {
         if (response._state === 'done') break;
-        // Promisify error middleware
-        // TODO: using async within a promise is an antipattern, therefore we need to refactor this asap
-        // eslint-disable-next-line no-async-promise-executor
         await new Promise(async (r) => {
           let rtn = await err(e, response._request, response, () => {
             r();
@@ -390,10 +377,9 @@ class API {
           if (rtn) response.send(rtn);
           r();
         });
-      } // end for
+      }
     }
 
-    // Throw standard error unless callback has already been executed
     if (response._state !== 'done') response.json({ error: message });
   } // end catch
 
@@ -453,8 +439,8 @@ class API {
       typeof args[0] === 'string'
         ? Array.of(args.shift())
         : Array.isArray(args[0])
-        ? args.shift()
-        : ['/*'];
+          ? args.shift()
+          : ['/*'];
 
     // Init middleware stack
     let middleware = [];

@@ -373,6 +373,52 @@ describe('Error Handling Tests:', function () {
       const error = new errors.ResponseError('test message');
       expect(error.code).toBe(500);
     });
+
+    it('ApiError with string message', async function () {
+      let _event = Object.assign({}, event, { path: '/testError' });
+      let result = await new Promise(r => api5.run(_event, {}, (e, res) => { r(res) }));
+      expect(result).toEqual({
+        multiValueHeaders: { 'content-type': ['application/json'] },
+        statusCode: 500,
+        body: '{"error":"This is a test error message"}',
+        isBase64Encoded: false
+      });
+    });
+
+    it('ApiError with code and message', async function () {
+      let _event = Object.assign({}, event, { path: '/testError' });
+      let result = await new Promise(r => api4.run(_event, {}, (e, res) => { r(res) }));
+      expect(result).toEqual({
+        multiValueHeaders: {},
+        statusCode: 500,
+        body: 'this is an error: false',
+        isBase64Encoded: false
+      });
+    });
+
+    it('ApiError with message and detail', async function () {
+      let _event = Object.assign({}, event, { path: '/testErrorDetail' });
+      let result = await new Promise(r => api5.run(_event, {}, (e, res) => { r(res) }));
+      expect(result).toEqual({
+        multiValueHeaders: { 'content-type': ['application/json'] },
+        statusCode: 500,
+        body: '{"error":"This is a test error message"}',
+        isBase64Encoded: false
+      });
+    });
+
+    it('ApiError properties', function () {
+      const error = new errors.ApiError('test message', 403, { foo: 'bar' });
+      expect(error.name).toBe('ApiError');
+      expect(error.message).toBe('test message');
+      expect(error.code).toBe(403);
+      expect(error.detail).toEqual({ foo: 'bar' });
+    });
+
+    it('ApiError default code', function () {
+      const error = new errors.ApiError('test message');
+      expect(error.code).toBe(500);
+    });
   })
 
   describe('Logging', function () {
