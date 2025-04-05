@@ -10,7 +10,7 @@ const RESPONSE = require('./lib/response');
 const UTILS = require('./lib/utils');
 const LOGGER = require('./lib/logger');
 const S3 = () => require('./lib/s3-service');
-const { ResponseError, ConfigurationError, ApiError } = require('./lib/errors');
+const { ConfigurationError, ApiError } = require('./lib/errors');
 const prettyPrint = require('./lib/prettyPrint');
 
 class API {
