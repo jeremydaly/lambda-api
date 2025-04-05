@@ -144,13 +144,8 @@ class API {
       route.push('');
     }
 
-    // Keep track of path variables
     let pathVars = {};
-
-    // Make a local copy of routes
     let routes = this._routes;
-
-    // Create a local stack for inheritance
     let _stack = { '*': [], m: [] };
 
     // Loop through the path levels
@@ -178,20 +173,17 @@ class API {
       methods.forEach((_method) => {
         // Method must be a string
         if (typeof _method === 'string') {
-          // Check for wild card at this level
-          if (routes['ROUTES']['*']) {
+          const wildcardForPathLevel = routes[i] == '' ? routes['ROUTES']['*'] : routes['ROUTES'][route[i]]['*'];
+          if (wildcardForPathLevel != null) {
             if (
-              routes['ROUTES']['*']['MIDDLEWARE'] &&
+              wildcardForPathLevel['MIDDLEWARE'] &&
               (route[i] !== '*' || _method !== '__MW__')
             ) {
-              _stack['*'][method] = routes['ROUTES']['*']['MIDDLEWARE'].stack;
+              _stack['*'][method] = wildcardForPathLevel['MIDDLEWARE'].stack;
             }
-            if (
-              routes['ROUTES']['*']['METHODS'] &&
-              routes['ROUTES']['*']['METHODS'][method]
-            ) {
+            if (wildcardForPathLevel?.['METHODS']?.[method] != null) {
               _stack['m'][method] =
-                routes['ROUTES']['*']['METHODS'][method].stack;
+                wildcardForPathLevel['METHODS'][method].stack;
             }
           } // end if wild card
 
@@ -215,13 +207,12 @@ class API {
                 : _stack['*'][method]
                 ? _stack['*'][method].concat(stack)
                 : stack,
-              // inherited: _stack[method] ? _stack[method] : [],
               route: '/' + parsedPath.join('/'),
               path: '/' + this._prefix.concat(parsedPath).join('/'),
             };
 
-            // If mounting middleware
-            if (method === '__MW__') {
+            const isMountingMiddleware = _method === '__MW__';
+            if (isMountingMiddleware) {
               // Merge stacks if middleware exists
               if (routes['ROUTES'][route[i]]['MIDDLEWARE']) {
                 meta.stack =
@@ -233,17 +224,6 @@ class API {
               }
               // Add/update middleware
               routes['ROUTES'][route[i]]['MIDDLEWARE'] = meta;
-
-              // Apply middleware to all child middlware routes
-              // if (route[i] === "*") {
-              //   // console.log("APPLY NESTED MIDDLEWARE");
-              //   // console.log(JSON.stringify(routes["ROUTES"], null, 2));
-              //   Object.keys(routes["ROUTES"]).forEach((nestedRoute) => {
-              //     if (nestedRoute != "*") {
-              //       console.log(nestedRoute);
-              //     }
-              //   });
-              // }
             } else {
               // Create the methods section if it doesn't exist
               if (!routes['ROUTES'][route[i]]['METHODS'])
@@ -264,8 +244,6 @@ class API {
               // Add method and meta data
               routes['ROUTES'][route[i]]['METHODS'][_method] = meta;
             } // end else
-
-            // console.log('STACK:',meta);
 
             // If there's a wild card that's not at the end
           } else if (route[i] === '*') {
