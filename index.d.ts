@@ -44,19 +44,13 @@ export declare interface App {
   [namespace: string]: Package;
 }
 
-export declare type Middleware<
-  TReq = Request,
-  TRes = Response
-> = (
+export declare type Middleware<TReq = Request, TRes = Response> = (
   req: TReq,
   res: TRes,
   next: NextFunction
 ) => void;
 
-export declare type ErrorHandlingMiddleware<
-  TReq = Request,
-  TRes = Response
-> = (
+export declare type ErrorHandlingMiddleware<TReq = Request, TRes = Response> = (
   error: Error,
   req: TReq,
   res: TRes,
@@ -65,10 +59,7 @@ export declare type ErrorHandlingMiddleware<
 
 export declare type ErrorCallback = (error?: Error) => void;
 
-export declare type HandlerFunction<
-  TReq = Request,
-  TRes = Response
-> = (
+export declare type HandlerFunction<TReq = Request, TRes = Response> = (
   req: TReq,
   res: TRes,
   next?: NextFunction
@@ -89,10 +80,10 @@ export declare type LoggerFunctionAdditionalInfo =
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
 export declare type SerializerFunction = (body: object) => string;
-export declare type FinallyFunction<
-  TReq = Request,
-  TRes = Response
-> = (req: TReq, res: TRes) => void;
+export declare type FinallyFunction<TReq = Request, TRes = Response> = (
+  req: TReq,
+  res: TRes
+) => void;
 export declare type METHODS =
   | 'GET'
   | 'POST'

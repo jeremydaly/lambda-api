@@ -93,7 +93,11 @@ expectError(customRes.send({ invalid: 'data' }));
 type CustomRequest = Request<CustomParams>;
 type CustomResponse = Response<CustomResponseBody>;
 
-const typedMiddleware: Middleware<CustomRequest, CustomResponse> = (req, res, next) => {
+const typedMiddleware: Middleware<CustomRequest, CustomResponse> = (
+  req,
+  res,
+  next
+) => {
   expectType<string>(req.params.id);
   expectType<string>(req.params.userId);
   expectType<void>(res.json({ success: true, message: 'middleware test' }));
@@ -104,7 +108,10 @@ expectType<Middleware<CustomRequest, CustomResponse>>(typedMiddleware);
 // Test generic handler function types
 type FullCustomRequest = Request<CustomParams, CustomQuery, CustomBody>;
 
-const typedHandler: HandlerFunction<FullCustomRequest, CustomResponse> = (req, res) => {
+const typedHandler: HandlerFunction<FullCustomRequest, CustomResponse> = (
+  req,
+  res
+) => {
   expectType<string>(req.params.id);
   expectType<string | undefined>(req.query.filter);
   expectType<string>(req.body.name);
@@ -113,11 +120,16 @@ const typedHandler: HandlerFunction<FullCustomRequest, CustomResponse> = (req, r
 expectType<HandlerFunction<FullCustomRequest, CustomResponse>>(typedHandler);
 
 // Test generic error handling middleware
-const typedErrorMiddleware: ErrorHandlingMiddleware<CustomRequest, CustomResponse> = (error, req, res, next) => {
+const typedErrorMiddleware: ErrorHandlingMiddleware<
+  CustomRequest,
+  CustomResponse
+> = (error, req, res, next) => {
   expectType<string>(req.params.id);
   res.json({ success: false, message: error.message });
 };
-expectType<ErrorHandlingMiddleware<CustomRequest, CustomResponse>>(typedErrorMiddleware);
+expectType<ErrorHandlingMiddleware<CustomRequest, CustomResponse>>(
+  typedErrorMiddleware
+);
 
 const apiGwV1Event: APIGatewayProxyEvent = {
   body: '{"test":"body"}',
@@ -337,6 +349,40 @@ expectType<ApiError>(apiError);
 expectType<string>(apiError.message);
 expectType<number | undefined>(apiError.code);
 expectType<any>(apiError.detail);
+
+// Test specific example from the GitHub issue
+interface MyDefinedRequest extends Request {
+  params: {
+    thingId: string;
+    anotherThingId: string;
+  };
+  context: Context & { metrics: any }; // MetricsLogger was not imported
+}
+
+interface MyDefinedResponseBody {
+  hello: string;
+  foo: string;
+}
+
+// Test the exact use case from the issue
+const issueExampleHandler = (
+  request: MyDefinedRequest,
+  response: Response<MyDefinedResponseBody>
+) => {
+  // request.params should be strongly typed
+  expectType<string>(request.params.thingId);
+  expectType<string>(request.params.anotherThingId);
+
+  // response.json should expect MyDefinedResponseBody
+  response.json({ hello: 'world', foo: 'bar' });
+
+  // This should cause a TypeScript error
+  expectError(response.json({ wrong: 'type' }));
+};
+
+expectType<
+  (request: MyDefinedRequest, response: Response<MyDefinedResponseBody>) => void
+>(issueExampleHandler);
 
 // Test backwards compatibility - default types should work the same as before
 const defaultReq = {} as Request;
