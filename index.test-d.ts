@@ -47,6 +47,78 @@ expectType<{ [key: string]: string | undefined }>(req.headers);
 expectType<any>(req.body);
 expectType<{ [key: string]: string }>(req.cookies);
 
+// Test generic Request types
+interface CustomParams {
+  id: string;
+  userId: string;
+}
+
+interface CustomQuery {
+  filter?: string;
+  limit?: string;
+}
+
+interface CustomBody {
+  name: string;
+  email: string;
+}
+
+interface CustomResponseBody {
+  success: boolean;
+  message: string;
+  data?: any;
+}
+
+// Test that custom types can be used with Request and Response generics
+const customReq = {} as Request<CustomParams, CustomQuery, CustomBody>;
+expectType<CustomParams>(customReq.params);
+expectType<CustomQuery>(customReq.query);
+expectType<CustomBody>(customReq.body);
+expectType<string>(customReq.params.id);
+expectType<string>(customReq.params.userId);
+expectType<string | undefined>(customReq.query.filter);
+expectType<string | undefined>(customReq.query.limit);
+expectType<string>(customReq.body.name);
+expectType<string>(customReq.body.email);
+
+const customRes = {} as Response<CustomResponseBody>;
+expectType<void>(customRes.json({ success: true, message: 'test' }));
+expectType<void>(customRes.send({ success: true, message: 'test', data: {} }));
+
+// Test that sending wrong type should cause type error
+expectError(customRes.json({ wrong: 'type' }));
+expectError(customRes.send({ invalid: 'data' }));
+
+// Test generic middleware types
+type CustomRequest = Request<CustomParams>;
+type CustomResponse = Response<CustomResponseBody>;
+
+const typedMiddleware: Middleware<CustomRequest, CustomResponse> = (req, res, next) => {
+  expectType<string>(req.params.id);
+  expectType<string>(req.params.userId);
+  expectType<void>(res.json({ success: true, message: 'middleware test' }));
+  next();
+};
+expectType<Middleware<CustomRequest, CustomResponse>>(typedMiddleware);
+
+// Test generic handler function types
+type FullCustomRequest = Request<CustomParams, CustomQuery, CustomBody>;
+
+const typedHandler: HandlerFunction<FullCustomRequest, CustomResponse> = (req, res) => {
+  expectType<string>(req.params.id);
+  expectType<string | undefined>(req.query.filter);
+  expectType<string>(req.body.name);
+  res.json({ success: true, message: `Hello ${req.body.name}` });
+};
+expectType<HandlerFunction<FullCustomRequest, CustomResponse>>(typedHandler);
+
+// Test generic error handling middleware
+const typedErrorMiddleware: ErrorHandlingMiddleware<CustomRequest, CustomResponse> = (error, req, res, next) => {
+  expectType<string>(req.params.id);
+  res.json({ success: false, message: error.message });
+};
+expectType<ErrorHandlingMiddleware<CustomRequest, CustomResponse>>(typedErrorMiddleware);
+
 const apiGwV1Event: APIGatewayProxyEvent = {
   body: '{"test":"body"}',
   headers: { 'content-type': 'application/json' },
@@ -265,3 +337,33 @@ expectType<ApiError>(apiError);
 expectType<string>(apiError.message);
 expectType<number | undefined>(apiError.code);
 expectType<any>(apiError.detail);
+
+// Test backwards compatibility - default types should work the same as before
+const defaultReq = {} as Request;
+expectType<{ [key: string]: string | undefined }>(defaultReq.params);
+expectType<{ [key: string]: string | undefined }>(defaultReq.query);
+expectType<any>(defaultReq.body);
+
+const defaultRes = {} as Response;
+expectType<void>(defaultRes.json({ any: 'value' }));
+expectType<void>(defaultRes.send('any string'));
+expectType<void>(defaultRes.send({ any: 'object' }));
+
+const defaultMiddleware: Middleware = (req, res, next) => {
+  expectType<{ [key: string]: string | undefined }>(req.params);
+  expectType<{ [key: string]: string | undefined }>(req.query);
+  expectType<any>(req.body);
+  expectType<void>(res.json({ any: 'value' }));
+  expectType<void>(res.send('any'));
+  next();
+};
+expectType<Middleware>(defaultMiddleware);
+
+const defaultHandler: HandlerFunction = (req, res) => {
+  expectType<{ [key: string]: string | undefined }>(req.params);
+  expectType<{ [key: string]: string | undefined }>(req.query);
+  expectType<any>(req.body);
+  expectType<void>(res.json({ any: 'value' }));
+  expectType<void>(res.send('any'));
+};
+expectType<HandlerFunction>(defaultHandler);

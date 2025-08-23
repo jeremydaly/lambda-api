@@ -44,21 +44,33 @@ export declare interface App {
   [namespace: string]: Package;
 }
 
-export declare type Middleware = (
-  req: Request,
-  res: Response,
+export declare type Middleware<
+  TReq = Request,
+  TRes = Response
+> = (
+  req: TReq,
+  res: TRes,
   next: NextFunction
 ) => void;
-export declare type ErrorHandlingMiddleware = (
+
+export declare type ErrorHandlingMiddleware<
+  TReq = Request,
+  TRes = Response
+> = (
   error: Error,
-  req: Request,
-  res: Response,
+  req: TReq,
+  res: TRes,
   next: NextFunction
 ) => void;
+
 export declare type ErrorCallback = (error?: Error) => void;
-export declare type HandlerFunction = (
-  req: Request,
-  res: Response,
+
+export declare type HandlerFunction<
+  TReq = Request,
+  TRes = Response
+> = (
+  req: TReq,
+  res: TRes,
   next?: NextFunction
 ) => void | any | Promise<any>;
 
@@ -77,7 +89,10 @@ export declare type LoggerFunctionAdditionalInfo =
 export declare type NextFunction = () => void;
 export declare type TimestampFunction = () => string;
 export declare type SerializerFunction = (body: object) => string;
-export declare type FinallyFunction = (req: Request, res: Response) => void;
+export declare type FinallyFunction<
+  TReq = Request,
+  TRes = Response
+> = (req: TReq, res: TRes) => void;
 export declare type METHODS =
   | 'GET'
   | 'POST'
@@ -136,18 +151,18 @@ export declare interface Options {
   s3Config?: S3ClientConfig;
 }
 
-export declare class Request {
+export declare class Request<
+  TParams = { [key: string]: string | undefined },
+  TQuery = { [key: string]: string | undefined },
+  TBody = any
+> {
   app: API;
   version: string;
   id: string;
-  params: {
-    [key: string]: string | undefined;
-  };
+  params: TParams;
   method: string;
   path: string;
-  query: {
-    [key: string]: string | undefined;
-  };
+  query: TQuery;
   multiValueQuery: {
     [key: string]: string[] | undefined;
   };
@@ -160,7 +175,7 @@ export declare class Request {
   rawHeaders?: {
     [key: string]: string | undefined;
   };
-  body: any;
+  body: TBody;
   rawBody: string;
   route: '';
   requestContext: APIGatewayEventRequestContext;
@@ -196,7 +211,7 @@ export declare class Request {
   [key: string]: any;
 }
 
-export declare class Response {
+export declare class Response<TBody = any> {
   status(code: number): this;
 
   sendStatus(code: number): void;
@@ -219,11 +234,11 @@ export declare class Response {
     callback?: ErrorCallback
   ): Promise<string>;
 
-  send(body: any): void;
+  send(body: TBody): void;
 
-  json(body: any): void;
+  json(body: TBody): void;
 
-  jsonp(body: any): void;
+  jsonp(body: TBody): void;
 
   html(body: any): void;
 
