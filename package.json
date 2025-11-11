@@ -3,7 +3,14 @@
   "version": "1.2.0",
   "description": "Lightweight web framework for your serverless applications",
   "main": "index.js",
+  "module": "index.mjs",
   "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js"
+    }
+  },
   "scripts": {
     "test": "tsd && jest unit",
     "test:types": "tsd",
@@ -47,6 +54,7 @@
     "@types/node": "^10.17.21",
     "bluebird": "^3.7.2",
     "coveralls": "^3.1.0",
+    "esbuild": "^0.27.0",
     "eslint": "^7.22.0",
     "eslint-config-prettier": "^8.3.0",
     "jest": "^26.6.3",
@@ -56,6 +64,7 @@
   },
   "files": [
     "index.js",
+    "index.mjs",
     "index.d.ts",
     "lib/"
   ]
