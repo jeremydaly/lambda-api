@@ -125,6 +125,7 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
 - [Configuring Routes in API Gateway](#configuring-routes-in-api-gateway)
 - [Reusing Persistent Connections](#reusing-persistent-connections)
 - [TypeScript Support](#typescript-support)
+- [ESM and Bundler Support](#esm-and-bundler-support)
 - [Contributions](#contributions)
 - [Are you using Lambda API?](#are-you-using-lambda-api)
 
@@ -1502,6 +1503,56 @@ api.get('/status', async (req, res) => {
 // Declare your Lambda handler
 exports.run = async (event: APIGatewayEvent, context: Context) => {
   // Run the request
+  return await api.run(event, context);
+};
+```
+
+## ESM and Bundler Support
+
+Lambda API now supports ES Module (ESM) imports and works seamlessly with modern bundlers like esbuild, webpack, and others when targeting ESM output.
+
+### Using with ESM
+
+```javascript
+// ESM import (uses index.mjs entry point)
+import createAPI from 'lambda-api';
+
+const api = createAPI();
+
+api.get('/status', async (req, res) => {
+  return { status: 'ok' };
+});
+
+export const handler = async (event, context) => {
+  return await api.run(event, context);
+};
+```
+
+### Bundling with esbuild
+
+When bundling your Lambda functions with esbuild for ESM output, Lambda API will automatically work without requiring any additional configuration:
+
+```bash
+esbuild your-handler.js --bundle --platform=node --format=esm --outfile=dist/handler.mjs
+```
+
+The library includes an ESM entry point (`index.mjs`) that automatically sets up the necessary polyfills for Node.js built-in modules, so you don't need to add any banners or inject scripts to your esbuild configuration.
+
+### CommonJS Support (Default)
+
+Lambda API continues to support CommonJS out of the box:
+
+```javascript
+// CommonJS require (default)
+const createAPI = require('lambda-api');
+
+const api = createAPI();
+
+api.get('/status', async (req, res) => {
+  return { status: 'ok' };
+});
+
+module.exports.handler = async (event, context) => {
   return await api.run(event, context);
 };
 ```
