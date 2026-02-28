@@ -16,6 +16,12 @@ const {
   isApiGatewayContext,
   isApiGatewayV2Context,
   isAlbContext,
+  isApiGatewayEvent,
+  isApiGatewayV2Event,
+  isAlbEvent,
+  isApiGatewayRequest,
+  isApiGatewayV2Request,
+  isAlbRequest,
 } = require('./lib/typeguards');
 
 class API {
@@ -564,3 +570,9 @@ module.exports.default = module.exports;
 module.exports.isApiGatewayContext = isApiGatewayContext;
 module.exports.isApiGatewayV2Context = isApiGatewayV2Context;
 module.exports.isAlbContext = isAlbContext;
+module.exports.isApiGatewayEvent = isApiGatewayEvent;
+module.exports.isApiGatewayV2Event = isApiGatewayV2Event;
+module.exports.isAlbEvent = isAlbEvent;
+module.exports.isApiGatewayRequest = isApiGatewayRequest;
+module.exports.isApiGatewayV2Request = isApiGatewayV2Request;
+module.exports.isAlbRequest = isAlbRequest;

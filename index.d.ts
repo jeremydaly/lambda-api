@@ -204,6 +204,8 @@ export interface Options {
 
 export declare type SerializerFunction = (body: object) => string;
 
+export declare type ErrorCallback = (error?: Error) => void;
+
 export declare class Request<
   TContext extends RequestContext = APIGatewayContext,
   TQuery extends Record<string, string | undefined> = Record<
