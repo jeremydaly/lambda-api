@@ -22,6 +22,7 @@ npm run prettier:write                          # Prettier auto-fix
 **Entry point**: `index.js` — main `API` class. Handles route registration, middleware management, and the `run()` method that processes Lambda events.
 
 **Core modules** in `lib/`:
+
 - `request.js` — Parses Lambda event into Express-like request object (headers, query, params, body, auth)
 - `response.js` — Response builder: `json()`, `html()`, `send()`, `redirect()`, `sendFile()`, `cookie()`, `cors()`
 - `utils.js` — Path parsing, URL encoding, HTML escaping, MIME lookup, body parsing
@@ -49,13 +50,13 @@ Example handler pattern:
 ```javascript
 // Route handler
 api.get('/users/:id', async (req, res) => {
-  return { id: req.params.id }
-})
+  return { id: req.params.id };
+});
 
 // Error middleware (4 params)
 api.use((err, req, res, next) => {
-  res.status(500).json({ error: err.message })
-})
+  res.status(500).json({ error: err.message });
+});
 ```
 
 ## Testing
@@ -68,10 +69,12 @@ api.use((err, req, res, next) => {
 ## Boundaries
 
 **Never do:**
+
 - Add external npm dependencies (zero-dependency policy is non-negotiable)
 - Introduce breaking changes to the public API
 
 **Always do:**
+
 - Add unit tests in `__tests__/*.unit.js` for new features
 - Update `index.d.ts` when changing the public API
 - Maintain backwards compatibility
