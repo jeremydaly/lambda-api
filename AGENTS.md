@@ -7,7 +7,7 @@ Lightweight web framework for AWS Lambda with **zero external dependencies**. Ex
 ```bash
 npm test                                        # Type tests (tsd) + Jest unit tests
 npm run test:unit                               # Jest unit tests only
-npm run test:unit -- __tests__/routes.unit.js   # Run a single test file
+npx jest __tests__/routes.unit.js               # Run a single test file
 npm run test:types                              # TypeScript definition tests (tsd)
 npm run test-cov                                # Jest with coverage
 npm run test-ci                                 # Full CI: lint + format + tests + coverage
@@ -29,7 +29,7 @@ npm run prettier:write                          # Prettier auto-fix
 - `logger.js` — Built-in logging with sampling, custom levels, and serializers
 - `errors.js` — Custom error classes: `RouteError`, `MethodError`, `ConfigurationError`, `ApiError`, `FileError`, `ResponseError`
 - `compression.js` — Brotli/Gzip/Deflate response compression
-- `s3-service.js` — S3 file operations and pre-signed URLs (`@aws-sdk/client-s3` peer dep)
+- `s3-service.js` — S3 file operations and pre-signed URLs (peer deps: `@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`)
 
 **Request/response flow**: Lambda event → `REQUEST` parses event → execution stack built from matched routes + middleware → handlers run sequentially via `next()` → `RESPONSE` formats output for API Gateway/ALB.
 
