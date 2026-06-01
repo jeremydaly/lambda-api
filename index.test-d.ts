@@ -26,6 +26,23 @@ import {
   ALBEvent,
 } from 'aws-lambda';
 
+type MetricsLogger = {
+  setProperty(name: string, value: boolean): void;
+};
+
+interface TypedRequest extends Request {
+  params: {
+    thingId: string;
+    anotherThingId: string;
+  };
+  context: Context & { metrics: MetricsLogger };
+}
+
+interface TypedResponseBody {
+  hello: string;
+  foo: string;
+}
+
 const options: Options = {
   base: '/api',
   version: 'v1',
@@ -174,6 +191,10 @@ expectType<void>(
 
 expectType<void>(res.redirect('/new-path'));
 
+const typedRes = {} as Response<TypedResponseBody>;
+expectType<void>(typedRes.json({ hello: 'thing', foo: 'another-thing' }));
+expectError(typedRes.json({ hello: 'thing' }));
+
 const middleware: Middleware = (req, res, next) => {
   next();
 };
@@ -188,6 +209,37 @@ const handler: HandlerFunction = (req, res) => {
   res.json({ success: true });
 };
 expectType<HandlerFunction>(handler);
+
+const typedHandler: HandlerFunction<TypedRequest, Response<TypedResponseBody>> = (
+  req,
+  res
+) => {
+  const { metrics } = req.context;
+  metrics.setProperty('test', true);
+  res.json({
+    hello: req.params.thingId,
+    foo: req.params.anotherThingId,
+  });
+};
+expectType<HandlerFunction<TypedRequest, Response<TypedResponseBody>>>(
+  typedHandler
+);
+
+api.get<TypedRequest, Response<TypedResponseBody>>('/typed', typedHandler);
+const invalidTypedHandler: HandlerFunction<
+  TypedRequest,
+  Response<TypedResponseBody>
+> = (req, res) => {
+  expectError(
+    res.json({
+      hello: req.params.thingId,
+    })
+  );
+};
+api.get<TypedRequest, Response<TypedResponseBody>>(
+  '/typed-invalid',
+  invalidTypedHandler
+);
 
 const cookieOptions: CookieOptions = {
   domain: 'example.com',
