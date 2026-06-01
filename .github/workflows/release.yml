@@ -48,16 +48,14 @@ jobs:
       - name: Ensure npm supports trusted publishing
         # Trusted publishing requires npm >= 11.5.1.
         run: npm install -g npm@latest
-      - name: Verify release tag matches package.json version
-        run: |
-          PKG_VERSION="v$(node -p "require('./package.json').version")"
-          TAG="${{ github.event.release.tag_name }}"
-          if [ "$PKG_VERSION" != "$TAG" ]; then
-            echo "::error::Release tag '$TAG' does not match package.json version '$PKG_VERSION'"
-            exit 1
-          fi
       - name: Install dependencies
         run: npm ci
+      - name: Set version from release tag
+        # package.json ships a 0.0.0-development placeholder; the real version
+        # is derived from the release tag (e.g. v1.2.0 -> 1.2.0) at publish time.
+        run: npm pkg set version="${TAG#v}"
+        env:
+          TAG: ${{ github.event.release.tag_name }}
       - name: Publish to npm
         # No NODE_AUTH_TOKEN: auth happens via OIDC, provenance is automatic.
         run: npm publish
