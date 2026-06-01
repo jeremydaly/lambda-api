@@ -58,4 +58,17 @@ describe('Base Path Tests:', function() {
     expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"path":"/v1/test/test2/test3","method":"get","status":"ok"}', isBase64Encoded: false })
   }) // end it
 
+  it('Middleware runs for root path when basepathed', async function() {
+    const testApi = require('../index')({ base: 'base-path' })
+    testApi.use((req,res,next) => {
+      res.cors()
+      next()
+    })
+    testApi.get('/', async () => ({ status: 'ok' }))
+
+    let _event = Object.assign({},event,{ path: '/base-path/' })
+    let result = await new Promise(r => testApi.run(_event,{},(e,res) => { r(res) }))
+    expect(result.multiValueHeaders).toHaveProperty('access-control-allow-origin')
+  }) // end it
+
 }) // end BASEPATH tests
