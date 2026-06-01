@@ -90,4 +90,17 @@ describe('Base Path Tests:', function() {
     })
   }) // end it
 
+  it('Middleware runs for root path when basepathed (CORS regression)', async function() {
+    const testApi = require('../index')({ base: 'base-path' })
+    testApi.use((req, res, next) => {
+      res.cors()
+      next()
+    })
+    testApi.get('/', async () => ({ status: 'ok' }))
+
+    let _event = Object.assign({},event,{ path: '/base-path/' })
+    let result = await new Promise(r => testApi.run(_event,{},(e,res) => { r(res) }))
+    expect(result.multiValueHeaders).toHaveProperty('access-control-allow-origin')
+  }) // end it
+
 }) // end BASEPATH tests
