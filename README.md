@@ -134,6 +134,8 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
 npm i lambda-api --save
 ```
 
+Releases are published to npm via GitHub Actions using [trusted publishing (OIDC)](https://docs.npmjs.com/trusted-publishers), so every published version ships with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) — a signed, verifiable link back to the exact commit and workflow that built it.
+
 ## Requirements
 
 - AWS Lambda running **Node 8.10+**
