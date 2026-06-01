@@ -207,6 +207,19 @@ class API {
                 routes['ROUTES'][route[i]]['MIDDLEWARE'].stack;
             } // end if
 
+            // Check for a wildcard child middleware (e.g. base path + '/')
+            if (
+              parsedPath.length === 0 &&
+              route[i] !== '*' &&
+              routes['ROUTES'][route[i]] &&
+              routes['ROUTES'][route[i]]['ROUTES'] &&
+              routes['ROUTES'][route[i]]['ROUTES']['*'] &&
+              routes['ROUTES'][route[i]]['ROUTES']['*']['MIDDLEWARE']
+            ) {
+              _stack['*'][method] =
+                routes['ROUTES'][route[i]]['ROUTES']['*']['MIDDLEWARE'].stack;
+            } // end if
+
             // Generate the route/method meta data
             let meta = {
               vars: pathVars,
