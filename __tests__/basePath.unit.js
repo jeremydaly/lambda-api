@@ -60,7 +60,7 @@ describe('Base Path Tests:', function() {
 
   it('Middleware runs for root path when basepathed', async function() {
     const testApi = require('../index')({ base: 'base-path' })
-    testApi.use((req,res,next) => {
+    testApi.use((req, res, next) => {
       res.cors()
       next()
     })
