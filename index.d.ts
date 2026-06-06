@@ -44,21 +44,21 @@ export declare interface App {
   [namespace: string]: Package;
 }
 
-export declare type Middleware = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => void;
-export declare type ErrorHandlingMiddleware = (
-  error: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => void;
+export declare type Middleware<
+  TRequest extends Request = Request,
+  TResponse extends Response = Response
+> = (req: TRequest, res: TResponse, next: NextFunction) => void;
+export declare type ErrorHandlingMiddleware<
+  TRequest extends Request = Request,
+  TResponse extends Response = Response
+> = (error: Error, req: TRequest, res: TResponse, next: NextFunction) => void;
 export declare type ErrorCallback = (error?: Error) => void;
-export declare type HandlerFunction = (
-  req: Request,
-  res: Response,
+export declare type HandlerFunction<
+  TRequest extends Request = Request,
+  TResponse extends Response = Response
+> = (
+  req: TRequest,
+  res: TResponse,
   next?: NextFunction
 ) => void | any | Promise<any>;
 
@@ -196,7 +196,7 @@ export declare class Request {
   [key: string]: any;
 }
 
-export declare class Response {
+export declare class Response<TBody = any> {
   status(code: number): this;
 
   sendStatus(code: number): void;
@@ -219,11 +219,11 @@ export declare class Response {
     callback?: ErrorCallback
   ): Promise<string>;
 
-  send(body: any): void;
+  send(body: TBody): void;
 
-  json(body: any): void;
+  json(body: TBody): void;
 
-  jsonp(body: any): void;
+  jsonp(body: TBody): void;
 
   html(body: any): void;
 
@@ -269,62 +269,181 @@ export declare class API {
   app(namespace: string, package: Package): App;
   app(packages: App): App;
 
-  get(
+  get<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
   ): void;
-  get(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  get<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
+  ): void;
 
-  post(
+  post<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
   ): void;
-  post(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  post<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
+  ): void;
 
-  put(
+  put<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
   ): void;
-  put(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  put<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
+  ): void;
 
-  patch(
+  patch<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
   ): void;
-  patch(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  patch<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
+  ): void;
 
-  delete(
+  delete<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
   ): void;
-  delete(...middlewaresAndHandler: HandlerFunction[]): void;
+  delete<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(...middlewaresAndHandler: HandlerFunction<TRequest, TResponse>[]): void;
 
-  options(
+  options<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
   ): void;
-  options(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  options<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
+  ): void;
 
-  head(
+  head<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
   ): void;
-  head(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  head<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
+  ): void;
 
-  any(
+  any<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
   ): void;
-  any(...middlewaresAndHandler: (Middleware | HandlerFunction)[]): void;
+  any<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
+  ): void;
 
-  METHOD(
+  METHOD<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     method: METHODS | METHODS[],
     path: string,
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
   ): void;
-  METHOD(
+  METHOD<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     method: METHODS | METHODS[],
-    ...middlewaresAndHandler: (Middleware | HandlerFunction)[]
+    ...middlewaresAndHandler: (
+      | Middleware<TRequest, TResponse>
+      | HandlerFunction<TRequest, TResponse>
+    )[]
   ): void;
 
   register(
@@ -336,9 +455,23 @@ export declare class API {
   routes(format: false): string[][];
   routes(): string[][];
 
-  use(path: string, ...middleware: Middleware[]): void;
-  use(paths: string[], ...middleware: Middleware[]): void;
-  use(...middleware: (Middleware | ErrorHandlingMiddleware)[]): void;
+  use<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(path: string, ...middleware: Middleware<TRequest, TResponse>[]): void;
+  use<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(paths: string[], ...middleware: Middleware<TRequest, TResponse>[]): void;
+  use<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
+    ...middleware: (
+      | Middleware<TRequest, TResponse>
+      | ErrorHandlingMiddleware<TRequest, TResponse>
+    )[]
+  ): void;
 
   finally(callback: FinallyFunction): void;
 
