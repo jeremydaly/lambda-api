@@ -47,20 +47,11 @@ export declare interface App {
 export declare type Middleware<
   TRequest extends Request = Request,
   TResponse extends Response = Response
-> = (
-  req: TRequest,
-  res: TResponse,
-  next: NextFunction
-) => void;
+> = (req: TRequest, res: TResponse, next: NextFunction) => void;
 export declare type ErrorHandlingMiddleware<
   TRequest extends Request = Request,
   TResponse extends Response = Response
-> = (
-  error: Error,
-  req: TRequest,
-  res: TResponse,
-  next: NextFunction
-) => void;
+> = (error: Error, req: TRequest, res: TResponse, next: NextFunction) => void;
 export declare type ErrorCallback = (error?: Error) => void;
 export declare type HandlerFunction<
   TRequest extends Request = Request,
@@ -278,14 +269,20 @@ export declare class API {
   app(namespace: string, package: Package): App;
   app(packages: App): App;
 
-  get<TRequest extends Request = Request, TResponse extends Response = Response>(
+  get<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     path: string,
     ...middlewaresAndHandler: (
       | Middleware<TRequest, TResponse>
       | HandlerFunction<TRequest, TResponse>
     )[]
   ): void;
-  get<TRequest extends Request = Request, TResponse extends Response = Response>(
+  get<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     ...middlewaresAndHandler: (
       | Middleware<TRequest, TResponse>
       | HandlerFunction<TRequest, TResponse>
@@ -312,14 +309,20 @@ export declare class API {
     )[]
   ): void;
 
-  put<TRequest extends Request = Request, TResponse extends Response = Response>(
+  put<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     path: string,
     ...middlewaresAndHandler: (
       | Middleware<TRequest, TResponse>
       | HandlerFunction<TRequest, TResponse>
     )[]
   ): void;
-  put<TRequest extends Request = Request, TResponse extends Response = Response>(
+  put<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     ...middlewaresAndHandler: (
       | Middleware<TRequest, TResponse>
       | HandlerFunction<TRequest, TResponse>
@@ -381,28 +384,40 @@ export declare class API {
     )[]
   ): void;
 
-  head<TRequest extends Request = Request, TResponse extends Response = Response>(
+  head<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     path: string,
     ...middlewaresAndHandler: (
       | Middleware<TRequest, TResponse>
       | HandlerFunction<TRequest, TResponse>
     )[]
   ): void;
-  head<TRequest extends Request = Request, TResponse extends Response = Response>(
+  head<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     ...middlewaresAndHandler: (
       | Middleware<TRequest, TResponse>
       | HandlerFunction<TRequest, TResponse>
     )[]
   ): void;
 
-  any<TRequest extends Request = Request, TResponse extends Response = Response>(
+  any<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     path: string,
     ...middlewaresAndHandler: (
       | Middleware<TRequest, TResponse>
       | HandlerFunction<TRequest, TResponse>
     )[]
   ): void;
-  any<TRequest extends Request = Request, TResponse extends Response = Response>(
+  any<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     ...middlewaresAndHandler: (
       | Middleware<TRequest, TResponse>
       | HandlerFunction<TRequest, TResponse>
@@ -440,15 +455,18 @@ export declare class API {
   routes(format: false): string[][];
   routes(): string[][];
 
-  use<TRequest extends Request = Request, TResponse extends Response = Response>(
-    path: string,
-    ...middleware: Middleware<TRequest, TResponse>[]
-  ): void;
-  use<TRequest extends Request = Request, TResponse extends Response = Response>(
-    paths: string[],
-    ...middleware: Middleware<TRequest, TResponse>[]
-  ): void;
-  use<TRequest extends Request = Request, TResponse extends Response = Response>(
+  use<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(path: string, ...middleware: Middleware<TRequest, TResponse>[]): void;
+  use<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(paths: string[], ...middleware: Middleware<TRequest, TResponse>[]): void;
+  use<
+    TRequest extends Request = Request,
+    TResponse extends Response = Response
+  >(
     ...middleware: (
       | Middleware<TRequest, TResponse>
       | ErrorHandlingMiddleware<TRequest, TResponse>

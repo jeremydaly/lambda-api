@@ -210,10 +210,10 @@ const handler: HandlerFunction = (req, res) => {
 };
 expectType<HandlerFunction>(handler);
 
-const typedHandler: HandlerFunction<TypedRequest, Response<TypedResponseBody>> = (
-  req,
-  res
-) => {
+const typedHandler: HandlerFunction<
+  TypedRequest,
+  Response<TypedResponseBody>
+> = (req, res) => {
   const { metrics } = req.context;
   metrics.setProperty('test', true);
   res.json({
