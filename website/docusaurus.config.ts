@@ -85,7 +85,6 @@ const config: Config = {
       },
     ],
     navbar: {
-      title: 'Lambda API',
       logo: {
         alt: 'Lambda API',
         src: 'img/logo.png',
@@ -144,16 +143,8 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'GitHub Discussions',
-              href: 'https://github.com/jeremydaly/lambda-api/discussions',
-            },
-            {
               label: 'Issues',
               href: 'https://github.com/jeremydaly/lambda-api/issues',
-            },
-            {
-              label: 'Stack Overflow',
-              href: 'https://stackoverflow.com/questions/tagged/lambda-api',
             },
           ],
         },
