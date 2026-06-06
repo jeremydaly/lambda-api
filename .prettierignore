@@ -3,3 +3,6 @@ node_modules
 __tests__
 *.test.js
 dist
+
+# Docs site is a self-contained sub-project with its own toolchain
+website

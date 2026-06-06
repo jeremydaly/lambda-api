@@ -1,0 +1,44 @@
+---
+title: Installation
+description: Install Lambda API with npm, yarn, or pnpm and review the runtime requirements.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+Install Lambda API using your preferred package manager:
+
+<Tabs groupId="npm2yarn">
+<TabItem value="npm" label="npm">
+
+```bash
+npm i lambda-api --save
+```
+
+</TabItem>
+<TabItem value="yarn" label="yarn">
+
+```bash
+yarn add lambda-api
+```
+
+</TabItem>
+<TabItem value="pnpm" label="pnpm">
+
+```bash
+pnpm add lambda-api
+```
+
+</TabItem>
+</Tabs>
+
+Releases are published to npm via GitHub Actions using [trusted publishing (OIDC)](https://docs.npmjs.com/trusted-publishers), so every published version ships with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) — a signed, verifiable link back to the exact commit and workflow that built it.
+
+:::info
+lambda-api@v1 is using AWS SDK v3. If you are using AWS SDK v2, please use lambda-api@v0.12.0.
+:::
+
+## Requirements
+
+- AWS Lambda running **Node 8.10+**
+- AWS API Gateway using [Proxy Integration](/docs/deployment/lambda-proxy-integration)

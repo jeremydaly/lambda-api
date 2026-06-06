@@ -1,0 +1,74 @@
+/**
+ * Global styles for the Lambda API documentation site.
+ * Built on Infima (bundled with the Docusaurus classic theme).
+ * Brand palette: warm amber/orange to match the Lambda API logo.
+ */
+
+/* Light mode */
+:root {
+  --ifm-color-primary: #d9690a;
+  --ifm-color-primary-dark: #c35e09;
+  --ifm-color-primary-darker: #b85909;
+  --ifm-color-primary-darkest: #984907;
+  --ifm-color-primary-light: #ef740d;
+  --ifm-color-primary-lighter: #f57f1c;
+  --ifm-color-primary-lightest: #f7963f;
+
+  --ifm-code-font-size: 95%;
+  --ifm-font-family-base:
+    system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --docusaurus-highlighted-code-line-bg: rgba(217, 105, 10, 0.1);
+
+  --lambda-hero-gradient: linear-gradient(135deg, #d9690a 0%, #f7963f 100%);
+  --lambda-hero-bg: #fff8f1;
+  --lambda-card-border: rgba(217, 105, 10, 0.18);
+}
+
+/* Dark mode — brighter amber so it glows on warm-tinted dark surfaces. */
+[data-theme='dark'] {
+  --ifm-color-primary: #ff9f43;
+  --ifm-color-primary-dark: #ff9020;
+  --ifm-color-primary-darker: #ff880f;
+  --ifm-color-primary-darkest: #db6e00;
+  --ifm-color-primary-light: #ffae66;
+  --ifm-color-primary-lighter: #ffb677;
+  --ifm-color-primary-lightest: #ffceaa;
+
+  --ifm-background-color: #16110c;
+  --ifm-background-surface-color: #1f1812;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 159, 67, 0.15);
+
+  --lambda-hero-gradient: linear-gradient(135deg, #db6e00 0%, #ff9f43 100%);
+  --lambda-hero-bg: #120d08;
+  --lambda-card-border: rgba(255, 159, 67, 0.18);
+}
+
+/* Crisp wordmark logo in the navbar */
+.navbar__logo {
+  height: 1.75rem;
+}
+
+/* Inline code chips pick up a subtle brand tint */
+:not(pre) > code {
+  border-color: var(--lambda-card-border);
+}
+
+/* Footer reads as warm-dark in both color modes */
+.footer--dark {
+  --ifm-footer-background-color: #120d08;
+}
+
+/* Pack the footer link columns together on the left instead of letting
+   them stretch to fill the full width (keeps "More" next to "Docs"). */
+.footer__links {
+  justify-content: flex-start;
+}
+
+.footer__col {
+  flex: 0 1 auto;
+  /* Infima's .col forces width:100%, which makes each footer column fill the
+     row and wrap. Reset so columns size to their content and sit side by side. */
+  width: auto;
+  max-width: none;
+  margin-right: 5rem;
+}

@@ -1,0 +1,61 @@
+---
+title: Quick Start
+description: Create your first Lambda API handler in JavaScript or TypeScript and run it on AWS Lambda.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+Getting started with Lambda API takes just a few lines of code. Require (or import) the framework, instantiate it, define a route, and wire it up to your Lambda handler:
+
+<Tabs groupId="language">
+<TabItem value="js" label="JavaScript">
+
+```javascript
+// Require the framework and instantiate it
+const api = require('lambda-api')();
+
+// Define a route
+api.get('/status', async (req, res) => {
+  return { status: 'ok' };
+});
+
+// Declare your Lambda handler
+exports.handler = async (event, context) => {
+  // Run the request
+  return await api.run(event, context);
+};
+```
+
+</TabItem>
+<TabItem value="ts" label="TypeScript">
+
+```typescript
+// import AWS Lambda types
+import { APIGatewayEvent, Context } from 'aws-lambda';
+// import Lambda API default function
+import createAPI from 'lambda-api';
+
+// instantiate framework
+const api = createAPI();
+
+// Define a route
+api.get('/status', async (req, res) => {
+  return { status: 'ok' };
+});
+
+// Declare your Lambda handler
+exports.run = async (event: APIGatewayEvent, context: Context) => {
+  // Run the request
+  return await api.run(event, context);
+};
+```
+
+</TabItem>
+</Tabs>
+
+For a full tutorial see [How To: Build a Serverless API with Serverless, AWS Lambda and Lambda API](https://www.jeremydaly.com/build-serverless-api-serverless-aws-lambda-lambda-api/).
+
+:::tip
+Next, learn how to define routes for every HTTP method in [Routes and Methods](/docs/core-concepts/routes-and-methods).
+:::
