@@ -111,6 +111,16 @@ api.get('/s3Path', function(req,res) {
   res.redirect('s3://my-test-bucket/test/test.txt')
 })
 
+// Issue #149: removeHeader should strip a response Authorization header before redirecting
+api.get('/redirectRemoveAuth', function(req,res) {
+  res.header('Authorization', 'Bearer SECRET').removeHeader('authorization').redirect('https://example.com/signed-url')
+})
+
+// Issue #149: the incoming request Authorization header must never leak into the redirect response
+api.get('/redirectKeepsRequestClean', function(req,res) {
+  res.redirect('https://example.com/signed-url')
+})
+
 api3.get('/test', function(req,res) {
   res.send({ object: true })
 })
@@ -259,6 +269,20 @@ describe('Response Tests:', function() {
       isBase64Encoded: false
     })
     expect(stub.lastCall.args[1]).toEqual({ Bucket: 'my-test-bucket', Key: 'test/test.txt', Expires: 900 })
+  }) // end it
+
+  it('Redirect (removeHeader strips response Authorization header - issue #149)', async function() {
+    let _event = Object.assign({},event,{ path: '/redirectRemoveAuth' })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['text/html'], 'location': ['https://example.com/signed-url'] }, statusCode: 302, body: '<p>302 Redirecting to <a href="https://example.com/signed-url">https://example.com/signed-url</a></p>', isBase64Encoded: false })
+    expect(result.multiValueHeaders).not.toHaveProperty('authorization')
+  }) // end it
+
+  it('Redirect (request Authorization header is not leaked into the response - issue #149)', async function() {
+    let _event = Object.assign({},event,{ path: '/redirectKeepsRequestClean', multiValueHeaders: { authorization: ['Bearer CLIENT-TOKEN'] } })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['text/html'], 'location': ['https://example.com/signed-url'] }, statusCode: 302, body: '<p>302 Redirecting to <a href="https://example.com/signed-url">https://example.com/signed-url</a></p>', isBase64Encoded: false })
+    expect(result.multiValueHeaders).not.toHaveProperty('authorization')
   }) // end it
 
 

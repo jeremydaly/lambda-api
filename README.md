@@ -662,6 +662,8 @@ api.get('/redirectToS3File', (req, res) => {
 });
 ```
 
+**NOTE:** `removeHeader()` only affects the **response** headers Lambda API sends back. Lambda API never copies the incoming request's `Authorization` header onto the response, so `res.removeHeader('authorization')` has nothing to strip in that case. If a redirect to a signed S3 URL fails because an `Authorization` header is being forwarded, that header is being re-sent by your **HTTP client** when it follows the `3xx` to the signed URL (S3 rejects requests that combine an `Authorization` header with query-string signing). Because that happens on the client's follow-up request after Lambda API has already responded, it cannot be removed server-side. Configure your client to drop `Authorization` on cross-origin redirects, or return the [`getLink()`](#getlinks3path--expires--callback) URL in the response body for the client to fetch directly instead of redirecting.
+
 ### cors([options])
 
 Convenience method for adding [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) headers to responses. An optional `options` object can be passed in to customize the defaults.
