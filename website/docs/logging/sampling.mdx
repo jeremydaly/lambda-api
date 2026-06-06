@@ -1,0 +1,86 @@
+---
+title: Sampling
+description: Periodically trace full request executions with Lambda API log sampling rules.
+---
+
+Sampling allows you to periodically generate log entries for all possible severities within a single request execution. All of the log entries will be written to CloudWatch Logs and can be used to trace an entire request. This can be used for debugging, metric samples, resource response time sampling, etc.
+
+Sampling can be enabled by adding a `sampling` property to the `logger` configuration object. A value of `true` will enable the default sampling rule. The default can be changed by passing in a configuration object with the following available _optional_ properties:
+
+| Property | Type     | Description                                                              | Default |
+| -------- | -------- | ------------------------------------------------------------------------ | ------- |
+| target   | `number` | The minimum number of samples per `period`.                              | 1       |
+| rate     | `number` | The percentage of samples to be taken during the `period`.               | 0.1     |
+| period   | `number` | Number of **seconds** representing the duration of each sampling period. | 60      |
+
+The example below would sample at least `2` requests every `30` seconds as well as an additional `0.1` (10%) of all other requests during that period. Lambda API tracks the velocity of requests and attempts to distribute the samples as evenly as possible across the specified `period`.
+
+```javascript
+const api = require('lambda-api')({
+  logger: {
+    sampling: {
+      target: 2,
+      rate: 0.1,
+      period: 30,
+    },
+  },
+});
+```
+
+Additional rules can be added by specifying a `rules` parameter in the `sampling` configuration object. The `rules` should contain an `array` of "rule" objects with the following properties:
+
+| Property | Type                | Description                                                              | Default | Required |
+| -------- | ------------------- | ------------------------------------------------------------------------ | ------- | -------- |
+| route    | `string`            | The route (as defined in a route handler) to apply this rule to.         |         | **Yes**  |
+| target   | `number`            | The minimum number of samples per `period`.                              | 1       | No       |
+| rate     | `number`            | The percentage of samples to be taken during the `period`.               | 0.1     | No       |
+| period   | `number`            | Number of **seconds** representing the duration of each sampling period. | 60      | No       |
+| method   | `string` or `array` | A comma separated list or `array` of HTTP methods to apply this rule to. |         | No       |
+
+The `route` property is the only value required and must match a route's path definition (e.g. `/user/:userId`, not `/user/123`) to be activated. Routes can also use wildcards at the end of the route to match multiple routes (e.g. `/user/*` would match `/user/:userId` _AND_ `/user/:userId/tags`). A list of `method`s can also be supplied that would limit the rule to just those HTTP methods. A comma separated `string` or an `array` will be properly parsed.
+
+Sampling rules can be used to disable sampling on certain routes by setting the `target` and `rate` to `0`. For example, if you had a `/status` route that you didn't want to be sampled, you would use the following configuration:
+
+```javascript
+const api = require('lambda-api')({
+  logger: {
+    sampling: {
+      rules: [{ route: '/status', target: 0, rate: 0 }],
+    },
+  },
+});
+```
+
+You could also use sampling rules to enable sampling on certain routes:
+
+```javascript
+const api = require('lambda-api')({
+  logger: {
+    sampling: {
+      rules: [
+        { route: '/user', target: 1, rate: 0.1 }, // enable for /user route
+        { route: '/posts/*', target: 1, rate: 0.1 }, // enable for all routes that start with /posts
+      ],
+      target: 0, // disable sampling default target
+      rate: 0, // disable sampling default rate
+    },
+  },
+});
+```
+
+If you'd like to disable sampling for `GET` and `POST` requests to user:
+
+```javascript
+const api = require('lambda-api')({
+  logger: {
+    sampling: {
+      rules: [
+        // disable GET and POST on /user route
+        { route: '/user', target: 0, rate: 0, method: ['GET', 'POST'] },
+      ],
+    },
+  },
+});
+```
+
+Any combination of rules can be provided to customize sampling behavior. Note that each rule tracks requests and velocity separately, which could limit the number of samples for infrequently accessed routes.
