@@ -40,7 +40,7 @@ Express.js, Fastify, Koa, Restify, and Hapi are just a few of the many amazing w
 
 These other frameworks are extremely powerful, but that benefit comes with the steep price of requiring several additional Node.js modules. Not only is this a bit of a security issue (see Beware of Third-Party Packages in [Securing Serverless](https://www.jeremydaly.com/securing-serverless-a-newbies-guide/)), but it also adds bloat to your codebase, filling your `node_modules` directory with a ton of extra files. For serverless applications that need to load quickly, all of these extra dependencies slow down execution and use more memory than necessary. Express.js has **30 dependencies**, Fastify has **12**, and Hapi has **17**! These numbers don't even include their dependencies' dependencies.
 
-Lambda API has **ZERO** dependencies. _None_. _Zip_. _Zilch_.
+Lambda API ships with **ZERO required dependencies**. _None_. _Zip_. _Zilch_. The only extras are the AWS SDK v3 S3 packages (`@aws-sdk/client-s3` and `@aws-sdk/s3-request-presigner`), declared as **optional peer dependencies**. They power the built-in S3 file helpers ([`sendFile()`](#sendfilefile--options--callback), [`getLink()`](#getlinks3path--expires--callback), and S3 redirects). Because they're optional, installing Lambda API won't pull them in — npm, pnpm, Yarn, and Bun all skip optional peer dependencies, so your `node_modules` stays clean unless you install them yourself. And because the S3 client is loaded lazily (only when an S3 helper actually runs), bundlers can safely treat the AWS SDK as external when you don't use those features. See [Installation](#installation) for details.
 
 Lambda API was written to be _extremely lightweight_ and built specifically for **SERVERLESS** applications using AWS Lambda and API Gateway. It provides support for API routing, serving up HTML pages, issuing redirects, serving binary files and much more. Worried about observability? Lambda API has a built-in logging engine that can even periodically sample requests for things like tracing and benchmarking. It has a powerful middleware and error handling system, allowing you to implement just about anything you can dream of. Best of all, it was designed to work with Lambda's Proxy Integration, automatically handling all the interaction with API Gateway for you. It parses **REQUESTS** and formats **RESPONSES**, allowing you to focus on your application's core functionality, instead of fiddling with inputs and outputs.
 
@@ -133,6 +133,14 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
 ```
 npm i lambda-api --save
 ```
+
+Lambda API has no required runtime dependencies. The S3 file helpers ([`sendFile()`](#sendfilefile--options--callback), [`getLink()`](#getlinks3path--expires--callback), and S3 redirects) rely on the AWS SDK v3, which is declared as an **optional peer dependency**. If you use those features, install the SDK packages alongside Lambda API:
+
+```
+npm i @aws-sdk/client-s3 @aws-sdk/s3-request-presigner --save
+```
+
+If you don't use the S3 helpers, you can skip this — nothing else in Lambda API touches the AWS SDK. The S3 client is loaded lazily, so even when the SDK is present in your tree, bundlers can mark it as external and leave it out of the bundle.
 
 Releases are published to npm via GitHub Actions using [trusted publishing (OIDC)](https://docs.npmjs.com/trusted-publishers), so every published version ships with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) — a signed, verifiable link back to the exact commit and workflow that built it.
 
