@@ -140,15 +140,6 @@ const config: Config = {
           ],
         },
         {
-          title: 'Community',
-          items: [
-            {
-              label: 'Issues',
-              href: 'https://github.com/jeremydaly/lambda-api/issues',
-            },
-          ],
-        },
-        {
           title: 'More',
           items: [
             {
@@ -158,14 +149,6 @@ const config: Config = {
             {
               label: 'npm',
               href: 'https://www.npmjs.com/package/lambda-api',
-            },
-            {
-              label: 'Releases',
-              href: 'https://github.com/jeremydaly/lambda-api/releases',
-            },
-            {
-              label: 'License (MIT)',
-              href: 'https://github.com/jeremydaly/lambda-api/blob/main/LICENSE',
             },
           ],
         },

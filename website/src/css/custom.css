@@ -57,3 +57,18 @@
 .footer--dark {
   --ifm-footer-background-color: #120d08;
 }
+
+/* Pack the footer link columns together on the left instead of letting
+   them stretch to fill the full width (keeps "More" next to "Docs"). */
+.footer__links {
+  justify-content: flex-start;
+}
+
+.footer__col {
+  flex: 0 1 auto;
+  /* Infima's .col forces width:100%, which makes each footer column fill the
+     row and wrap. Reset so columns size to their content and sit side by side. */
+  width: auto;
+  max-width: none;
+  margin-right: 5rem;
+}
