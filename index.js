@@ -16,6 +16,8 @@ const prettyPrint = require('./lib/prettyPrint');
 class API {
   constructor(props) {
     this._version = props && props.version ? props.version : 'v1';
+    this._lowercaseHeaders =
+      props && props._lowercaseHeaders ? props._lowercaseHeaders : true;
     this._base =
       props && props.base && typeof props.base === 'string'
         ? props.base.trim()
