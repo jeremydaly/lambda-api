@@ -60,8 +60,7 @@ class FileError extends Error {
   }
 }
 
-// Export the response object
-module.exports = {
+export {
   RouteError,
   MethodError,
   ConfigurationError,

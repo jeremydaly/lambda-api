@@ -5,9 +5,11 @@
  * @license MIT
  */
 
-const QS = require('querystring'); // Require the querystring library
-const crypto = require('crypto'); // Require Node.js crypto library
-const { FileError } = require('./errors'); // Require custom errors
+import QS from 'querystring';
+import crypto from 'crypto';
+import { FileError } from './errors.js';
+import mimeMap from './mimemap.js';
+import statusCodes from './statusCodes.js';
 
 const entityMap = {
   '&': '&amp;',
@@ -17,7 +19,8 @@ const entityMap = {
   "'": '&#39;',
 };
 
-exports.escapeHtml = (html) => html.replace(/[&<>"']/g, (s) => entityMap[s]);
+export const escapeHtml = (html) =>
+  html.replace(/[&<>"']/g, (s) => entityMap[s]);
 
 // From encodeurl by Douglas Christopher Wilson
 let ENCODE_CHARS_REGEXP =
@@ -26,7 +29,7 @@ let UNMATCHED_SURROGATE_PAIR_REGEXP =
   /(^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]|[\uD800-\uDBFF]([^\uDC00-\uDFFF]|$)/g;
 let UNMATCHED_SURROGATE_PAIR_REPLACE = '$1\uFFFD$2';
 
-exports.encodeUrl = (url) =>
+export const encodeUrl = (url) =>
   String(url)
     .replace(UNMATCHED_SURROGATE_PAIR_REGEXP, UNMATCHED_SURROGATE_PAIR_REPLACE)
     .replace(ENCODE_CHARS_REGEXP, encodeURI);
@@ -42,9 +45,9 @@ const encodeBody = (body, serializer) => {
     : '';
 };
 
-exports.encodeBody = encodeBody;
+export { encodeBody };
 
-exports.parsePath = (path) => {
+export const parsePath = (path) => {
   return path
     ? path
         .trim()
@@ -54,7 +57,7 @@ exports.parsePath = (path) => {
     : [];
 };
 
-exports.parseBody = (body) => {
+export const parseBody = (body) => {
   try {
     return JSON.parse(body);
   } catch (e) {
@@ -86,7 +89,7 @@ const parseAuthValue = (type, value) => {
   }
 };
 
-exports.parseAuth = (authStr) => {
+export const parseAuth = (authStr) => {
   let auth = authStr && typeof authStr === 'string' ? authStr.split(' ') : [];
   return auth.length > 1 &&
     ['Bearer', 'Basic', 'Digest', 'OAuth'].includes(auth[0])
@@ -94,9 +97,7 @@ exports.parseAuth = (authStr) => {
     : { type: 'none', value: null };
 };
 
-const mimeMap = require('./mimemap.js'); // MIME Map
-
-exports.mimeLookup = (input, custom = {}) => {
+export const mimeLookup = (input, custom = {}) => {
   let type = input.trim().replace(/^\./, '');
 
   // If it contains a slash, return unmodified
@@ -109,9 +110,7 @@ exports.mimeLookup = (input, custom = {}) => {
   }
 };
 
-const statusCodes = require('./statusCodes.js'); // MIME Map
-
-exports.statusLookup = (status) => {
+export const statusLookup = (status) => {
   return status in statusCodes ? statusCodes[status] : 'Unknown';
 };
 
@@ -134,10 +133,10 @@ const extractRoutes = (routes, table = []) => {
   return table;
 };
 
-exports.extractRoutes = extractRoutes;
+export { extractRoutes };
 
 // Generate an Etag for the supplied value
-exports.generateEtag = (data) =>
+export const generateEtag = (data) =>
   crypto
     .createHash('sha256')
     .update(encodeBody(data))
@@ -145,27 +144,27 @@ exports.generateEtag = (data) =>
     .substr(0, 32);
 
 // Check if valid S3 path
-exports.isS3 = (path) => /^s3:\/\/.+\/.+/i.test(path);
+export const isS3 = (path) => /^s3:\/\/.+\/.+/i.test(path);
 
 // Parse S3 path
-exports.parseS3 = (path) => {
-  if (!this.isS3(path)) throw new FileError('Invalid S3 path', { path });
+export const parseS3 = (path) => {
+  if (!isS3(path)) throw new FileError('Invalid S3 path', { path });
   let s3object = path.replace(/^s3:\/\//i, '').split('/');
   return { Bucket: s3object.shift(), Key: s3object.join('/') };
 };
 
 // Deep Merge
-exports.deepMerge = (a, b) => {
+export const deepMerge = (a, b) => {
   Object.keys(b).forEach((key) => {
     if (key === '__proto__') return;
     if (typeof b[key] !== 'object') return Object.assign(a, b);
-    return key in a ? this.deepMerge(a[key], b[key]) : Object.assign(a, b);
+    return key in a ? deepMerge(a[key], b[key]) : Object.assign(a, b);
   });
   return a;
 };
 
 // Concatenate arrays when merging two objects
-exports.mergeObjects = (obj1, obj2) =>
+export const mergeObjects = (obj1, obj2) =>
   Object.keys(Object.assign({}, obj1, obj2)).reduce((acc, key) => {
     if (
       obj1[key] &&
@@ -185,11 +184,11 @@ exports.mergeObjects = (obj1, obj2) =>
   }, {});
 
 // Concats values from an array to ',' separated string
-exports.fromArray = (val) =>
+export const fromArray = (val) =>
   val && val instanceof Array ? val.toString() : undefined;
 
 // Stringify multi-value headers
-exports.stringifyHeaders = (headers) =>
+export const stringifyHeaders = (headers) =>
   Object.keys(headers).reduce(
     (acc, key) =>
       Object.assign(acc, {
@@ -202,7 +201,7 @@ exports.stringifyHeaders = (headers) =>
     {}
   );
 
-exports.streamToBuffer = (stream) =>
+export const streamToBuffer = (stream) =>
   new Promise((resolve, reject) => {
     const chunks = [];
     stream.on('data', (chunk) => chunks.push(chunk));

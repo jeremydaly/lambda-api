@@ -9,11 +9,11 @@
 // IDEA: response length
 // https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html#context-variable-reference
 
-const UTILS = require('./utils'); // Require utils library
-const { ConfigurationError } = require('./errors'); // Require custom errors
+import * as UTILS from './utils.js';
+import { ConfigurationError } from './errors.js';
 
 // Config logger
-exports.config = (config, levels) => {
+export const config = (config, levels) => {
   let cfg = config ? config : {};
 
   // Add custom logging levels
@@ -195,7 +195,7 @@ exports.config = (config, levels) => {
 };
 
 // Determine if we should sample this request
-exports.sampler = (app, req) => {
+export const sampler = (app, req) => {
   if (app._logger.sampling) {
     // Default level to false
     let level = false;

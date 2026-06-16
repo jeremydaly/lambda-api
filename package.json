@@ -2,18 +2,42 @@
   "name": "lambda-api",
   "version": "0.0.0-development",
   "description": "Lightweight web framework for your serverless applications",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "default": "./dist/cjs/index.js"
+    },
+    "./lib/*": {
+      "import": "./dist/esm/lib/*.js",
+      "require": "./dist/cjs/lib/*.js",
+      "default": "./dist/cjs/lib/*.js"
+    },
+    "./lib/*.js": {
+      "import": "./dist/esm/lib/*.js",
+      "require": "./dist/cjs/lib/*.js",
+      "default": "./dist/cjs/lib/*.js"
+    }
+  },
   "scripts": {
-    "test": "tsd && jest unit",
+    "clean": "rm -rf dist",
+    "build:cjs": "swc src -d dist/cjs --config-file .swcrc.cjs.json --strip-leading-paths",
+    "build:esm": "swc src -d dist/esm --config-file .swcrc.esm.json --copy-files --strip-leading-paths",
+    "build": "npm run clean && npm run build:cjs && npm run build:esm",
+    "test": "npm run build && tsd && jest unit",
     "test:types": "tsd",
-    "test:unit": "jest unit",
+    "test:unit": "npm run build && jest unit",
+    "test:compat": "npm run build && jest module-compat",
     "lint:check": "eslint .",
     "lint:fix": "eslint . --fix",
     "prettier:check": "prettier --check .",
     "prettier:write": "prettier --write .",
-    "test-cov": "jest unit --coverage",
-    "test-ci": "npm run lint:check && npm run prettier:check && jest unit --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "test-cov": "npm run build && jest unit --coverage",
+    "test-ci": "npm run lint:check && npm run prettier:check && npm run build && jest unit --coverage && jest module-compat && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "prepublishOnly": "npm test && npm run lint:check",
     "changelog": "git log $(git describe --tags --abbrev=0)..HEAD --oneline"
   },
@@ -53,6 +77,8 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "3.470.0",
     "@aws-sdk/s3-request-presigner": "3.470.0",
+    "@swc/cli": "^0.6.0",
+    "@swc/core": "^1.11.0",
     "@types/aws-lambda": "^8.10.51",
     "@types/node": "^10.17.21",
     "bluebird": "^3.7.2",
@@ -65,8 +91,7 @@
     "tsd": "^0.31.2"
   },
   "files": [
-    "index.js",
-    "index.d.ts",
-    "lib/"
+    "dist/",
+    "index.d.ts"
   ]
 }

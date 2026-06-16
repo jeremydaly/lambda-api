@@ -5,11 +5,11 @@
  * @license MIT
  */
 
-const zlib = require('zlib');
+import zlib from 'zlib';
 
 const defaultEnabledEcodings = ['gzip', 'deflate'];
 
-exports.compress = (input, headers, _enabledEncodings) => {
+export const compress = (input, headers, _enabledEncodings) => {
   const enabledEncodings = new Set(_enabledEncodings || defaultEnabledEcodings);
   const acceptEncodingHeader = headers['accept-encoding'] || '';
   const acceptableEncodings = new Set(

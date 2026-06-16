@@ -5,10 +5,10 @@
  * @license MIT
  */
 
-const QS = require('querystring'); // Require the querystring library
-const UTILS = require('./utils'); // Require utils library
-const LOGGER = require('./logger'); // Require logger library
-const { RouteError, MethodError } = require('./errors'); // Require custom errors
+import QS from 'querystring';
+import * as UTILS from './utils.js';
+import * as LOGGER from './logger.js';
+import { RouteError, MethodError } from './errors.js';
 
 class REQUEST {
   // Create the constructor function.
@@ -355,5 +355,8 @@ class REQUEST {
   }
 } // end REQUEST class
 
-// Export the response object
-module.exports = REQUEST;
+export default REQUEST;
+
+if (typeof module !== 'undefined') {
+  module.exports = REQUEST;
+}

@@ -10,3 +10,6 @@ dump.rdb
 # Coverage reports
 .nyc_output
 coverage
+
+# Build output
+dist

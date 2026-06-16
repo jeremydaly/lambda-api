@@ -5,15 +5,12 @@
  * @license MIT
  */
 
-const UTILS = require('./utils.js');
-
-const fs = require('fs'); // Require Node.js file system
-const path = require('path'); // Require Node.js path
-const compression = require('./compression'); // Require compression lib
-const { ResponseError, FileError, ApiError } = require('./errors'); // Require custom errors
-
-// Lazy load AWS S3 service
-const S3 = () => require('./s3-service');
+import * as UTILS from './utils.js';
+import fs from 'fs';
+import path from 'path';
+import * as compression from './compression.js';
+import { ResponseError, FileError, ApiError } from './errors.js';
+import * as S3 from './s3-service.js';
 
 class RESPONSE {
   // Create the constructor function.
@@ -200,7 +197,7 @@ class RESPONSE {
 
     // getSignedUrl doesn't support .promise()
     return await new Promise((r) =>
-      S3().getSignedUrl('getObject', params, async (e, url) => {
+      S3.getSignedUrl('getObject', params, async (e, url) => {
         if (e) {
           // Execute callback with caught error
           await fn(e);
@@ -341,7 +338,7 @@ class RESPONSE {
           let params = UTILS.parseS3(filepath);
 
           // Attempt to get the object from S3
-          let data = await S3().getObject(params).promise();
+          let data = await S3.getObject(params).promise();
 
           // Set results, type and header
           buffer = data.Body;
@@ -608,5 +605,8 @@ class RESPONSE {
   } // end error
 } // end Response class
 
-// Export the response object
-module.exports = RESPONSE;
+export default RESPONSE;
+
+if (typeof module !== 'undefined') {
+  module.exports = RESPONSE;
+}
