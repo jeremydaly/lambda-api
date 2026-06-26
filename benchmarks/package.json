@@ -1,0 +1,23 @@
+{
+  "name": "lambda-api-benchmarks",
+  "version": "0.0.0",
+  "private": true,
+  "description": "In-process micro-benchmarks comparing lambda-api against other AWS Lambda web frameworks (issue #34)",
+  "scripts": {
+    "bench": "node run.js",
+    "bench:md": "node run.js --md results/RESULTS.md",
+    "bench:json": "node run.js --json results/raw.json",
+    "bench:release": "node run.js --md results/RESULTS.md --json results/raw.json --update-readme"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@fastify/aws-lambda": "^6.4.0",
+    "@vendia/serverless-express": "^4.12.6",
+    "express": "^4.21.2",
+    "fastify": "^5.8.5",
+    "hono": "^4.12.27",
+    "mitata": "^1.0.34"
+  }
+}

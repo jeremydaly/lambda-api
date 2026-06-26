@@ -1523,3 +1523,69 @@ Contributions, ideas and bug reports are welcome and greatly appreciated. Please
 ## Are you using Lambda API?
 
 If you're using Lambda API and finding it useful, hit me up on [Twitter](https://twitter.com/jeremy_daly) or email me at contact[at]jeremydaly.com. I'd love to hear your stories, ideas, and even your complaints!
+
+<!-- BENCHMARKS:START -->
+
+## Benchmarks
+
+In-process micro-benchmarks of lambda-api against other AWS Lambda web frameworks. The numbers measure **framework overhead only** (event → route → middleware → response, in a single Node VM) — not end-to-end Lambda timings. Absolute values vary by machine, so compare the **relative** ranking rather than the raw ops/sec. See [`benchmarks/`](./benchmarks) for the methodology and how to reproduce.
+
+_Generated 2026-06-26 21:07:24 UTC · lambda-api v0.0.0-development · Node 20.19.5 · Apple M4 Max (16 cores) · darwin/arm64_
+
+#### API Gateway REST (v1) — throughput (ops/sec, higher is better)
+
+| Framework                      | get-json  | path-param | post-json | routing-50 | not-found |
+| ------------------------------ | --------- | ---------- | --------- | ---------- | --------- |
+| baseline                       | 5,765,495 | 5,514,860  | 2,561,648 | 4,530,735  | 4,646,303 |
+| lambda-api `0.0.0-development` | 215,921   | 200,518    | 191,027   | 198,443    | 81,754    |
+| fastify `5.8.5`                | 54,972    | 52,420     | 13,758    | 56,234     | 49,800    |
+| hono `4.12.27`                 | 48,833    | 55,054     | 36,955    | 59,643     | 61,384    |
+| serverless-express `4.22.2`    | 25,569    | 27,466     | 15,432    | 25,636     | 27,325    |
+
+<details><summary>API Gateway REST (v1) — latency (avg / p99, µs, lower is better)</summary>
+
+| Framework                      | get-json    | path-param  | post-json   | routing-50  | not-found   |
+| ------------------------------ | ----------- | ----------- | ----------- | ----------- | ----------- |
+| baseline                       | 0.17 / 0.22 | 0.18 / 0.25 | 0.39 / 0.50 | 0.22 / 0.28 | 0.22 / 0.27 |
+| lambda-api `0.0.0-development` | 4.63 / 4.84 | 4.99 / 5.24 | 5.23 / 5.80 | 5.04 / 5.25 | 12.2 / 12.3 |
+| fastify `5.8.5`                | 18.2 / 68.8 | 19.1 / 20.7 | 72.7 / 151  | 17.8 / 23.4 | 20.1 / 19.7 |
+| hono `4.12.27`                 | 20.5 / 118  | 18.2 / 20.8 | 27.1 / 27.4 | 16.8 / 18.0 | 16.3 / 17.5 |
+| serverless-express `4.22.2`    | 39.1 / 126  | 36.4 / 38.2 | 64.8 / 194  | 39.0 / 103  | 36.6 / 37.7 |
+
+</details>
+
+#### API Gateway HTTP (v2) — throughput (ops/sec, higher is better)
+
+| Framework                      | get-json  | path-param | post-json | routing-50 | not-found |
+| ------------------------------ | --------- | ---------- | --------- | ---------- | --------- |
+| baseline                       | 4,838,095 | 4,425,059  | 2,283,297 | 3,864,414  | 4,039,412 |
+| lambda-api `0.0.0-development` | 196,317   | 190,996    | 185,950   | 187,732    | 79,295    |
+| hono `4.12.27`                 | 70,609    | 67,280     | 41,784    | 67,375     | 68,399    |
+| fastify `5.8.5`                | 44,946    | 39,743     | 14,657    | 56,339     | 39,648    |
+| serverless-express `4.22.2`    | 27,309    | 24,706     | 17,450    | 25,505     | 28,701    |
+
+<details><summary>API Gateway HTTP (v2) — latency (avg / p99, µs, lower is better)</summary>
+
+| Framework                      | get-json    | path-param  | post-json   | routing-50  | not-found   |
+| ------------------------------ | ----------- | ----------- | ----------- | ----------- | ----------- |
+| baseline                       | 0.21 / 0.44 | 0.23 / 0.42 | 0.44 / 0.69 | 0.26 / 0.47 | 0.25 / 0.50 |
+| lambda-api `0.0.0-development` | 5.09 / 5.28 | 5.24 / 5.41 | 5.38 / 5.56 | 5.33 / 5.62 | 12.6 / 12.8 |
+| hono `4.12.27`                 | 14.2 / 15.2 | 14.9 / 16.3 | 23.9 / 25.6 | 14.8 / 15.9 | 14.6 / 15.9 |
+| fastify `5.8.5`                | 22.2 / 23.4 | 25.2 / 30.4 | 68.2 / 130  | 17.7 / 23.0 | 25.2 / 28.2 |
+| serverless-express `4.22.2`    | 36.6 / 39.2 | 40.5 / 53.5 | 57.3 / 58.8 | 39.2 / 40.7 | 34.8 / 37.0 |
+
+</details>
+
+#### History
+
+Throughput for the `get-json` scenario on V2 events (ops/sec), one row per release:
+
+<!-- BENCHMARKS:HISTORY:START -->
+
+| version           | date       | node    | baseline  | lambda-api | fastify | hono   | express |
+| ----------------- | ---------- | ------- | --------- | ---------- | ------- | ------ | ------- |
+| 0.0.0-development | 2026-06-26 | 20.19.5 | 4,838,095 | 196,317    | 44,946  | 70,609 | 27,309  |
+
+<!-- BENCHMARKS:HISTORY:END -->
+
+<!-- BENCHMARKS:END -->
