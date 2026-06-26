@@ -1,0 +1,75 @@
+name: 'Release'
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g. 1.2.0 or v1.2.0)'
+        required: true
+        type: string
+
+# Least-privilege by default; the publish job opts into id-token below.
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: 'Test (Node ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [14, 16, 18, 20, 22]
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v4
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+      - name: Install NPM (if node 14)
+        run: if [ "${{ matrix.node }}" == "14" ]; then npm install -g npm@9; fi
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm run test
+
+  publish:
+    name: 'Publish to npm'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required for npm OIDC trusted publishing + provenance
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v4
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Ensure npm supports trusted publishing
+        # Trusted publishing requires npm >= 11.5.1.
+        run: npm install -g npm@latest
+      - name: Install dependencies
+        run: npm ci
+      - name: Set version to publish
+        # package.json ships a 0.0.0-development placeholder; the real version
+        # comes from the manual input (workflow_dispatch) or the release tag,
+        # with any leading "v" stripped (e.g. v1.2.0 -> 1.2.0).
+        run: |
+          VERSION="${INPUT_VERSION:-$TAG}"
+          if [ -z "$VERSION" ]; then
+            echo "::error::No version provided" && exit 1
+          fi
+          npm pkg set version="${VERSION#v}"
+          echo "Publishing version ${VERSION#v}"
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          TAG: ${{ github.event.release.tag_name }}
+      - name: Publish to npm
+        # No NODE_AUTH_TOKEN: auth happens via OIDC, provenance is automatic.
+        run: npm publish

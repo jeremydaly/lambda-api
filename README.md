@@ -40,7 +40,7 @@ Express.js, Fastify, Koa, Restify, and Hapi are just a few of the many amazing w
 
 These other frameworks are extremely powerful, but that benefit comes with the steep price of requiring several additional Node.js modules. Not only is this a bit of a security issue (see Beware of Third-Party Packages in [Securing Serverless](https://www.jeremydaly.com/securing-serverless-a-newbies-guide/)), but it also adds bloat to your codebase, filling your `node_modules` directory with a ton of extra files. For serverless applications that need to load quickly, all of these extra dependencies slow down execution and use more memory than necessary. Express.js has **30 dependencies**, Fastify has **12**, and Hapi has **17**! These numbers don't even include their dependencies' dependencies.
 
-Lambda API has **ZERO** dependencies. _None_. _Zip_. _Zilch_.
+Lambda API ships with **ZERO required dependencies**. _None_. _Zip_. _Zilch_. The only extras are the AWS SDK v3 S3 packages (`@aws-sdk/client-s3` and `@aws-sdk/s3-request-presigner`), declared as **optional peer dependencies**. They power the built-in S3 file helpers ([`sendFile()`](#sendfilefile--options--callback), [`getLink()`](#getlinks3path--expires--callback), and S3 redirects). Because they're optional, installing Lambda API won't pull them in — npm, pnpm, Yarn, and Bun all skip optional peer dependencies, so your `node_modules` stays clean unless you install them yourself. And because the S3 client is loaded lazily (only when an S3 helper actually runs), bundlers can safely treat the AWS SDK as external when you don't use those features. See [Installation](#installation) for details.
 
 Lambda API was written to be _extremely lightweight_ and built specifically for **SERVERLESS** applications using AWS Lambda and API Gateway. It provides support for API routing, serving up HTML pages, issuing redirects, serving binary files and much more. Worried about observability? Lambda API has a built-in logging engine that can even periodically sample requests for things like tracing and benchmarking. It has a powerful middleware and error handling system, allowing you to implement just about anything you can dream of. Best of all, it was designed to work with Lambda's Proxy Integration, automatically handling all the interaction with API Gateway for you. It parses **REQUESTS** and formats **RESPONSES**, allowing you to focus on your application's core functionality, instead of fiddling with inputs and outputs.
 
@@ -133,6 +133,16 @@ Whatever you decide is best for your use case, **Lambda API** is there to suppor
 ```
 npm i lambda-api --save
 ```
+
+Lambda API has no required runtime dependencies. The S3 file helpers ([`sendFile()`](#sendfilefile--options--callback), [`getLink()`](#getlinks3path--expires--callback), and S3 redirects) rely on the AWS SDK v3, which is declared as an **optional peer dependency**. If you use those features, install the SDK packages alongside Lambda API:
+
+```
+npm i @aws-sdk/client-s3 @aws-sdk/s3-request-presigner --save
+```
+
+If you don't use the S3 helpers, you can skip this — nothing else in Lambda API touches the AWS SDK. The S3 client is loaded lazily, so even when the SDK is present in your tree, bundlers can mark it as external and leave it out of the bundle.
+
+Releases are published to npm via GitHub Actions using [trusted publishing (OIDC)](https://docs.npmjs.com/trusted-publishers), so every published version ships with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) — a signed, verifiable link back to the exact commit and workflow that built it.
 
 ## Requirements
 
@@ -1513,3 +1523,73 @@ Contributions, ideas and bug reports are welcome and greatly appreciated. Please
 ## Are you using Lambda API?
 
 If you're using Lambda API and finding it useful, hit me up on [Twitter](https://twitter.com/jeremy_daly) or email me at contact[at]jeremydaly.com. I'd love to hear your stories, ideas, and even your complaints!
+
+<!-- BENCHMARKS:START -->
+
+## Benchmarks
+
+In-process micro-benchmarks of lambda-api against other AWS Lambda web frameworks. The numbers measure **framework overhead only** (event → route → middleware → response, in a single Node VM) — not end-to-end Lambda timings. Absolute values vary by machine, so compare the **relative** ranking rather than the raw ops/sec. See [`benchmarks/`](./benchmarks) for the methodology and how to reproduce.
+
+_Generated 2026-06-26 21:24:41 UTC · lambda-api v0.0.0-development · Node 20.19.5 · Apple M4 Max (16 cores) · darwin/arm64_
+
+#### API Gateway REST (v1) — throughput (ops/sec, higher is better)
+
+| Framework                      | get-json  | path-param | post-json | routing-50 | not-found |
+| ------------------------------ | --------- | ---------- | --------- | ---------- | --------- |
+| baseline                       | 5,654,874 | 5,513,012  | 2,560,533 | 4,493,436  | 4,620,989 |
+| middy `6.4.5`                  | 1,056,927 | 811,301    | 62,540    | 433,185    | 155,744   |
+| lambda-api `0.0.0-development` | 217,700   | 202,224    | 194,819   | 199,565    | 91,296    |
+| hono `4.12.27`                 | 58,370    | 57,559     | 38,469    | 60,441     | 61,732    |
+| fastify `5.8.5`                | 51,240    | 52,873     | 13,598    | 56,465     | 48,915    |
+| serverless-express `4.22.2`    | 26,732    | 28,082     | 15,997    | 26,940     | 28,643    |
+
+<details><summary>API Gateway REST (v1) — latency (avg / p99, µs, lower is better)</summary>
+
+| Framework                      | get-json    | path-param  | post-json   | routing-50  | not-found   |
+| ------------------------------ | ----------- | ----------- | ----------- | ----------- | ----------- |
+| baseline                       | 0.18 / 0.23 | 0.18 / 0.25 | 0.39 / 0.46 | 0.22 / 0.28 | 0.22 / 0.27 |
+| middy `6.4.5`                  | 0.95 / 2.29 | 1.23 / 1.41 | 16.0 / 16.3 | 2.31 / 2.45 | 6.42 / 6.56 |
+| lambda-api `0.0.0-development` | 4.59 / 4.74 | 4.95 / 5.14 | 5.13 / 5.28 | 5.01 / 5.63 | 11.0 / 11.0 |
+| hono `4.12.27`                 | 17.1 / 69.7 | 17.4 / 18.7 | 26.0 / 30.2 | 16.5 / 17.3 | 16.2 / 18.1 |
+| fastify `5.8.5`                | 19.5 / 95.6 | 18.9 / 20.4 | 73.5 / 152  | 17.7 / 23.4 | 20.4 / 20.4 |
+| serverless-express `4.22.2`    | 37.4 / 118  | 35.6 / 36.8 | 62.5 / 195  | 37.1 / 99.0 | 34.9 / 36.7 |
+
+</details>
+
+#### API Gateway HTTP (v2) — throughput (ops/sec, higher is better)
+
+| Framework                      | get-json  | path-param | post-json | routing-50 | not-found |
+| ------------------------------ | --------- | ---------- | --------- | ---------- | --------- |
+| baseline                       | 4,830,598 | 4,424,847  | 2,237,039 | 3,946,604  | 3,994,042 |
+| middy `6.4.5`                  | 1,032,952 | 791,846    | 55,802    | 372,581    | 148,189   |
+| lambda-api `0.0.0-development` | 201,969   | 187,395    | 183,887   | 195,975    | 88,721    |
+| hono `4.12.27`                 | 70,859    | 62,001     | 40,860    | 65,895     | 67,978    |
+| fastify `5.8.5`                | 45,114    | 38,232     | 12,973    | 45,687     | 49,536    |
+| serverless-express `4.22.2`    | 26,837    | 27,753     | 17,533    | 25,565     | 29,008    |
+
+<details><summary>API Gateway HTTP (v2) — latency (avg / p99, µs, lower is better)</summary>
+
+| Framework                      | get-json    | path-param  | post-json   | routing-50  | not-found   |
+| ------------------------------ | ----------- | ----------- | ----------- | ----------- | ----------- |
+| baseline                       | 0.21 / 0.47 | 0.23 / 0.44 | 0.45 / 0.71 | 0.25 / 0.48 | 0.25 / 0.51 |
+| middy `6.4.5`                  | 0.97 / 1.17 | 1.26 / 1.38 | 17.9 / 21.8 | 2.68 / 3.70 | 6.75 / 7.37 |
+| lambda-api `0.0.0-development` | 4.95 / 5.32 | 5.34 / 5.57 | 5.44 / 5.87 | 5.10 / 5.30 | 11.3 / 11.3 |
+| hono `4.12.27`                 | 14.1 / 14.2 | 16.1 / 19.9 | 24.5 / 26.9 | 15.2 / 16.4 | 14.7 / 15.2 |
+| fastify `5.8.5`                | 22.2 / 20.0 | 26.2 / 30.9 | 77.1 / 248  | 21.9 / 30.3 | 20.2 / 25.6 |
+| serverless-express `4.22.2`    | 37.3 / 46.0 | 36.0 / 38.1 | 57.0 / 144  | 39.1 / 40.9 | 34.5 / 35.5 |
+
+</details>
+
+#### History
+
+Throughput for the `get-json` scenario on V2 events (ops/sec), one row per release:
+
+<!-- BENCHMARKS:HISTORY:START -->
+
+| version           | date       | node    | baseline  | lambda-api | fastify | hono   | middy     | express |
+| ----------------- | ---------- | ------- | --------- | ---------- | ------- | ------ | --------- | ------- |
+| 0.0.0-development | 2026-06-26 | 20.19.5 | 4,830,598 | 201,969    | 45,114  | 70,859 | 1,032,952 | 26,837  |
+
+<!-- BENCHMARKS:HISTORY:END -->
+
+<!-- BENCHMARKS:END -->
