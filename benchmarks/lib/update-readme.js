@@ -26,6 +26,7 @@ const HISTORY_FRAMEWORKS = [
   { name: 'lambda-api', header: 'lambda-api' },
   { name: 'fastify', header: 'fastify' },
   { name: 'hono', header: 'hono' },
+  { name: 'middy', header: 'middy' },
   { name: 'serverless-express', header: 'express' }
 ];
 

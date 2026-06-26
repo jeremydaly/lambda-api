@@ -1,7 +1,6 @@
 # lambda-api benchmarks
 
-Benchmark suite for [issue #34](https://github.com/jeremydaly/lambda-api/issues/34):
-a repeatable comparison of **lambda-api** against other popular frameworks running on AWS
+A repeatable comparison of **lambda-api** against other popular frameworks running on AWS
 Lambda.
 
 This is an isolated package — its (heavy) comparison-framework dependencies live here and
@@ -57,6 +56,7 @@ they answer "how fast is my whole deployment", not "how much overhead does the f
 | `serverless-express` | `express` + `@vendia/serverless-express`| `serverlessExpress()`  |
 | `fastify`            | `fastify` + `@fastify/aws-lambda`       | `awsLambdaFastify()`   |
 | `hono`               | `hono`                                  | `hono/aws-lambda`      |
+| `middy`              | `@middy/core` + `@middy/http-router`    | `httpRouterHandler()`  |
 
 `baseline` is a raw handler with zero routing abstraction; every other framework's overhead is
 read as the gap above it.
@@ -79,9 +79,10 @@ REST (v1)** and **HTTP API (v2)** events.
 
 - Frameworks are configured minimally and equivalently — the goal is to compare core overhead,
   not feature sets. Defaults still differ (e.g. lambda-api computes an `ETag` and handles
-  serialization itself; Express needs an explicit `express.json()` and a 404 handler), and those
-  differences are part of what the numbers reflect. Read the `frameworks/*.js` to see exactly how
-  each is set up.
+  serialization itself; Express needs an explicit `express.json()` and a 404 handler; Middy is a
+  middleware engine wired with only `http-router` + a per-route JSON body parser + an error
+  handler, and is otherwise a very thin layer), and those differences are part of what the numbers
+  reflect. Read the `frameworks/*.js` to see exactly how each is set up.
 - Absolute ops/sec depend on the machine. **Compare the relative ranking**, not raw numbers.
 - All frameworks run in one process by default. Pass `--framework <name>` to run a single one in
   its own process — used for published numbers — to avoid cross-framework JIT interference.
@@ -92,7 +93,7 @@ REST (v1)** and **HTTP API (v2)** events.
 node run.js [options]
 
   --framework <name>   run a single framework (baseline | lambda-api | serverless-express
-                       | fastify | hono); also gives clean per-process JIT isolation
+                       | fastify | hono | middy); also gives clean per-process JIT isolation
   --md <path>          write the markdown report to a file (relative to benchmarks/)
   --json <path>        dump raw per-cell stats as JSON
   --update-readme      refresh the Benchmarks section in ../README.md (full run only)

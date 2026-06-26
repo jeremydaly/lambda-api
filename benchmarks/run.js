@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * lambda-api benchmark runner (issue #34).
+ * lambda-api benchmark runner.
  *
  * Invokes each framework's compiled aws-lambda handler IN-PROCESS with identical synthetic
  * API Gateway events and measures framework overhead with mitata. This deliberately avoids
@@ -27,7 +27,7 @@ const validate = require('./lib/validate');
 const { renderTables } = require('./lib/table');
 const { updateReadme } = require('./lib/update-readme');
 
-const ALL_FRAMEWORKS = ['baseline', 'lambda-api', 'serverless-express', 'fastify', 'hono'];
+const ALL_FRAMEWORKS = ['baseline', 'lambda-api', 'serverless-express', 'fastify', 'hono', 'middy'];
 
 const FORMATS = [
   { id: 'v1', build: apiGatewayV1 },
