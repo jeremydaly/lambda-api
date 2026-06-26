@@ -1,0 +1,79 @@
+name: 'Benchmarks'
+
+# Perf numbers are noisy on shared runners, so benchmarks never gate PRs. They run on each
+# published release (and on demand) to refresh the Benchmarks section of the README.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version label to record (defaults to package.json version)'
+        required: false
+        type: string
+      commit:
+        description: 'Commit the refreshed README back to the default branch'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  benchmark:
+    name: 'Run benchmarks (Node 20)'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Resolve version label
+        id: ver
+        run: |
+          RAW="${{ github.event.release.tag_name || inputs.version }}"
+          echo "value=${RAW#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Install benchmark dependencies
+        working-directory: benchmarks
+        run: npm ci
+
+      - name: Run benchmarks and refresh README
+        working-directory: benchmarks
+        env:
+          LAMBDA_API_VERSION: ${{ steps.ver.outputs.value }}
+        run: node run.js --md results/RESULTS.md --json results/raw.json --update-readme
+
+      # Keep the committed README Prettier-clean so the push doesn't break main's CI.
+      - name: Format README
+        run: npx --yes prettier@2 --write README.md
+
+      - name: Upload raw results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmarks/results/
+
+      - name: Add results to job summary
+        run: cat benchmarks/results/RESULTS.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit refreshed README
+        if: ${{ github.event_name == 'release' || inputs.commit }}
+        run: |
+          if git diff --quiet -- README.md; then
+            echo 'README.md unchanged — nothing to commit'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add README.md
+          git commit -m 'docs: update benchmark results [skip ci]'
+          git push origin HEAD:${{ github.event.repository.default_branch }}
