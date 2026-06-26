@@ -5,9 +5,6 @@
  *
  * Represents the common "port my Express app to Lambda" path. Configured minimally —
  * only the JSON body parser middleware — to keep the comparison fair.
- *
- * @author Benchmark suite for lambda-api (issue #34)
- * @license MIT
  */
 
 const express = require('express');

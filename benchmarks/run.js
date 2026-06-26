@@ -15,9 +15,6 @@
  *   node run.js --md results/RESULTS.md write the markdown report to a file
  *   node run.js --json results/raw.json dump raw per-cell stats (machine-readable)
  *   node run.js --update-readme         refresh the Benchmarks section in ../README.md
- *
- * @author Benchmark suite for lambda-api (issue #34)
- * @license MIT
  */
 
 const os = require('os');

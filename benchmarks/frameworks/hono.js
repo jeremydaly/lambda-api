@@ -5,9 +5,6 @@
  *
  * Hono ships as ESM-only, so it is loaded through a dynamic import() inside an async
  * build() — keeping the rest of the suite plain CommonJS. The runner awaits build().
- *
- * @author Benchmark suite for lambda-api (issue #34)
- * @license MIT
  */
 
 const fs = require('fs');

@@ -2,9 +2,6 @@
 
 /**
  * Fastify (via @fastify/aws-lambda) adapter for the benchmark suite.
- *
- * @author Benchmark suite for lambda-api (issue #34)
- * @license MIT
  */
 
 const Fastify = require('fastify');

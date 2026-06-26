@@ -5,9 +5,6 @@
  *
  * Loaded directly from the repository working tree (../../), so `npm run bench` always
  * measures the local source — exactly what a maintainer iterating on performance wants.
- *
- * @author Benchmark suite for lambda-api (issue #34)
- * @license MIT
  */
 
 const createAPI = require('../../');

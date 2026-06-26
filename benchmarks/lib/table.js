@@ -6,9 +6,6 @@
  * Layout: one throughput table per event format (rows = framework, columns = scenario),
  * each followed by a collapsible latency table (avg / p99). Rows are sorted by the
  * `get-json` throughput, descending.
- *
- * @author Benchmark suite for lambda-api (issue #34)
- * @license MIT
  */
 
 const { scenarios } = require('./scenarios');

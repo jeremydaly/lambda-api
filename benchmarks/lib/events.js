@@ -7,9 +7,6 @@
  * trimmed to the fields that lambda-api and the comparison adapters actually read, so
  * every framework performs equivalent work. The method / path / body are overridden per
  * scenario; everything else is realistic boilerplate.
- *
- * @author Benchmark suite for lambda-api (issue #34)
- * @license MIT
  */
 
 const V1_HEADERS = {

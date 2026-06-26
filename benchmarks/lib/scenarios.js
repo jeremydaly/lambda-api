@@ -11,9 +11,6 @@
  *
  * The 50 `r{i}/:p` routes (registered by each framework) make `routing-50` a meaningful
  * test of routing cost as the route table grows.
- *
- * @author Benchmark suite for lambda-api (issue #34)
- * @license MIT
  */
 
 const ROUTE_COUNT = 50;

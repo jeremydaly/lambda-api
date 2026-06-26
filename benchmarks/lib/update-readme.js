@@ -8,9 +8,6 @@
  * duplicate sections). Inside it, a compact History table keeps one row per lambda-api
  * version: a new version appends a row; re-running for the same version replaces its row.
  * If the markers are absent, the section is appended once at the end of the file.
- *
- * @author Benchmark suite for lambda-api (issue #34)
- * @license MIT
  */
 
 const fs = require('fs');

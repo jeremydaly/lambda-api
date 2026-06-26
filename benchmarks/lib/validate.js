@@ -7,9 +7,6 @@
  * throwing, or emitting the wrong body — a classic way framework comparisons become
  * dishonest. Throws a descriptive Error on any mismatch; the runner catches it, marks
  * that cell as failed, and excludes it from the results (rather than crashing the suite).
- *
- * @author Benchmark suite for lambda-api (issue #34)
- * @license MIT
  */
 
 /**

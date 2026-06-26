@@ -6,9 +6,6 @@
  * Establishes the theoretical lower bound for request handling — event parse, a manual
  * route match, JSON serialize. Every framework's overhead is meaningfully read as the gap
  * above this floor.
- *
- * @author Benchmark suite for lambda-api (issue #34)
- * @license MIT
  */
 
 const { ROUTE_COUNT } = require('../lib/scenarios');
