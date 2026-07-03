@@ -32,6 +32,7 @@
     "test:types": "tsd",
     "test:unit": "npm run build && jest unit",
     "test:compat": "npm run build && jest module-compat",
+    "test:prebuilt": "jest unit",
     "lint:check": "eslint .",
     "lint:fix": "eslint . --fix",
     "prettier:check": "prettier --check .",
