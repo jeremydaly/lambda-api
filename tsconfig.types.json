@@ -1,0 +1,18 @@
+{
+  "//": "Generates .d.ts for the deep-importable lib/* modules from the JS source, so the exports-map `types` conditions resolve (index.d.ts is hand-maintained and left untouched).",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "skipLibCheck": true,
+    "noEmitOnError": false,
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "rootDir": "src",
+    "outDir": "dist/types",
+    "types": []
+  },
+  "include": ["src/lib/**/*.js"]
+}
