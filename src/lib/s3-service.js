@@ -49,27 +49,28 @@ export const getSignedUrl = async (
   { Expires, ...params },
   callback = () => {}
 ) => {
-  const { GetObjectCommand } = await import('@aws-sdk/client-s3');
-  const { getSignedUrl: awsGetSignedUrl } = await import(
-    '@aws-sdk/s3-request-presigner'
-  );
-  let command;
-  switch (type) {
-    case 'getObject':
-      command = new GetObjectCommand(params);
-      break;
-    default:
-      throw new Error('Invalid command type');
+  // Callers (response.getLink) use the callback and ignore the returned promise, so this must
+  // ALWAYS resolve via the callback and never reject — including when the lazy SDK import fails.
+  try {
+    const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+    const { getSignedUrl: awsGetSignedUrl } = await import(
+      '@aws-sdk/s3-request-presigner'
+    );
+    let command;
+    switch (type) {
+      case 'getObject':
+        command = new GetObjectCommand(params);
+        break;
+      default:
+        throw new Error('Invalid command type');
+    }
+    const client = await getClient();
+    const url = await awsGetSignedUrl(client, command, { expiresIn: Expires });
+    callback(null, url);
+    return url;
+  } catch (err) {
+    callback(err);
   }
-  const client = await getClient();
-  return awsGetSignedUrl(client, command, { expiresIn: Expires })
-    .then((url) => {
-      callback(null, url);
-      return url;
-    })
-    .catch((err) => {
-      callback(err);
-    });
 };
 
 const service = {

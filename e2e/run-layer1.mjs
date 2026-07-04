@@ -70,6 +70,23 @@ section('esm-import (no optional @aws-sdk installed)');
   });
 }
 
+// 2b. An S3 route WITHOUT the optional SDK must fail gracefully (handled 5xx), never crash
+//     the process with an unhandled rejection (regression guard: getSignedUrl must not reject).
+section('s3 route without @aws-sdk -> graceful 5xx (no unhandled rejection)');
+{
+  const dir = stageFixture(base, 's3-no-sdk');
+  check('non-S3 route still 200', () => {
+    const r = parseResponse(runNode(dir, 'handler.js', writeEvent(dir, 'ok.json', apiGatewayV1('/ok'))), 's3-no-sdk /ok');
+    assert(r.statusCode === 200, `status ${r.statusCode}`);
+  });
+  check('S3 route -> handled 5xx, process did not crash', () => {
+    const res = runNode(dir, 'handler.js', writeEvent(dir, 'link.json', apiGatewayV1('/link')));
+    assert(res.status === 0, `process crashed (unhandled rejection?) status=${res.status}\n${res.stderr || ''}`);
+    const r = JSON.parse(res.stdout);
+    assert(r.statusCode >= 500 && r.statusCode < 600, `expected 5xx, got ${r.statusCode}`);
+  });
+}
+
 // 3. deep imports via the exports `./lib/*` map
 section('deep-import lambda-api/lib/utils (cjs + esm)');
 {
