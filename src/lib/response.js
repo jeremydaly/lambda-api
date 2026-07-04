@@ -397,8 +397,22 @@ class RESPONSE {
 
       // If missing file
       if (e.code === 'ENOENT') {
+        // Surface the missing path so the cause is self-evident, but avoid
+        // leaking absolute server paths (e.g. /var/task/...) in the
+        // client-visible error body: strip any configured `root` prefix and
+        // reduce a still-absolute path to its basename. The full `e.path` is
+        // preserved on the FileError for server-side logging.
+        let display = e.path;
+        if (display) {
+          if (opts.root && display.startsWith(opts.root)) {
+            display = display.slice(opts.root.length);
+          }
+          if (path.isAbsolute(display)) {
+            display = path.basename(display);
+          }
+        }
         this.error(
-          new FileError(`No such file${e.path ? `: ${e.path}` : ''}`, e)
+          new FileError(`No such file${display ? `: ${display}` : ''}`, e)
         );
       } else {
         this.error(e); // Throw error if not done in callback

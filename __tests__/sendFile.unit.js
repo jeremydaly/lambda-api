@@ -37,6 +37,18 @@ api.get('/sendfile/root', function(req,res) {
   res.sendFile('test.txt', { root: './__tests__/' })
 })
 
+// Missing file under an absolute `root` -- the root prefix must be stripped
+// from the client-visible error so internal server paths aren't disclosed.
+api.get('/sendfile/root-missing', function(req,res) {
+  res.sendFile('missing.txt', { root: '/var/task/private/' })
+})
+
+// Missing file passed as an absolute path (no root) -- reduced to its basename
+// in the client-visible error for the same reason.
+api.get('/sendfile/abs-missing', function(req,res) {
+  res.sendFile('/var/task/private/secret.txt')
+})
+
 api.get('/sendfile/err', function(req,res) {
   res.sendFile('./test-missing.txt', err => {
     if (err) {
@@ -202,6 +214,18 @@ describe('SendFile Tests:', function() {
     let _event = Object.assign({},event,{ path: '/sendfile' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 500, body: '{"error":"No such file: ./test-missing.txt"}', isBase64Encoded: false })
+  }) // end it
+
+  it('Missing file under absolute root strips the root prefix', async function() {
+    let _event = Object.assign({},event,{ path: '/sendfile/root-missing' })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 500, body: '{"error":"No such file: missing.txt"}', isBase64Encoded: false })
+  }) // end it
+
+  it('Missing file with absolute path is reduced to basename', async function() {
+    let _event = Object.assign({},event,{ path: '/sendfile/abs-missing' })
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'],'x-error': ['true'] }, statusCode: 500, body: '{"error":"No such file: secret.txt"}', isBase64Encoded: false })
   }) // end it
 
   it('Missing file with custom catch', async function() {

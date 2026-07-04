@@ -10,6 +10,14 @@
 // Init API instance (no base -- matching the reporter's setup)
 const api = require('../index')();
 
+// Sample events for the other supported interfaces. Route matching must not
+// diverge across API Gateway v1 (`path`), API Gateway v2 (`rawPath`) and ALB
+// (`path` + `requestContext.elb`), so the same version-like segment is asserted
+// against each shape below. Deep-cloned per test so overrides don't leak.
+const sampleV2 = require('./sample-event-apigateway-v2.json');
+const sampleAlb = require('./sample-event-alb1.json');
+const clone = (obj) => JSON.parse(JSON.stringify(obj));
+
 // NOTE: Set test to true
 api._test = true;
 
@@ -39,6 +47,26 @@ describe('Versioning (issue #257) Tests:', function() {
     let _event = Object.assign({},event,{ path: '/v1/schema.json' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"method":"get","status":"ok","v":"v1"}', isBase64Encoded: false })
+  }) // end it
+
+  it('API Gateway v2 (rawPath) matches the version-like segment literally: /v1/schema.json', async function() {
+    let _event = clone(sampleV2)
+    _event.rawPath = '/v1/schema.json'
+    _event.requestContext.http.method = 'GET'
+    _event.requestContext.http.path = '/v1/schema.json'
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result.statusCode).toBe(200)
+    expect(JSON.parse(result.body).v).toBe('v1')
+  }) // end it
+
+  it('ALB event (path) matches the version-like segment literally: /v1/schema.json', async function() {
+    let _event = clone(sampleAlb)
+    _event.httpMethod = 'GET'
+    _event.path = '/v1/schema.json'
+    _event.isBase64Encoded = false
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result.statusCode).toBe(200)
+    expect(JSON.parse(result.body).v).toBe('v1')
   }) // end it
 
   it('Non-version first segment is matched the same way: /abc/schema.json', async function() {
