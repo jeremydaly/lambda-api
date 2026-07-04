@@ -1,0 +1,11 @@
+{
+  "name": "lambda-api-e2e-localstack",
+  "private": true,
+  "type": "module",
+  "description": "LocalStack driver for the lambda-api dual-package e2e suite",
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.470.0",
+    "@aws-sdk/client-s3": "^3.470.0",
+    "@aws-sdk/client-api-gateway": "^3.470.0"
+  }
+}

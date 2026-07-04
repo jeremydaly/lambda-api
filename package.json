@@ -21,7 +21,8 @@
       "import": "./dist/esm/lib/*.js",
       "require": "./dist/cjs/lib/*.js",
       "default": "./dist/cjs/lib/*.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
     "clean": "rm -rf dist",
@@ -33,6 +34,8 @@
     "test:unit": "npm run build && jest unit",
     "test:compat": "npm run build && jest module-compat",
     "test:prebuilt": "jest unit",
+    "test:e2e": "npm run build && node e2e/run-layer1.mjs",
+    "test:e2e:localstack": "npm run build && node e2e/localstack/run-all.mjs",
     "lint:check": "eslint .",
     "lint:fix": "eslint . --fix",
     "prettier:check": "prettier --check .",

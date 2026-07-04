@@ -5,16 +5,33 @@
  * @license MIT
  */
 
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl as awsGetSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { streamToBuffer } from './utils.js';
 
-export let client = new S3Client();
-export const setConfig = (config) => (client = new S3Client(config));
+// The AWS SDK is an OPTIONAL peer dependency. It (and the S3 client) are loaded lazily on the
+// first real S3 use so that `require('lambda-api')` / `import 'lambda-api'` never pull it in for
+// consumers that don't use S3. `dynamicImport` is enabled in both SWC configs, so `import()`
+// compiles to a lazy `require()` in the CJS build and stays a native dynamic `import()` in ESM.
+let _config;
+let _client;
+
+export const setConfig = (config) => {
+  _config = config;
+  _client = undefined; // rebuild with the new config on next use
+};
+
+const getClient = async () => {
+  if (!_client) {
+    const { S3Client } = await import('@aws-sdk/client-s3');
+    _client = new S3Client(_config);
+  }
+  return _client;
+};
 
 export const getObject = (params) => {
   return {
     promise: async () => {
+      const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+      const client = await getClient();
       const res = await client.send(new GetObjectCommand(params));
 
       if (!res.Body) return res;
@@ -32,6 +49,10 @@ export const getSignedUrl = async (
   { Expires, ...params },
   callback = () => {}
 ) => {
+  const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+  const { getSignedUrl: awsGetSignedUrl } = await import(
+    '@aws-sdk/s3-request-presigner'
+  );
   let command;
   switch (type) {
     case 'getObject':
@@ -40,6 +61,7 @@ export const getSignedUrl = async (
     default:
       throw new Error('Invalid command type');
   }
+  const client = await getClient();
   return awsGetSignedUrl(client, command, { expiresIn: Expires })
     .then((url) => {
       callback(null, url);
@@ -52,7 +74,7 @@ export const getSignedUrl = async (
 
 const service = {
   get client() {
-    return client;
+    return _client;
   },
   setConfig,
   getObject,
