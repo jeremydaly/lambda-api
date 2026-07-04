@@ -567,4 +567,8 @@ export default createAPI;
 
 if (typeof module !== 'undefined') {
   module.exports = createAPI;
+  // Preserve the `.default` self-reference the CommonJS build shipped before the dual-package
+  // refactor, so `require('lambda-api').default` keeps working for TypeScript consumers compiled
+  // to CommonJS with esModuleInterop:false (they emit `require('lambda-api').default(...)`).
+  module.exports.default = createAPI;
 }

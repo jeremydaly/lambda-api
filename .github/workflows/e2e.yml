@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: 'npm'
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run test:e2e
 
   layer2-localstack:
@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - name: Install LocalStack driver deps
         working-directory: e2e/localstack
         run: npm install --no-audit --no-fund

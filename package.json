@@ -29,6 +29,7 @@
     "build:cjs": "swc src -d dist/cjs --config-file .swcrc.cjs.json --strip-leading-paths",
     "build:esm": "swc src -d dist/esm --config-file .swcrc.esm.json --copy-files --strip-leading-paths",
     "build": "npm run clean && npm run build:cjs && npm run build:esm",
+    "prepare": "npm run build",
     "test": "npm run build && tsd && jest unit",
     "test:types": "tsd",
     "test:unit": "npm run build && jest unit",

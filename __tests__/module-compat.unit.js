@@ -25,6 +25,13 @@ describe('Module Compatibility Tests:', function () {
       expect(typeof createAPI).toBe('function');
     });
 
+    it('exposes a .default self-reference (require("lambda-api").default)', function () {
+      // Preserves the pre-dual-package behavior so TS consumers compiled to CommonJS with
+      // esModuleInterop:false (they emit `require('lambda-api').default(...)`) keep working.
+      const createAPI = require('../dist/cjs/index.js');
+      expect(createAPI.default).toBe(createAPI);
+    });
+
     it('runs a route from dist/cjs', async function () {
       const createAPI = require('../dist/cjs/index.js');
       const api = createAPI({ version: 'v1.0' });
