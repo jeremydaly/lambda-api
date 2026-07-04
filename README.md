@@ -163,6 +163,7 @@ Require the `lambda-api` module into your Lambda handler script and instantiate 
 | version              | `String`              | Version number accessible via the `REQUEST` object                                                                                                                                                        |
 | errorHeaderWhitelist | `Array`               | Array of headers to maintain on errors                                                                                                                                                                    |
 | s3Config             | `Object`              | Optional object to provide as config to S3 sdk. [S3ClientConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html)                                 |
+| directInvoke         | `boolean`             | Enables support for [direct AWS SDK `Invoke` requests](#direct-lambda-invocations) that bypass API Gateway/ALB. Defaults to `false`.                                                                      |
 
 ```javascript
 // Require the framework and instantiate it with optional version and base parameters
@@ -433,7 +434,7 @@ The `REQUEST` object contains a parsed and normalized request from API Gateway. 
 - `app`: A reference to an instance of the app
 - `version`: The version set at initialization
 - `id`: The awsRequestId from the Lambda `context`
-- `interface`: The interface being used to access Lambda (`apigateway`,`alb`, or `edge`)
+- `interface`: The interface being used to access Lambda (`apigateway`, `alb`, or `lambda` for [direct AWS SDK `Invoke` requests](#direct-lambda-invocations))
 - `params`: Dynamic path parameters parsed from the path (see [path parameters](#path-parameters))
 - `method`: The HTTP method of the request
 - `path`: The path passed in by the request including the `base` and any `prefix` assigned to routes
@@ -1478,6 +1479,61 @@ AWS recently added support for Lambda functions as targets for Application Load 
 Please note that ALB events do not contain all of the same headers as API Gateway (such as `clientType`), but Lambda API provides defaults for seamless integration between the interfaces. ALB also automatically enables binary support, giving you the ability to serve images and other binary file types. Lambda API reads the `path` parameter supplied by the ALB event and uses that to route your requests. If you specify a wildcard in your listener rule, then all matching paths will be forwarded to your Lambda function. Lambda API's routing system can be used to process these routes just like with API Gateway. This includes static paths, parameterized paths, wildcards, middleware, etc.
 
 Sample ALB request and response events can be found [here](https://docs.aws.amazon.com/lambda/latest/dg/services-alb.html).
+
+## Direct Lambda Invocations
+
+In addition to API Gateway and ALB, Lambda API can process requests that **bypass API Gateway** and invoke your function directly through the AWS SDK [`Invoke`](https://docs.aws.amazon.com/lambda/latest/api/API_Invoke.html) API. This is useful for testing, service-to-service calls, and asynchronous fan-out. Both the `RequestResponse` (synchronous) and `Event` (asynchronous) invocation types are supported.
+
+This behavior is **opt-in**. Enable it by setting `directInvoke: true` when you instantiate the API:
+
+```javascript
+const api = require('lambda-api')({ directInvoke: true });
+```
+
+With `directInvoke` enabled, any event that does **not** contain a `requestContext` is treated as a direct invocation and assigned the `lambda` [interface](#request). API Gateway and ALB events always include a `requestContext`, so the same handler continues to serve them with the standard proxy envelope — no code changes required.
+
+Provide an event that describes the request you want to route. The shape mirrors the API Gateway v1 proxy format, but only `httpMethod` and `path` are required:
+
+```javascript
+// RequestResponse invocation payload
+{
+  "httpMethod": "GET",
+  "path": "/users/123"
+}
+
+// With a body (may be a JSON string or a raw object) and query string
+{
+  "httpMethod": "POST",
+  "path": "/users",
+  "queryStringParameters": { "notify": "true" },
+  "body": { "name": "Jane" }
+}
+```
+
+Unlike API Gateway/ALB requests, a direct invocation returns an **unwrapped response** so the caller receives the payload with a single parse of the SDK `Invoke` `Payload`, rather than the proxy envelope's stringified `body` (which would require a second `JSON.parse`):
+
+```javascript
+// Handler: res.status(200).json({ id: 123 })
+// Invoke Payload:
+{
+  "statusCode": 200,
+  "body": { "id": 123 }
+}
+
+// Errors (Lambda API never throws — status is the only failure signal):
+// Invoke Payload:
+{
+  "statusCode": 404,
+  "body": { "error": "Route not found" }
+}
+```
+
+A few things to keep in mind for direct invocations:
+
+- The response omits the proxy-only `headers`, `multiValueHeaders`, and `statusDescription` fields, so response headers and cookies set via `res.header()`/`res.cookie()` are not returned. `isBase64Encoded: true` is preserved for binary responses (e.g. `res.sendFile()`), where `body` is the base64 string.
+- `Event` (asynchronous) invocations discard the function's return value, so the response body is only meaningful for `RequestResponse` invocations.
+- Because there is no HTTP layer, `req.ip` is `undefined` and `req.clientType`/`req.clientCountry` default to `'unknown'` unless you supply the corresponding headers on the event.
+- A `path` must be supplied; an event without one routes to `/`.
 
 ## Configuring Routes in API Gateway
 

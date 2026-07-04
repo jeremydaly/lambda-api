@@ -525,6 +525,29 @@ class RESPONSE {
       body = '';
     }
 
+    // Direct AWS SDK Invoke request: return an unwrapped payload with status,
+    // bypassing the API Gateway/ALB proxy envelope (headers, cookies,
+    // compression, base64 flag). The body is returned as a parsed value so the
+    // caller receives it with a single JSON.parse of the Invoke response.
+    if (this._request.interface === 'lambda') {
+      const encodedBody =
+        this._request.method === 'HEAD'
+          ? ''
+          : UTILS.encodeBody(body, this._serializer);
+
+      this._response = this._isBase64
+        ? {
+            statusCode: this._statusCode,
+            body: encodedBody,
+            isBase64Encoded: true,
+          }
+        : { statusCode: this._statusCode, body: UTILS.parseBody(encodedBody) };
+
+      // Trigger the callback function
+      this.app._callback(null, this._response, this);
+      return;
+    }
+
     let headers = {};
     let cookies = {};
 

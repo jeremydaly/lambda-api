@@ -183,8 +183,16 @@ class REQUEST {
         this.requestContext['identity']['sourceIp'] &&
         this.requestContext['identity']['sourceIp'].split(',')[0].trim());
 
-    // Assign the requesting interface
-    this.interface = this.requestContext.elb ? 'alb' : 'apigateway';
+    // Assign the requesting interface. Events carrying a requestContext come
+    // from API Gateway/ALB; when directInvoke is enabled, an event without one
+    // is treated as a direct AWS SDK Invoke request ('lambda' interface).
+    this.interface = this.requestContext.elb
+      ? 'alb'
+      : this.app._event.requestContext
+      ? 'apigateway'
+      : this.app._directInvoke
+      ? 'lambda'
+      : 'apigateway';
 
     // Set the pathParameters
     this.pathParameters = this.app._event.pathParameters || {};

@@ -1,0 +1,7 @@
+{
+  "httpMethod": "GET",
+  "path": "/test/hello",
+  "queryStringParameters": {
+    "qs1": "foo"
+  }
+}
