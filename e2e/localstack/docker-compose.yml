@@ -1,0 +1,11 @@
+services:
+  localstack:
+    image: localstack/localstack:3
+    ports:
+      - '4566:4566'
+    environment:
+      - SERVICES=lambda,s3,apigateway,iam,logs,cloudwatch,sts
+      - LAMBDA_RUNTIME_ENVIRONMENT_TIMEOUT=60
+      - DEBUG=0
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'

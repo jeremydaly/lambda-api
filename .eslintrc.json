@@ -7,11 +7,15 @@
   "extends": ["eslint:recommended", "prettier"],
   "parserOptions": {
     "ecmaVersion": 2018,
-    "sourceType": "module"
+    "sourceType": "script"
   },
-  "rules": {},
-  "globals": {
-    "expect": true,
-    "it": true
-  }
+  "overrides": [
+    {
+      "files": ["src/**/*.js", "__tests__/**/*.mjs"],
+      "parserOptions": {
+        "ecmaVersion": 2020,
+        "sourceType": "module"
+      }
+    }
+  ]
 }

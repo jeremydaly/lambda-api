@@ -15,8 +15,36 @@ permissions:
   contents: read
 
 jobs:
+  # Build the dual CJS/ESM output once (SWC needs Node >= 16.14), then run the test
+  # matrix against the prebuilt dist so Node 14-22 runtime compatibility is verified
+  # without building on the older versions.
+  build:
+    name: 'Build'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@v4
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+      - name: Build dist (CJS + ESM)
+        run: npm run build
+      - name: Type check
+        run: npm run test:types
+      - name: Upload dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
   test:
     name: 'Test (Node ${{ matrix.node }})'
+    needs: build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -32,9 +60,14 @@ jobs:
       - name: Install NPM (if node 14)
         run: if [ "${{ matrix.node }}" == "14" ]; then npm install -g npm@9; fi
       - name: Install dependencies
-        run: npm ci
-      - name: Run tests
-        run: npm run test
+        run: npm ci --ignore-scripts
+      - name: Download prebuilt dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Run tests against prebuilt dist
+        run: npm run test:prebuilt
 
   publish:
     name: 'Publish to npm'
@@ -55,7 +88,7 @@ jobs:
         # Trusted publishing requires npm >= 11.5.1.
         run: npm install -g npm@latest
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
       - name: Set version to publish
         # package.json ships a 0.0.0-development placeholder; the real version
         # comes from the manual input (workflow_dispatch) or the release tag,

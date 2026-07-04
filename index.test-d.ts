@@ -1,4 +1,4 @@
-import { expectType, expectError } from 'tsd';
+import { expectError, expectType } from 'tsd';
 import {
   API,
   Request,
@@ -19,6 +19,7 @@ import {
   FileError,
   ApiError,
 } from './index';
+import createAPI from './index';
 import {
   APIGatewayProxyEvent,
   APIGatewayProxyEventV2,
@@ -54,6 +55,9 @@ const options: Options = {
   compression: true,
 };
 expectType<Options>(options);
+
+const apiFromFactory = createAPI(options);
+expectType<API>(apiFromFactory);
 
 const req = {} as Request;
 expectType<string>(req.method);
@@ -230,11 +234,7 @@ const invalidTypedHandler: HandlerFunction<
   TypedRequest,
   Response<TypedResponseBody>
 > = (req, res) => {
-  expectError(
-    res.json({
-      hello: req.params.thingId,
-    })
-  );
+  expectError(res.json({ hello: req.params.thingId }));
 };
 api.get<TypedRequest, Response<TypedResponseBody>>(
   '/typed-invalid',

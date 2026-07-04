@@ -5,13 +5,13 @@
  * @license MIT
  */
 
-const REQUEST = require('./lib/request');
-const RESPONSE = require('./lib/response');
-const UTILS = require('./lib/utils');
-const LOGGER = require('./lib/logger');
-const S3 = () => require('./lib/s3-service');
-const { ConfigurationError, ApiError } = require('./lib/errors');
-const prettyPrint = require('./lib/prettyPrint');
+import REQUEST from './lib/request.js';
+import RESPONSE from './lib/response.js';
+import * as UTILS from './lib/utils.js';
+import * as LOGGER from './lib/logger.js';
+import { ConfigurationError, ApiError } from './lib/errors.js';
+import prettyPrint from './lib/prettyPrint.js';
+import * as S3 from './lib/s3-service.js';
 
 class API {
   constructor(props) {
@@ -50,7 +50,7 @@ class API {
     this._s3Config = props && props.s3Config;
 
     // Set S3 Client
-    if (this._s3Config) S3().setConfig(this._s3Config);
+    if (this._s3Config) S3.setConfig(this._s3Config);
 
     this._sampleCounts = {};
 
@@ -561,7 +561,14 @@ class API {
   }
 } // end API class
 
-// Export the API class as a new instance
-module.exports = (opts) => new API(opts);
-// Add createAPI as default export (to match index.d.ts)
-module.exports.default = module.exports;
+const createAPI = (opts) => new API(opts);
+
+export default createAPI;
+
+if (typeof module !== 'undefined') {
+  module.exports = createAPI;
+  // Preserve the `.default` self-reference the CommonJS build shipped before the dual-package
+  // refactor, so `require('lambda-api').default` keeps working for TypeScript consumers compiled
+  // to CommonJS with esModuleInterop:false (they emit `require('lambda-api').default(...)`).
+  module.exports.default = createAPI;
+}

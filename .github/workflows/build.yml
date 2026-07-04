@@ -10,7 +10,10 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x]
+        # The SWC build toolchain requires Node >= 16.14, so coverage runs on a
+        # modern LTS. Runtime compatibility across older Node is covered by the
+        # release workflow's test matrix against the prebuilt dist.
+        node-version: [20.x]
 
     steps:
       - name: Get branch name (merge)
@@ -28,9 +31,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - name: Install NPM
-        run: npm install -g npm@9
-      - run: npm ci
+          cache: 'npm'
+      - run: npm ci --ignore-scripts
       - run: npm run test-ci
         env:
           COVERALLS_SERVICE_NAME: GithubActions

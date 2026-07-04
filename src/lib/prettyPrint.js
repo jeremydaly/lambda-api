@@ -5,7 +5,7 @@
  * @license MIT
  */
 
-module.exports = (routes) => {
+const prettyPrint = (routes) => {
   let out = '';
 
   // Calculate column widths
@@ -81,3 +81,9 @@ module.exports = (routes) => {
 
   return out;
 };
+
+export default prettyPrint;
+
+if (typeof module !== 'undefined') {
+  module.exports = prettyPrint;
+}

@@ -9,7 +9,7 @@
   Minimal mime map for common file types
  */
 
-module.exports = {
+const mimemap = {
   // images
   gif: 'image/gif',
   ico: 'image/x-icon',
@@ -71,3 +71,9 @@ module.exports = {
   ppsm: 'application/vnd.ms-powerpoint.slideshow.macroEnabled.12',
   mdb: 'application/vnd.ms-access',
 };
+
+export default mimemap;
+
+if (typeof module !== 'undefined') {
+  module.exports = mimemap;
+}

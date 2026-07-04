@@ -1,0 +1,16 @@
+{
+  "$schema": "https://swc.rs/schema.json",
+  "jsc": {
+    "parser": {
+      "syntax": "ecmascript",
+      "dynamicImport": true
+    },
+    "target": "es2018",
+    "keepClassNames": true
+  },
+  "module": {
+    "type": "commonjs",
+    "noInterop": false
+  },
+  "sourceMaps": false
+}

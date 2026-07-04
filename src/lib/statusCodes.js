@@ -9,7 +9,7 @@
   HTTP status code map (IANA Status Code Registry)
  */
 
-module.exports = {
+const statusCodes = {
   // 1xx: Informational
   100: 'Continue',
   101: 'Switching Protocols',
@@ -81,3 +81,9 @@ module.exports = {
   510: 'Not Extended',
   511: 'Network Authentication Required',
 };
+
+export default statusCodes;
+
+if (typeof module !== 'undefined') {
+  module.exports = statusCodes;
+}

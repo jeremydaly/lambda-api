@@ -1,0 +1,38 @@
+name: 'E2E'
+
+# Dual-package (CJS/ESM) end-to-end validation. Manual only — the Docker/LocalStack layer is
+# heavy and these are not fast unit checks, so they never gate PRs.
+on:
+  workflow_dispatch:
+
+jobs:
+  layer1:
+    name: 'Layer 1 (Node ${{ matrix.node }})'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+      - run: npm ci --ignore-scripts
+      - run: npm run test:e2e
+
+  layer2-localstack:
+    name: 'Layer 2 (LocalStack)'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci --ignore-scripts
+      - name: Install LocalStack driver deps
+        working-directory: e2e/localstack
+        run: npm install --no-audit --no-fund
+      - name: Run LocalStack e2e
+        run: npm run test:e2e:localstack
