@@ -134,6 +134,7 @@ export declare interface Options {
   compression?: boolean;
   headers?: object;
   s3Config?: S3ClientConfig;
+  directInvoke?: boolean;
 }
 
 export declare class Request {
@@ -145,6 +146,7 @@ export declare class Request {
   };
   method: string;
   path: string;
+  interface: 'apigateway' | 'alb' | 'lambda';
   query: {
     [key: string]: string | undefined;
   };

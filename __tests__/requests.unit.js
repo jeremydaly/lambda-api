@@ -3,6 +3,9 @@
 // Init API instance
 const api = require('../index')({ version: 'v1.0' })
 
+// Init API instance with direct Invoke support enabled
+const apiDirect = require('../index')({ version: 'v1.0', directInvoke: true })
+
 /******************************************************************************/
 /***  DEFINE TEST ROUTES                                                    ***/
 /******************************************************************************/
@@ -16,6 +19,15 @@ api.get('/test/hello', function(req,res) {
 api.get('/test/201', function(req,res) {
   let request = Object.assign(req,{app:null})
   res.status(201).json({ request })
+})
+
+apiDirect.get('/test/hello', function(req,res) {
+  let request = Object.assign(req,{app:null})
+  res.status(200).json({ request })
+})
+
+apiDirect.get('/test/binary', function(req,res) {
+  res.sendFile(Buffer.from('binary-data'))
 })
 
 
@@ -219,6 +231,84 @@ describe('Request Tests:', function() {
       expect(body.request.multiValueQuery).toEqual({})
       expect(body.request.headers).toEqual({})
       // NOTE: body.request.multiValueHeaders is null in this case
+    })
+
+  })
+
+  describe('Lambda Direct Invoke', function() {
+
+    // NOTE: The 'Event' (async) invocation type needs no separate test — AWS
+    // discards the function return value for async invokes, so the framework
+    // behavior is identical to 'RequestResponse' from its side.
+
+    it('Returns an unwrapped { statusCode, body } response', async function() {
+      let _event = require('./sample-event-lambda1.json')
+      let result = await new Promise(r => apiDirect.run(_event,{},(e,res) => { r(res) }))
+      // Unwrapped shape: status + parsed body, no proxy envelope fields
+      expect(result.statusCode).toBe(200)
+      expect(typeof result.body).toBe('object')
+      expect(result.headers).toBeUndefined()
+      expect(result.multiValueHeaders).toBeUndefined()
+      expect(result.isBase64Encoded).toBeUndefined()
+      expect(result.statusDescription).toBeUndefined()
+    })
+
+    it('Detects the lambda interface and routes correctly', async function() {
+      let _event = require('./sample-event-lambda1.json')
+      let result = await new Promise(r => apiDirect.run(_event,{},(e,res) => { r(res) }))
+      expect(result.body.request.interface).toBe('lambda')
+      expect(result.body.request.method).toBe('GET')
+      expect(result.body.request.route).toBe('/test/hello')
+      expect(result.body.request.query.qs1).toBe('foo')
+    })
+
+    it('Returns an unwrapped error payload for unmatched routes', async function() {
+      let _event = Object.assign({}, require('./sample-event-lambda1.json'), { path: '/nope' })
+      let result = await new Promise(r => apiDirect.run(_event,{},(e,res) => { r(res) }))
+      expect(result.statusCode).toBe(404)
+      expect(result.body).toEqual({ error: 'Route not found' })
+      expect(result.headers).toBeUndefined()
+    })
+
+    it('Preserves the base64 flag and raw body for binary responses', async function() {
+      let _event = Object.assign({}, require('./sample-event-lambda1.json'), { path: '/test/binary' })
+      let result = await new Promise(r => apiDirect.run(_event,{},(e,res) => { r(res) }))
+      expect(result.statusCode).toBe(200)
+      expect(result.isBase64Encoded).toBe(true)
+      // Body stays the base64 string (not parsed) so the caller can decode it
+      expect(typeof result.body).toBe('string')
+      expect(Buffer.from(result.body, 'base64').toString()).toBe('binary-data')
+      expect(result.headers).toBeUndefined()
+    })
+
+    it('Returns an empty body for HEAD requests', async function() {
+      let _event = Object.assign({}, require('./sample-event-lambda1.json'), { httpMethod: 'HEAD' })
+      let result = await new Promise(r => apiDirect.run(_event,{},(e,res) => { r(res) }))
+      expect(result.statusCode).toBe(200)
+      expect(result.body).toBe('')
+      expect(result.isBase64Encoded).toBeUndefined()
+      expect(result.headers).toBeUndefined()
+    })
+
+    it('Backward compat: directInvoke off keeps the API Gateway envelope', async function() {
+      // Same requestContext-less event through the default api instance
+      let _event = require('./sample-event-lambda1.json')
+      let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+      let body = JSON.parse(result.body)
+      expect(typeof result.body).toBe('string')
+      expect(result.headers).toBeDefined()
+      expect(body.request.interface).toBe('apigateway')
+    })
+
+    it('Dual mode: directInvoke on still returns the envelope for API Gateway events', async function() {
+      // API Gateway events carry a requestContext, so they keep the proxy envelope
+      let _event = require('./sample-event-apigateway-v1.json')
+      let _context = require('./sample-context-apigateway1.json')
+      let result = await new Promise(r => apiDirect.run(_event,_context,(e,res) => { r(res) }))
+      let body = JSON.parse(result.body)
+      expect(typeof result.body).toBe('string')
+      expect(result.multiValueHeaders).toBeDefined()
+      expect(body.request.interface).toBe('apigateway')
     })
 
   })

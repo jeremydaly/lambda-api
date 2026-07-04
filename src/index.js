@@ -47,6 +47,14 @@ class API {
         ? props.compression
         : false;
 
+    // Treat events without a requestContext (direct AWS SDK Invoke requests)
+    // as the 'lambda' interface and return an unwrapped { statusCode, body }
+    // response. Opt-in to preserve the API Gateway envelope by default.
+    this._directInvoke =
+      props && typeof props.directInvoke === 'boolean'
+        ? props.directInvoke
+        : false;
+
     this._s3Config = props && props.s3Config;
 
     // Set S3 Client
