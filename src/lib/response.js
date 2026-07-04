@@ -397,7 +397,9 @@ class RESPONSE {
 
       // If missing file
       if (e.code === 'ENOENT') {
-        this.error(new FileError('No such file', e));
+        this.error(
+          new FileError(`No such file${e.path ? `: ${e.path}` : ''}`, e)
+        );
       } else {
         this.error(e); // Throw error if not done in callback
       }
