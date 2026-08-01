@@ -232,6 +232,23 @@ describe("Utility Function Tests:", function () {
     }); // end it
   }); // end encodeBody tests
 
+  describe("statusBodyLookup:", function () {
+    test.each([
+      [100, ""],
+      [101, ""],
+      [200, "OK"],
+      [204, ""],
+      [205, ""],
+      [304, ""],
+      [404, "Not Found"],
+      [502, "Bad Gateway"],
+      [999, "Unknown"],
+    ])("%d", (status, expected) => {
+      expect(utils.statusBodyLookup(status)).toBe(expected);
+    }); // end it
+  }); // end statusBodyLookup tests
+
+
   describe("extractRoutes:", function () {
     it("Sample routes", function () {
       // Create an api instance
