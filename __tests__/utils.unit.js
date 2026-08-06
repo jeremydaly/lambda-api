@@ -237,13 +237,18 @@ describe("Utility Function Tests:", function () {
       [100, ""],
       [101, ""],
       [200, "OK"],
+      ["200", "OK"],
       [204, ""],
+      ["204", ""],
       [205, ""],
+      ["205", ""],
       [304, ""],
+      ["304", ""],
       [404, "Not Found"],
       [502, "Bad Gateway"],
       [999, "Unknown"],
-    ])("%d", (status, expected) => {
+      ["not a number", "Unknown"]
+    ])("%s", (status, expected) => {
       expect(utils.statusBodyLookup(status)).toBe(expected);
     }); // end it
   }); // end statusBodyLookup tests

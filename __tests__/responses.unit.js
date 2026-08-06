@@ -73,6 +73,10 @@ api.get('/testSendStatus', function(req,res) {
   res.sendStatus(200)
 })
 
+api.get('/testSendStatus204', function(req,res) {
+  res.sendStatus(204)
+})
+
 api.get('/testSendStatus403', function(req,res) {
   res.sendStatus(403)
 })
@@ -178,6 +182,12 @@ describe('Response Tests:', function() {
     let _event = Object.assign({},event,{ path: '/testSendStatus'})
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: 'OK', isBase64Encoded: false })
+  }) // end it
+
+  it('sendStatus 204', async function() {
+    let _event = Object.assign({},event,{ path: '/testSendStatus204'})
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 204, body: '', isBase64Encoded: false })
   }) // end it
 
   it('sendStatus 403', async function() {
