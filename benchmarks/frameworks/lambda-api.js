@@ -26,4 +26,9 @@ function build() {
   return (event, context) => api.run(event, context);
 }
 
-module.exports = { name: 'lambda-api', version: pkg.version, build };
+// package.json ships a 0.0.0-development placeholder (the real version is stamped at
+// publish time), so prefer the release label the workflow passes in — same precedence
+// as the run metadata in run.js.
+const version = process.env.LAMBDA_API_VERSION || pkg.version;
+
+module.exports = { name: 'lambda-api', version, build };
