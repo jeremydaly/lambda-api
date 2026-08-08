@@ -1544,53 +1544,53 @@ If you're using Lambda API and finding it useful, hit me up on [Twitter](https:/
 
 In-process micro-benchmarks of lambda-api against other AWS Lambda web frameworks. The numbers measure **framework overhead only** (event → route → middleware → response, in a single Node VM) — not end-to-end Lambda timings. Absolute values vary by machine, so compare the **relative** ranking rather than the raw ops/sec. See [`benchmarks/`](./benchmarks) for the methodology and how to reproduce.
 
-_Generated 2026-06-26 21:24:41 UTC · lambda-api v0.0.0-development · Node 20.19.5 · Apple M4 Max (16 cores) · darwin/arm64_
+_Generated 2026-08-08 17:06:04 UTC · lambda-api v1.5.0 · Node 20.20.2 · AMD EPYC 7763 64-Core Processor (4 cores) · linux/x64_
 
 #### API Gateway REST (v1) — throughput (ops/sec, higher is better)
 
-| Framework                      | get-json  | path-param | post-json | routing-50 | not-found |
-| ------------------------------ | --------- | ---------- | --------- | ---------- | --------- |
-| baseline                       | 5,654,874 | 5,513,012  | 2,560,533 | 4,493,436  | 4,620,989 |
-| middy `6.4.5`                  | 1,056,927 | 811,301    | 62,540    | 433,185    | 155,744   |
-| lambda-api `0.0.0-development` | 217,700   | 202,224    | 194,819   | 199,565    | 91,296    |
-| hono `4.12.27`                 | 58,370    | 57,559     | 38,469    | 60,441     | 61,732    |
-| fastify `5.8.5`                | 51,240    | 52,873     | 13,598    | 56,465     | 48,915    |
-| serverless-express `4.22.2`    | 26,732    | 28,082     | 15,997    | 26,940     | 28,643    |
+| Framework                   | get-json  | path-param | post-json | routing-50 | not-found |
+| --------------------------- | --------- | ---------- | --------- | ---------- | --------- |
+| baseline                    | 2,444,066 | 2,477,678  | 1,302,129 | 1,935,069  | 2,255,100 |
+| middy `6.4.5`               | 382,851   | 282,355    | 31,111    | 163,187    | 68,913    |
+| lambda-api `1.5.0`          | 128,426   | 115,517    | 113,134   | 115,238    | 48,521    |
+| fastify `5.8.5`             | 13,353    | 16,644     | 5,792     | 17,561     | 15,549    |
+| hono `4.12.34`              | 12,101    | 17,762     | 10,562    | 17,792     | 18,302    |
+| serverless-express `4.22.2` | 8,559     | 11,035     | 5,440     | 10,060     | 11,079    |
 
 <details><summary>API Gateway REST (v1) — latency (avg / p99, µs, lower is better)</summary>
 
-| Framework                      | get-json    | path-param  | post-json   | routing-50  | not-found   |
-| ------------------------------ | ----------- | ----------- | ----------- | ----------- | ----------- |
-| baseline                       | 0.18 / 0.23 | 0.18 / 0.25 | 0.39 / 0.46 | 0.22 / 0.28 | 0.22 / 0.27 |
-| middy `6.4.5`                  | 0.95 / 2.29 | 1.23 / 1.41 | 16.0 / 16.3 | 2.31 / 2.45 | 6.42 / 6.56 |
-| lambda-api `0.0.0-development` | 4.59 / 4.74 | 4.95 / 5.14 | 5.13 / 5.28 | 5.01 / 5.63 | 11.0 / 11.0 |
-| hono `4.12.27`                 | 17.1 / 69.7 | 17.4 / 18.7 | 26.0 / 30.2 | 16.5 / 17.3 | 16.2 / 18.1 |
-| fastify `5.8.5`                | 19.5 / 95.6 | 18.9 / 20.4 | 73.5 / 152  | 17.7 / 23.4 | 20.4 / 20.4 |
-| serverless-express `4.22.2`    | 37.4 / 118  | 35.6 / 36.8 | 62.5 / 195  | 37.1 / 99.0 | 34.9 / 36.7 |
+| Framework                   | get-json    | path-param  | post-json   | routing-50  | not-found   |
+| --------------------------- | ----------- | ----------- | ----------- | ----------- | ----------- |
+| baseline                    | 0.41 / 0.66 | 0.40 / 0.78 | 0.77 / 0.83 | 0.52 / 1.04 | 0.44 / 0.50 |
+| middy `6.4.5`               | 2.61 / 3.53 | 3.54 / 4.81 | 32.1 / 33.5 | 6.13 / 6.42 | 14.5 / 15.3 |
+| lambda-api `1.5.0`          | 7.79 / 7.87 | 8.66 / 8.77 | 8.84 / 8.93 | 8.68 / 8.76 | 20.6 / 55.8 |
+| fastify `5.8.5`             | 74.9 / 196  | 60.1 / 110  | 173 / 372   | 56.9 / 96.5 | 64.3 / 115  |
+| hono `4.12.34`              | 82.6 / 322  | 56.3 / 109  | 94.7 / 193  | 56.2 / 58.6 | 54.6 / 108  |
+| serverless-express `4.22.2` | 117 / 260   | 90.6 / 158  | 184 / 386   | 99.4 / 180  | 90.3 / 150  |
 
 </details>
 
 #### API Gateway HTTP (v2) — throughput (ops/sec, higher is better)
 
-| Framework                      | get-json  | path-param | post-json | routing-50 | not-found |
-| ------------------------------ | --------- | ---------- | --------- | ---------- | --------- |
-| baseline                       | 4,830,598 | 4,424,847  | 2,237,039 | 3,946,604  | 3,994,042 |
-| middy `6.4.5`                  | 1,032,952 | 791,846    | 55,802    | 372,581    | 148,189   |
-| lambda-api `0.0.0-development` | 201,969   | 187,395    | 183,887   | 195,975    | 88,721    |
-| hono `4.12.27`                 | 70,859    | 62,001     | 40,860    | 65,895     | 67,978    |
-| fastify `5.8.5`                | 45,114    | 38,232     | 12,973    | 45,687     | 49,536    |
-| serverless-express `4.22.2`    | 26,837    | 27,753     | 17,533    | 25,565     | 29,008    |
+| Framework                   | get-json  | path-param | post-json | routing-50 | not-found |
+| --------------------------- | --------- | ---------- | --------- | ---------- | --------- |
+| baseline                    | 2,126,449 | 1,789,247  | 1,037,185 | 1,642,674  | 1,806,611 |
+| middy `6.4.5`               | 372,278   | 278,227    | 31,178    | 161,222    | 67,381    |
+| lambda-api `1.5.0`          | 116,936   | 106,058    | 105,104   | 106,097    | 48,838    |
+| hono `4.12.34`              | 20,199    | 18,707     | 11,981    | 18,557     | 19,416    |
+| fastify `5.8.5`             | 17,361    | 15,423     | 6,162     | 16,474     | 15,968    |
+| serverless-express `4.22.2` | 10,909    | 11,229     | 6,739     | 10,472     | 11,515    |
 
 <details><summary>API Gateway HTTP (v2) — latency (avg / p99, µs, lower is better)</summary>
 
-| Framework                      | get-json    | path-param  | post-json   | routing-50  | not-found   |
-| ------------------------------ | ----------- | ----------- | ----------- | ----------- | ----------- |
-| baseline                       | 0.21 / 0.47 | 0.23 / 0.44 | 0.45 / 0.71 | 0.25 / 0.48 | 0.25 / 0.51 |
-| middy `6.4.5`                  | 0.97 / 1.17 | 1.26 / 1.38 | 17.9 / 21.8 | 2.68 / 3.70 | 6.75 / 7.37 |
-| lambda-api `0.0.0-development` | 4.95 / 5.32 | 5.34 / 5.57 | 5.44 / 5.87 | 5.10 / 5.30 | 11.3 / 11.3 |
-| hono `4.12.27`                 | 14.1 / 14.2 | 16.1 / 19.9 | 24.5 / 26.9 | 15.2 / 16.4 | 14.7 / 15.2 |
-| fastify `5.8.5`                | 22.2 / 20.0 | 26.2 / 30.9 | 77.1 / 248  | 21.9 / 30.3 | 20.2 / 25.6 |
-| serverless-express `4.22.2`    | 37.3 / 46.0 | 36.0 / 38.1 | 57.0 / 144  | 39.1 / 40.9 | 34.5 / 35.5 |
+| Framework                   | get-json    | path-param  | post-json   | routing-50  | not-found   |
+| --------------------------- | ----------- | ----------- | ----------- | ----------- | ----------- |
+| baseline                    | 0.47 / 0.95 | 0.56 / 0.99 | 0.96 / 1.64 | 0.61 / 0.94 | 0.55 / 1.04 |
+| middy `6.4.5`               | 2.69 / 3.32 | 3.59 / 3.91 | 32.1 / 34.6 | 6.20 / 6.64 | 14.8 / 15.4 |
+| lambda-api `1.5.0`          | 8.55 / 8.67 | 9.43 / 9.53 | 9.51 / 9.69 | 9.43 / 9.59 | 20.5 / 20.7 |
+| hono `4.12.34`              | 49.5 / 99.1 | 53.5 / 54.8 | 83.5 / 130  | 53.9 / 56.3 | 51.5 / 52.8 |
+| fastify `5.8.5`             | 57.6 / 56.0 | 64.8 / 60.5 | 162 / 376   | 60.7 / 66.7 | 62.6 / 59.7 |
+| serverless-express `4.22.2` | 91.7 / 193  | 89.1 / 172  | 148 / 262   | 95.5 / 145  | 86.8 / 136  |
 
 </details>
 
@@ -1603,6 +1603,7 @@ Throughput for the `get-json` scenario on V2 events (ops/sec), one row per relea
 | version           | date       | node    | baseline  | lambda-api | fastify | hono   | middy     | express |
 | ----------------- | ---------- | ------- | --------- | ---------- | ------- | ------ | --------- | ------- |
 | 0.0.0-development | 2026-06-26 | 20.19.5 | 4,830,598 | 201,969    | 45,114  | 70,859 | 1,032,952 | 26,837  |
+| 1.5.0             | 2026-08-08 | 20.20.2 | 2,126,449 | 116,936    | 17,361  | 20,199 | 372,278   | 10,909  |
 
 <!-- BENCHMARKS:HISTORY:END -->
 
