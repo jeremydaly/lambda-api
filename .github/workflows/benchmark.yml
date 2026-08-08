@@ -42,6 +42,15 @@ jobs:
           RAW="${{ github.event.release.tag_name || inputs.version }}"
           echo "value=${RAW#v}" >> "$GITHUB_OUTPUT"
 
+      # The benchmark adapter loads lambda-api from the working tree via require('../../'),
+      # which resolves through the root package's "main" (./dist/cjs/index.js). That path
+      # only exists after a build, so the root package must be installed and built first.
+      - name: Install root dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build dist (CJS + ESM)
+        run: npm run build
+
       - name: Install benchmark dependencies
         working-directory: benchmarks
         run: npm ci
