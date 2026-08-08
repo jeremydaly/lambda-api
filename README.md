@@ -486,8 +486,14 @@ The `sendStatus` method sets the status code and returns its string representati
 
 ```javascript
 res.sendStatus(200); // equivalent to res.status(200).send('OK')
-res.sendStatus(304); // equivalent to res.status(304).send('Not Modified')
 res.sendStatus(403); // equivalent to res.status(403).send('Forbidden')
+```
+
+Status codes that [must not carry content](https://datatracker.ietf.org/doc/html/rfc9110#name-overview-of-status-codes) per RFC 9110 — `1xx`, `204`, `205`, and `304` — are sent with an empty body instead:
+
+```javascript
+res.sendStatus(204); // equivalent to res.status(204).send('')
+res.sendStatus(304); // equivalent to res.status(304).send('')
 ```
 
 **NOTE:** If an unsupported status code is provided, it will return 'Unknown' as the body.
