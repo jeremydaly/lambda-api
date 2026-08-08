@@ -476,7 +476,15 @@ The `status` method allows you to set the status code that is returned to API Ga
 
 ```javascript
 api.get('/users', (req, res) => {
-  res.status(304).send('Not Modified');
+  res.status(404).send('Not Found');
+});
+```
+
+**NOTE:** Status codes that [must not carry content](https://datatracker.ietf.org/doc/html/rfc9110#name-overview-of-status-codes) per RFC 9110 — `1xx`, `204`, `205`, and `304` — are always sent with an empty body. Any body passed to `send()`, `json()`, `html()`, etc. is discarded for these status codes.
+
+```javascript
+api.get('/users', (req, res) => {
+  res.status(204).json({ foo: 'bar' }); // sent as 204 with an empty body
 });
 ```
 
@@ -489,7 +497,7 @@ res.sendStatus(200); // equivalent to res.status(200).send('OK')
 res.sendStatus(403); // equivalent to res.status(403).send('Forbidden')
 ```
 
-Status codes that [must not carry content](https://datatracker.ietf.org/doc/html/rfc9110#name-overview-of-status-codes) per RFC 9110 — `1xx`, `204`, `205`, and `304` — are sent with an empty body instead:
+As with [`status()`](#statuscode), the `1xx`, `204`, `205`, and `304` status codes are sent with an empty body:
 
 ```javascript
 res.sendStatus(204); // equivalent to res.status(204).send('')
