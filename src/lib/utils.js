@@ -114,6 +114,18 @@ export const statusLookup = (status) => {
   return status in statusCodes ? statusCodes[status] : 'Unknown';
 };
 
+export const statusBodyLookup = (status) => {
+  const code = typeof status === 'string' ? Number(status) : status;
+
+  // The following status codes must not have a response body
+  // according to rfc 9110
+  if ((100 <= code && code < 200) || [204, 205, 304].includes(code)) {
+    return '';
+  }
+
+  return statusLookup(code);
+};
+
 // Parses routes into readable array
 const extractRoutes = (routes, table = []) => {
   // Loop through all routes

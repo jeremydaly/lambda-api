@@ -415,7 +415,7 @@ class RESPONSE {
 
   // Convenience method for sending status codes
   sendStatus(status) {
-    this.status(status).send(UTILS.statusLookup(status));
+    this.status(status).send(UTILS.statusBodyLookup(status));
   }
 
   // Convenience method for setting CORS headers
