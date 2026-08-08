@@ -114,16 +114,13 @@ export const statusLookup = (status) => {
   return status in statusCodes ? statusCodes[status] : 'Unknown';
 };
 
-export const statusBodyLookup = (status) => {
+// Status codes that must not include content per RFC 9110
+// https://datatracker.ietf.org/doc/html/rfc9110#name-overview-of-status-codes
+export const isNullBodyStatus = (status) => {
   const code = typeof status === 'string' ? Number(status) : status;
-
-  // The following status codes must not have a response body
-  // according to rfc 9110
-  if ((100 <= code && code < 200) || [204, 205, 304].includes(code)) {
-    return '';
-  }
-
-  return statusLookup(code);
+  return (
+    (code >= 100 && code < 200) || code === 204 || code === 205 || code === 304
+  );
 };
 
 // Parses routes into readable array

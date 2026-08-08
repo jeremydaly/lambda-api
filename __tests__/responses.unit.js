@@ -81,6 +81,22 @@ api.get('/testSendStatus403', function(req,res) {
   res.sendStatus(403)
 })
 
+api.get('/testNullBodyJson', function(req,res) {
+  res.status(204).json({ foo: 'bar' })
+})
+
+api.get('/testNullBodySend', function(req,res) {
+  res.status(205).send('Reset Content')
+})
+
+api.get('/testNullBodyHtml', function(req,res) {
+  res.status(304).html('<div>Not Modified</div>')
+})
+
+api.get('/testNonNullBodyJson', function(req,res) {
+  res.status(200).json({ foo: 'bar' })
+})
+
 // Secondary route
 api2.get('/testJSONPResponse', function(req,res) {
   res.jsonp({ foo: 'bar' })
@@ -194,6 +210,30 @@ describe('Response Tests:', function() {
     let _event = Object.assign({},event,{ path: '/testSendStatus403'})
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
     expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 403, body: 'Forbidden', isBase64Encoded: false })
+  }) // end it
+
+  it('Null body status: json()', async function() {
+    let _event = Object.assign({},event,{ path: '/testNullBodyJson'})
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 204, body: '', isBase64Encoded: false })
+  }) // end it
+
+  it('Null body status: send()', async function() {
+    let _event = Object.assign({},event,{ path: '/testNullBodySend'})
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 205, body: '', isBase64Encoded: false })
+  }) // end it
+
+  it('Null body status: html()', async function() {
+    let _event = Object.assign({},event,{ path: '/testNullBodyHtml'})
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['text/html'] }, statusCode: 304, body: '', isBase64Encoded: false })
+  }) // end it
+
+  it('Non-null body status is unaffected', async function() {
+    let _event = Object.assign({},event,{ path: '/testNonNullBodyJson'})
+    let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'] }, statusCode: 200, body: '{"foo":"bar"}', isBase64Encoded: false })
   }) // end it
 
   it('JSONP response (default callback)', async function() {

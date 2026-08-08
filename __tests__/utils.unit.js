@@ -232,27 +232,32 @@ describe("Utility Function Tests:", function () {
     }); // end it
   }); // end encodeBody tests
 
-  describe("statusBodyLookup:", function () {
+  describe("isNullBodyStatus:", function () {
     test.each([
-      [100, ""],
-      [101, ""],
-      [200, "OK"],
-      ["200", "OK"],
-      [204, ""],
-      ["204", ""],
-      [205, ""],
-      ["205", ""],
-      [304, ""],
-      ["304", ""],
-      [404, "Not Found"],
-      [502, "Bad Gateway"],
-      [999, "Unknown"],
-      ["not a number", "Unknown"]
+      [100, true],
+      [101, true],
+      [199, true],
+      [204, true],
+      [205, true],
+      [304, true],
+      ["204", true],
+      ["304", true],
+      [200, false],
+      [201, false],
+      [203, false],
+      [206, false],
+      [303, false],
+      [305, false],
+      [404, false],
+      [502, false],
+      ["200", false],
+      ["foo", false],
+      [undefined, false],
+      [null, false],
     ])("%s", (status, expected) => {
-      expect(utils.statusBodyLookup(status)).toBe(expected);
+      expect(utils.isNullBodyStatus(status)).toBe(expected);
     }); // end it
-  }); // end statusBodyLookup tests
-
+  }); // end isNullBodyStatus tests
 
   describe("extractRoutes:", function () {
     it("Sample routes", function () {

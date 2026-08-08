@@ -415,7 +415,7 @@ class RESPONSE {
 
   // Convenience method for sending status codes
   sendStatus(status) {
-    this.status(status).send(UTILS.statusBodyLookup(status));
+    this.status(status).send(UTILS.statusLookup(status));
   }
 
   // Convenience method for setting CORS headers
@@ -522,6 +522,11 @@ class RESPONSE {
       this._request.headers['if-none-match'] === this.getHeader('etag')
     ) {
       this.status(304);
+      body = '';
+    }
+
+    // Discard the body for status codes that must not include content
+    if (UTILS.isNullBodyStatus(this._statusCode)) {
       body = '';
     }
 
