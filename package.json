@@ -93,7 +93,7 @@
     }
   },
   "devDependencies": {
-    "@aws-sdk/client-s3": "3.470.0",
+    "@aws-sdk/client-s3": "3.1106.0",
     "@aws-sdk/s3-request-presigner": "3.470.0",
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.11.0",
