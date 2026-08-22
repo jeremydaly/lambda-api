@@ -59,6 +59,23 @@ api.use((err, req, res, next) => {
 });
 ```
 
+## Build
+
+`src/` is **pure ESM** and is compiled twice by SWC — to `dist/cjs` and to `dist/esm`. The
+CommonJS interop that makes `require('lambda-api')` callable is appended to the CJS artifact
+_only_, by `scripts/cjs-interop.js`.
+
+Never put a `module.exports` / `typeof module` write in `src/`. It would also land in `dist/esm`,
+and bundlers that inline the ESM artifact into a generated CommonJS wrapper (esbuild
+`--format=cjs`, AWS CDK `NodejsFunction`, SST, Serverless) execute it against the _consumer's_
+`module`, wiping out their exports — on Lambda that reads as `Runtime.HandlerNotFound`
+(issue #346). `__tests__/module-compat.unit.js` fails the build if one reappears.
+
+The footer is derived per file, not enumerated: a module whose only export is `default` collapses
+to that value, a module with named exports is left as SWC emitted it, and a module with both fails
+the build until you add an explicit entry to `EXCEPTIONS` in `scripts/cjs-interop.js`. New files
+are covered automatically.
+
 ## Testing
 
 - Tests live in `__tests__/*.unit.js`
@@ -72,6 +89,7 @@ api.use((err, req, res, next) => {
 
 - Add external npm dependencies (zero-dependency policy is non-negotiable)
 - Introduce breaking changes to the public API
+- Write to `module.exports` or `exports` from `src/` — see Build below
 
 **Always do:**
 

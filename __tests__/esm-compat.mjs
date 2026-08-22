@@ -4,6 +4,7 @@ import createAPI from '../dist/esm/index.js';
 import * as utils from '../dist/esm/lib/utils.js';
 import prettyPrint from '../dist/esm/lib/prettyPrint.js';
 import { ApiError } from '../dist/esm/lib/errors.js';
+import * as s3 from '../dist/esm/lib/s3-service.js';
 
 const event = {
   httpMethod: 'GET',
@@ -42,6 +43,17 @@ async function main() {
 
   if (JSON.parse(result.body).ok !== true) {
     throw new Error('Expected successful ESM route response');
+  }
+
+  for (const name of ['setConfig', 'getObject', 'getSignedUrl']) {
+    if (typeof s3[name] !== 'function') {
+      throw new Error(`Expected s3-service to export ${name} as a function`);
+    }
+  }
+
+  // The CJS artifact collapses to this object; under ESM it stays a plain named export.
+  if (typeof s3.service !== 'object' || typeof s3.service.getObject !== 'function') {
+    throw new Error('Expected s3-service to export the service object');
   }
 }
 

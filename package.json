@@ -38,7 +38,7 @@
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "build:cjs": "swc src -d dist/cjs --config-file .swcrc.cjs.json --strip-leading-paths",
+    "build:cjs": "swc src -d dist/cjs --config-file .swcrc.cjs.json --strip-leading-paths && node scripts/cjs-interop.js",
     "build:esm": "swc src -d dist/esm --config-file .swcrc.esm.json --copy-files --strip-leading-paths",
     "build:types": "tsc -p tsconfig.types.json && cp dist/types/lib/*.d.ts dist/cjs/lib/ && cp dist/types/lib/*.d.ts dist/esm/lib/ && rm -rf dist/types",
     "build": "npm run clean && npm run build:cjs && npm run build:esm && npm run build:types",

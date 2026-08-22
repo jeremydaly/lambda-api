@@ -143,6 +143,34 @@ section('esbuild bundle (issue #295: no "Dynamic require")');
   });
 }
 
+// 4b. issue #346 — an ESM entry bundled to CJS must not lose the consumer's own exports.
+//     esbuild resolves lambda-api through the `import` condition here and inlines dist/esm into
+//     a generated CommonJS wrapper, so any `module.exports = ...` in the ESM artifact lands on
+//     the BUNDLE's exports. On Lambda that shows up as `Runtime.HandlerNotFound`.
+section('esbuild ESM entry -> cjs output (issue #346: consumer exports survive)');
+{
+  const dir = stageFixture(base, 'esm-to-cjs-bundle');
+  check('bundles, keeps `handler` export, and returns 200', () => {
+    try {
+      execFileSync(
+        esbuildBin,
+        ['handler.mjs', '--bundle', '--format=cjs', '--platform=node', '--external:@aws-sdk/*', '--outfile=bundle.cjs'],
+        { cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }
+      );
+    } catch (e) {
+      throw new Error(`esbuild failed: ${(e.stderr || '') + (e.stdout || '')}`);
+    }
+    const r = parseResponse(runNode(dir, 'invoke.cjs', ev1), 'esm-to-cjs-bundle');
+    assert(
+      r.handlerType === 'function',
+      `bundle exports ${JSON.stringify(r.keys)} — handler is ${r.handlerType} (issue #346 regression)`
+    );
+    assert(r.keys.includes('handler'), `expected 'handler' in exports, got ${JSON.stringify(r.keys)}`);
+    assert(r.response && r.response.statusCode === 200, `status ${r.response && r.response.statusCode}`);
+    assert(JSON.parse(r.response.body).hello === 'world', 'body.hello');
+  });
+}
+
 // 5. exports map subpath resolution (root, lib/*, lib/*.js, package.json)
 section('exports map subpath resolution');
 {
