@@ -71,7 +71,10 @@ and bundlers that inline the ESM artifact into a generated CommonJS wrapper (esb
 `module`, wiping out their exports — on Lambda that reads as `Runtime.HandlerNotFound`
 (issue #346). `__tests__/module-compat.unit.js` fails the build if one reappears.
 
-To change the CommonJS shape of a module, edit the footer table in `scripts/cjs-interop.js`.
+The footer is derived per file, not enumerated: a module whose only export is `default` collapses
+to that value, a module with named exports is left as SWC emitted it, and a module with both fails
+the build until you add an explicit entry to `EXCEPTIONS` in `scripts/cjs-interop.js`. New files
+are covered automatically.
 
 ## Testing
 

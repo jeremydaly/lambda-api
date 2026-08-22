@@ -13,21 +13,27 @@
  * CONSUMER's `module`, wiping out their own exports — issue #346, which surfaced on Lambda as
  * `Runtime.HandlerNotFound: index.handler is undefined or not exported`.
  *
- * So the footers are injected here, into `dist/cjs` only. Each one is written out per file rather
- * than generated from a single template: `.default` is correct on the package root but would, for
- * example, make `mimemap['default']` resolve to the whole MIME map.
+ * The rule, applied to every `src/**\/*.js` in turn:
+ *
+ *   - a module whose only export is `default` collapses to that value
+ *   - a module with named exports is left as SWC emitted it
+ *   - a module with BOTH is ambiguous and fails the build (see EXCEPTIONS)
  */
 
 const fs = require('fs');
 const path = require('path');
 
-const CJS_DIR = path.join(__dirname, '..', 'dist', 'cjs');
+const ROOT = path.join(__dirname, '..');
+const SRC_DIR = path.join(ROOT, 'src');
+const CJS_DIR = path.join(ROOT, 'dist', 'cjs');
 const MARKER = '/* CommonJS interop — injected by scripts/cjs-interop.js */';
 
-// Modules with a single `export default`: `require()` returns that value directly.
-const DEFAULT_FOOTER = 'module.exports = exports.default;\n';
+const HAS_DEFAULT = /^export default /m;
+const HAS_NAMED = /^export (const|let|var|function|class|\{)/m;
 
-const FOOTERS = {
+// Modules whose CommonJS shape is not "collapse to the default export". Anything listed here
+// wins over the rule, so a module with both a default and named exports needs an entry.
+const EXCEPTIONS = {
   'index.js':
     'var _createAPI = exports.default;\n' +
     'module.exports = _createAPI;\n' +
@@ -35,79 +41,60 @@ const FOOTERS = {
     "// refactor, so `require('lambda-api').default` keeps working for TypeScript consumers\n" +
     '// compiled to CommonJS with esModuleInterop:false (they emit `require(...).default(...)`).\n' +
     'module.exports.default = _createAPI;\n',
-  'lib/mimemap.js': DEFAULT_FOOTER,
-  'lib/prettyPrint.js': DEFAULT_FOOTER,
-  'lib/request.js': DEFAULT_FOOTER,
-  'lib/response.js': DEFAULT_FOOTER,
-  'lib/statusCodes.js': DEFAULT_FOOTER,
-  // s3-service has no default export. It must resolve to the single mutable `service` object so
-  // response.js and the unit suites (sinon.stub) operate on the same properties — SWC's own
-  // `_export()` emits non-configurable getters, which stubbing cannot replace. `__esModule` keeps
-  // SWC's `_interop_require_wildcard` returning the object untouched.
-  'lib/s3-service.js':
+  // No default export. It must resolve to the single mutable `service` object so response.js and
+  // the unit suites (sinon.stub) operate on the same properties — SWC's own `_export()` emits
+  // non-configurable getters, which stubbing cannot replace. `__esModule` keeps SWC's
+  // `_interop_require_wildcard` returning the object untouched.
+  [path.join('lib', 's3-service.js')]:
     "Object.defineProperty(exports.service, '__esModule', { value: true });\n" +
     'module.exports = exports.service;\n',
 };
 
-// Loaded back after patching so a toolchain change that breaks the contract fails the BUILD,
-// not just the test suite (`npm test` and `prepublishOnly` both go through `npm run build`).
-const CONTRACT = {
-  'index.js': (m) => typeof m === 'function' && m.default === m,
-  'lib/mimemap.js': (m) =>
-    typeof m.json === 'string' && m.default === undefined,
-  'lib/prettyPrint.js': (m) => typeof m === 'function',
-  'lib/request.js': (m) => typeof m === 'function',
-  'lib/response.js': (m) => typeof m === 'function',
-  'lib/statusCodes.js': (m) =>
-    typeof m[404] === 'string' && m.default === undefined,
-  'lib/s3-service.js': (m) =>
-    m.__esModule === true &&
-    'client' in m &&
-    ['getObject', 'getSignedUrl', 'setConfig'].every(function (name) {
-      const descriptor = Object.getOwnPropertyDescriptor(m, name);
-      return (
-        typeof m[name] === 'function' &&
-        descriptor.writable &&
-        descriptor.configurable
-      );
-    }),
-};
+const COLLAPSE_TO_DEFAULT = 'module.exports = exports.default;\n';
 
 const fail = (message) => {
   console.error('cjs-interop: ' + message); // eslint-disable-line no-console
   process.exit(1);
 };
 
-Object.keys(FOOTERS).forEach((relative) => {
-  const file = path.join(CJS_DIR, relative);
+const jsFilesIn = (dir) =>
+  fs.readdirSync(dir, { withFileTypes: true }).reduce((acc, entry) => {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) return acc.concat(jsFilesIn(full));
+    return entry.name.endsWith('.js') ? acc.concat(full) : acc;
+  }, []);
 
-  if (!fs.existsSync(file)) {
+jsFilesIn(SRC_DIR).forEach((sourceFile) => {
+  const relative = path.relative(SRC_DIR, sourceFile);
+  const source = fs.readFileSync(sourceFile, 'utf8');
+
+  let footer = EXCEPTIONS[relative];
+
+  if (!footer) {
+    if (!HAS_DEFAULT.test(source)) return; // named exports only — SWC's output is already right
+    if (HAS_NAMED.test(source)) {
+      fail(
+        'src/' +
+          relative +
+          ' has BOTH a default and named exports, so its CommonJS shape is ambiguous — ' +
+          'add an explicit entry to EXCEPTIONS in this file.'
+      );
+    }
+    footer = COLLAPSE_TO_DEFAULT;
+  }
+
+  const target = path.join(CJS_DIR, relative);
+
+  if (!fs.existsSync(target)) {
     fail('expected ' + relative + ' in dist/cjs — did build:cjs run?');
   }
 
-  const source = fs.readFileSync(file, 'utf8');
-
-  if (source.indexOf(MARKER) !== -1) {
-    fail(relative + ' is already patched — run `npm run clean` first');
-  }
-
   fs.writeFileSync(
-    file,
-    source.replace(/\s*$/, '\n') + '\n' + MARKER + '\n' + FOOTERS[relative]
+    target,
+    fs.readFileSync(target, 'utf8').replace(/\s*$/, '\n') +
+      '\n' +
+      MARKER +
+      '\n' +
+      footer
   );
-});
-
-Object.keys(CONTRACT).forEach((relative) => {
-  const file = path.join(CJS_DIR, relative);
-  let loaded;
-
-  try {
-    loaded = require(file);
-  } catch (e) {
-    fail('patched ' + relative + ' failed to load: ' + e.message);
-  }
-
-  if (!CONTRACT[relative](loaded)) {
-    fail(relative + ' did not end up with the expected CommonJS shape');
-  }
 });
