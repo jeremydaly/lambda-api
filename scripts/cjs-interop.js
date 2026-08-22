@@ -28,8 +28,11 @@ const SRC_DIR = path.join(ROOT, 'src');
 const CJS_DIR = path.join(ROOT, 'dist', 'cjs');
 const MARKER = '/* CommonJS interop — injected by scripts/cjs-interop.js */';
 
-const HAS_DEFAULT = /^export default /m;
-const HAS_NAMED = /^export (const|let|var|function|class|\{)/m;
+// Any `export` line that is not `export default` is a named export. Stated as a negative
+// lookahead rather than a list of keywords so forms nobody uses today — `export async function`,
+// `export * from`, `export { x as default }` — classify correctly instead of slipping through.
+const HAS_DEFAULT = /^export default\b|\bas default\b/m;
+const HAS_NAMED = /^export (?!default\b)/m;
 
 // Modules whose CommonJS shape is not "collapse to the default export". Anything listed here
 // wins over the rule, so a module with both a default and named exports needs an entry.
@@ -76,8 +79,9 @@ jsFilesIn(SRC_DIR).forEach((sourceFile) => {
       fail(
         'src/' +
           relative +
-          ' has BOTH a default and named exports, so its CommonJS shape is ambiguous — ' +
-          'add an explicit entry to EXCEPTIONS in this file.'
+          ' mixes a default export with named exports, so collapsing it to the default would ' +
+          'silently drop the rest — add an explicit entry to EXCEPTIONS in this file. ' +
+          '(`export { x as default }` counts; prefer `export default x`.)'
       );
     }
     footer = COLLAPSE_TO_DEFAULT;
@@ -91,10 +95,6 @@ jsFilesIn(SRC_DIR).forEach((sourceFile) => {
 
   fs.writeFileSync(
     target,
-    fs.readFileSync(target, 'utf8').replace(/\s*$/, '\n') +
-      '\n' +
-      MARKER +
-      '\n' +
-      footer
+    fs.readFileSync(target, 'utf8').trimEnd() + '\n\n' + MARKER + '\n' + footer
   );
 });

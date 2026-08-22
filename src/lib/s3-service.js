@@ -73,6 +73,7 @@ export const getSignedUrl = async (
   }
 };
 
+// @internal — not part of the public API.
 // The CommonJS artifact re-exports this object as its whole module value (see
 // scripts/cjs-interop.js) so `require('lambda-api/lib/s3-service')` keeps returning ONE mutable
 // service object: response.js reads the S3 methods through it and the unit suites stub them on
