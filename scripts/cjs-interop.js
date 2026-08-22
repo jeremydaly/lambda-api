@@ -55,11 +55,6 @@ const EXCEPTIONS = {
 
 const COLLAPSE_TO_DEFAULT = 'module.exports = exports.default;\n';
 
-const fail = (message) => {
-  console.error('cjs-interop: ' + message); // eslint-disable-line no-console
-  process.exit(1);
-};
-
 const jsFilesIn = (dir) =>
   fs.readdirSync(dir, { withFileTypes: true }).reduce((acc, entry) => {
     const full = path.join(dir, entry.name);
@@ -67,34 +62,66 @@ const jsFilesIn = (dir) =>
     return entry.name.endsWith('.js') ? acc.concat(full) : acc;
   }, []);
 
-jsFilesIn(SRC_DIR).forEach((sourceFile) => {
-  const relative = path.relative(SRC_DIR, sourceFile);
-  const source = fs.readFileSync(sourceFile, 'utf8');
+/**
+ * Decide which CommonJS footer a module needs, from its ESM source.
+ *
+ * @param {string} relative path of the module inside `src/`
+ * @param {string} source its ESM source
+ * @returns {string|null} the footer to append, or null when SWC's output is already correct
+ * @throws {Error} when the export shape is ambiguous and needs an explicit EXCEPTIONS entry
+ */
+const footerFor = (relative, source) => {
+  if (EXCEPTIONS[relative]) return EXCEPTIONS[relative];
 
-  let footer = EXCEPTIONS[relative];
+  // Named exports only — SWC's output is already the right shape.
+  if (!HAS_DEFAULT.test(source)) return null;
 
-  if (!footer) {
-    if (!HAS_DEFAULT.test(source)) return; // named exports only — SWC's output is already right
-    if (HAS_NAMED.test(source)) {
-      fail(
-        'src/' +
-          relative +
-          ' mixes a default export with named exports, so collapsing it to the default would ' +
-          'silently drop the rest — add an explicit entry to EXCEPTIONS in this file. ' +
-          '(`export { x as default }` counts; prefer `export default x`.)'
+  if (HAS_NAMED.test(source)) {
+    throw new Error(
+      'src/' +
+        relative +
+        ' mixes a default export with named exports, so collapsing it to the default would ' +
+        'silently drop the rest — add an explicit entry to EXCEPTIONS in scripts/cjs-interop.js. ' +
+        '(`export { x as default }` counts; prefer `export default x`.)'
+    );
+  }
+
+  return COLLAPSE_TO_DEFAULT;
+};
+
+const run = () => {
+  jsFilesIn(SRC_DIR).forEach((sourceFile) => {
+    const relative = path.relative(SRC_DIR, sourceFile);
+    const footer = footerFor(relative, fs.readFileSync(sourceFile, 'utf8'));
+
+    if (!footer) return;
+
+    const target = path.join(CJS_DIR, relative);
+
+    if (!fs.existsSync(target)) {
+      throw new Error(
+        'expected ' + relative + ' in dist/cjs — did build:cjs run?'
       );
     }
-    footer = COLLAPSE_TO_DEFAULT;
+
+    fs.writeFileSync(
+      target,
+      fs.readFileSync(target, 'utf8').trimEnd() +
+        '\n\n' +
+        MARKER +
+        '\n' +
+        footer
+    );
+  });
+};
+
+module.exports = { footerFor, run, COLLAPSE_TO_DEFAULT, EXCEPTIONS, MARKER };
+
+if (require.main === module) {
+  try {
+    run();
+  } catch (e) {
+    console.error('cjs-interop: ' + e.message); // eslint-disable-line no-console
+    process.exit(1);
   }
-
-  const target = path.join(CJS_DIR, relative);
-
-  if (!fs.existsSync(target)) {
-    fail('expected ' + relative + ' in dist/cjs — did build:cjs run?');
-  }
-
-  fs.writeFileSync(
-    target,
-    fs.readFileSync(target, 'utf8').trimEnd() + '\n\n' + MARKER + '\n' + footer
-  );
-});
+}
