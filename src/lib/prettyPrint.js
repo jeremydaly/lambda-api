@@ -83,7 +83,3 @@ const prettyPrint = (routes) => {
 };
 
 export default prettyPrint;
-
-if (typeof module !== 'undefined') {
-  module.exports = prettyPrint;
-}

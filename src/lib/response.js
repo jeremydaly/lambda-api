@@ -611,7 +611,3 @@ class RESPONSE {
 } // end Response class
 
 export default RESPONSE;
-
-if (typeof module !== 'undefined') {
-  module.exports = RESPONSE;
-}

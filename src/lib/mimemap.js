@@ -73,7 +73,3 @@ const mimemap = {
 };
 
 export default mimemap;
-
-if (typeof module !== 'undefined') {
-  module.exports = mimemap;
-}

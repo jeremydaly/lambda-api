@@ -356,7 +356,3 @@ class REQUEST {
 } // end REQUEST class
 
 export default REQUEST;
-
-if (typeof module !== 'undefined') {
-  module.exports = REQUEST;
-}

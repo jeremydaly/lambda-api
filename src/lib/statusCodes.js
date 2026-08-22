@@ -83,7 +83,3 @@ const statusCodes = {
 };
 
 export default statusCodes;
-
-if (typeof module !== 'undefined') {
-  module.exports = statusCodes;
-}
