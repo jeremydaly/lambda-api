@@ -34,21 +34,24 @@ const MARKER = '/* CommonJS interop — injected by scripts/cjs-interop.js */';
 const HAS_DEFAULT = /^export default\b|\bas default\b/m;
 const HAS_NAMED = /^export (?!default\b)/m;
 
-// Modules whose CommonJS shape is not "collapse to the default export". Anything listed here
-// wins over the rule, so a module with both a default and named exports needs an entry.
+// Modules whose CommonJS shape is not "collapse to the default export". Keyed by path relative
+// to src/, always with forward slashes. An entry wins over the rule, so a module with both a
+// default and named exports needs one.
 const EXCEPTIONS = {
+  // The package root stays callable AND keeps the `.default` self-reference the CommonJS build
+  // shipped before the dual-package refactor, so TypeScript consumers compiled to CommonJS with
+  // esModuleInterop:false (they emit `require('lambda-api').default(...)`) keep working.
+  // The local is `_createAPI`, not `_default`: SWC already declares `const _default` here.
   'index.js':
     'var _createAPI = exports.default;\n' +
     'module.exports = _createAPI;\n' +
-    '// Preserve the `.default` self-reference the CommonJS build shipped before the dual-package\n' +
-    "// refactor, so `require('lambda-api').default` keeps working for TypeScript consumers\n" +
-    '// compiled to CommonJS with esModuleInterop:false (they emit `require(...).default(...)`).\n' +
     'module.exports.default = _createAPI;\n',
-  // No default export. It must resolve to the single mutable `service` object so response.js and
-  // the unit suites (sinon.stub) operate on the same properties — SWC's own `_export()` emits
+
+  // No default export. Must resolve to the single mutable `service` object so response.js and the
+  // unit suites (sinon.stub) share one set of properties — SWC's `_export()` emits
   // non-configurable getters, which stubbing cannot replace. `__esModule` keeps SWC's
   // `_interop_require_wildcard` returning the object untouched.
-  [path.join('lib', 's3-service.js')]:
+  'lib/s3-service.js':
     "Object.defineProperty(exports.service, '__esModule', { value: true });\n" +
     'module.exports = exports.service;\n',
 };
@@ -91,7 +94,10 @@ const footerFor = (relative, source) => {
 
 const run = () => {
   jsFilesIn(SRC_DIR).forEach((sourceFile) => {
-    const relative = path.relative(SRC_DIR, sourceFile);
+    const relative = path
+      .relative(SRC_DIR, sourceFile)
+      .split(path.sep)
+      .join('/');
     const footer = footerFor(relative, fs.readFileSync(sourceFile, 'utf8'));
 
     if (!footer) return;
