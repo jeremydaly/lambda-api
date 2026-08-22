@@ -155,7 +155,7 @@ describe('Download Tests:', function() {
   it('Missing file', async function() {
     let _event = Object.assign({},event,{ path: '/download' })
     let result = await new Promise(r => api.run(_event,{},(e,res) => { r(res) }))
-    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 500, body: '{"error":"No such file"}', isBase64Encoded: false })
+    expect(result).toEqual({ multiValueHeaders: { 'content-type': ['application/json'], 'x-error': ['true'] }, statusCode: 500, body: '{"error":"No such file: ./test-missing.txt"}', isBase64Encoded: false })
   }) // end it
 
   it('Missing file with custom catch', async function() {
