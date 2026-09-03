@@ -19,7 +19,7 @@
     "@middy/http-json-body-parser": "^6.4.3",
     "@middy/http-router": "^6.4.3",
     "@vendia/serverless-express": "^4.12.6",
-    "express": "^4.21.2",
+    "express": "^5.2.1",
     "fastify": "^5.8.5",
     "hono": "^4.12.34",
     "mitata": "^1.0.34"
